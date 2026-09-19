@@ -2,6 +2,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { todayDateOnly } from "@/lib/date";
 
 const STATUS_TONE = {
   PRESENT: "success",
@@ -30,8 +31,7 @@ function formatTime(date: Date | null) {
 export default async function AttendancePage() {
   await requireAdmin();
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = todayDateOnly();
 
   const records = await prisma.attendanceRecord.findMany({
     where: { date: today },
