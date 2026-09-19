@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PayslipList } from "@/components/payroll/PayslipList";
 import { requireEmployee, isAdmin } from "@/lib/auth";
@@ -22,7 +23,18 @@ export default async function PayrollPage() {
 
     return (
       <>
-        <PageHeader title="Payroll" description="All employee payslips" />
+        <PageHeader
+          title="Payroll"
+          description="All employee payslips"
+          actions={
+            <Link
+              href="/payroll/new"
+              className="flex h-8 items-center rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+            >
+              Add payslip
+            </Link>
+          }
+        />
         <div className="p-6">
           <PayslipList
             payslips={payslips.map((p) => ({

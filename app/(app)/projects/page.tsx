@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { MyProjectsList } from "@/components/projects/MyProjectsList";
@@ -37,10 +38,29 @@ export default async function ProjectsPage() {
 
     return (
       <>
-        <PageHeader title="Projects" description={`${projects.length} projects`} />
+        <PageHeader
+          title="Projects"
+          description={`${projects.length} projects`}
+          actions={
+            <Link
+              href="/projects/new"
+              className="flex h-8 items-center rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+            >
+              New project
+            </Link>
+          }
+        />
         <div className="p-6">
           {projects.length === 0 ? (
-            <p className="text-sm text-foreground-muted">No projects yet.</p>
+            <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+              <p className="text-sm font-medium text-foreground">No projects yet</p>
+              <Link
+                href="/projects/new"
+                className="mt-2 flex h-9 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+              >
+                New project
+              </Link>
+            </div>
           ) : (
             <div className="overflow-hidden rounded-lg border border-border bg-surface">
               <table className="w-full text-left text-sm">
@@ -55,8 +75,13 @@ export default async function ProjectsPage() {
                 <tbody>
                   {projects.map((project) => (
                     <tr key={project.id} className="border-b border-border last:border-0">
-                      <td className="px-4 py-2.5 font-medium text-foreground">
-                        {project.name}
+                      <td className="px-4 py-2.5 font-medium">
+                        <Link
+                          href={`/projects/${project.id}`}
+                          className="text-foreground hover:text-accent"
+                        >
+                          {project.name}
+                        </Link>
                       </td>
                       <td className="px-4 py-2.5">
                         <StatusBadge
