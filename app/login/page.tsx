@@ -20,7 +20,7 @@ export default async function LoginPage() {
             E
           </div>
           <h1 className="text-lg font-semibold text-foreground">
-            Employee Management System
+            Elevloop Internal
           </h1>
           <p className="text-sm text-foreground-muted">
             Sign in with your work email
