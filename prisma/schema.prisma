@@ -73,9 +73,17 @@ model Employee {
   employeeNumber   String            @unique
   fullName         String
   officialEmail    String            @unique
+  // --- Self-service fields: the employee fills these in from /profile. ---
   personalEmail    String?
   phone            String?
   profilePictureUrl String?
+  dateOfBirth      DateTime?         @db.Date
+  gender           String?
+  residentialAddress String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+
+  // --- Admin/HR-only fields: never writable from the self-service profile action. ---
   role             Role              @default(EMPLOYEE)
   designation      String?
   employmentStatus EmploymentStatus  @default(ACTIVE)
