@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ProfileForm } from "@/components/profile/ProfileForm";
+import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { requireEmployee } from "@/lib/auth";
 import { employmentStatusLabel } from "@/lib/format";
 
@@ -22,6 +23,16 @@ export default async function ProfilePage() {
         description="Personal details are editable below. Employment details are managed by HR/admin."
       />
       <div className="flex flex-col gap-6 p-6">
+        <section className="max-w-2xl rounded-lg border border-border bg-surface p-6">
+          <h2 className="mb-4 text-sm font-medium text-foreground-muted">
+            Photo
+          </h2>
+          <AvatarUploader
+            fullName={employee.fullName}
+            currentUrl={employee.profilePictureUrl}
+          />
+        </section>
+
         <section className="max-w-2xl rounded-lg border border-border bg-surface p-6">
           <h2 className="mb-4 text-sm font-medium text-foreground-muted">
             Employment details (admin-managed)

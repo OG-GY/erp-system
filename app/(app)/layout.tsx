@@ -14,6 +14,7 @@ export default async function ProtectedLayout({
       fullName={employee.fullName}
       designation={employee.designation}
       role={employee.role}
+      profilePictureUrl={employee.profilePictureUrl}
     >
       {children}
     </AppShell>

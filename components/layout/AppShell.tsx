@@ -7,11 +7,13 @@ export function AppShell({
   fullName,
   designation,
   role,
+  profilePictureUrl,
   children,
 }: {
   fullName: string;
   designation: string | null;
   role: Role;
+  profilePictureUrl: string | null;
   children: ReactNode;
 }) {
   return (
@@ -28,7 +30,11 @@ export function AppShell({
         </div>
 
         <div className="border-t border-border p-2">
-          <UserMenu fullName={fullName} designation={designation} />
+          <UserMenu
+            fullName={fullName}
+            designation={designation}
+            profilePictureUrl={profilePictureUrl}
+          />
         </div>
       </aside>
 

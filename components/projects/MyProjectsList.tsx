@@ -1,4 +1,5 @@
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TaskStatusSelect } from "@/components/projects/TaskStatusSelect";
 
 const PROJECT_STATUS_TONE = {
   PLANNING: "neutral",
@@ -16,28 +17,10 @@ const PROJECT_STATUS_LABEL = {
   ARCHIVED: "Archived",
 } as const;
 
-const TASK_STATUS_TONE = {
-  TODO: "neutral",
-  IN_PROGRESS: "warning",
-  IN_REVIEW: "warning",
-  BLOCKED: "danger",
-  COMPLETED: "success",
-  CANCELLED: "neutral",
-} as const;
-
-const TASK_STATUS_LABEL = {
-  TODO: "To do",
-  IN_PROGRESS: "In progress",
-  IN_REVIEW: "In review",
-  BLOCKED: "Blocked",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
-} as const;
-
 type Task = {
   id: string;
   title: string;
-  status: keyof typeof TASK_STATUS_LABEL;
+  status: string;
   dueDate: Date | null;
 };
 
@@ -97,7 +80,7 @@ export function MyProjectsList({ projects }: { projects: Project[] }) {
               {project.tasks.map((task) => (
                 <li
                   key={task.id}
-                  className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-black/[.04] dark:hover:bg-white/[.06]"
+                  className="flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-sm"
                 >
                   <span className="truncate text-foreground">{task.title}</span>
                   <span className="flex shrink-0 items-center gap-2">
@@ -110,10 +93,7 @@ export function MyProjectsList({ projects }: { projects: Project[] }) {
                         }).format(task.dueDate)}
                       </span>
                     ) : null}
-                    <StatusBadge
-                      label={TASK_STATUS_LABEL[task.status]}
-                      tone={TASK_STATUS_TONE[task.status]}
-                    />
+                    <TaskStatusSelect taskId={task.id} status={task.status} />
                   </span>
                 </li>
               ))}

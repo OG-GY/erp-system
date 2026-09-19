@@ -1,23 +1,6 @@
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { CreateTaskForm } from "@/components/projects/CreateTaskForm";
-
-const TASK_STATUS_TONE = {
-  TODO: "neutral",
-  IN_PROGRESS: "warning",
-  IN_REVIEW: "warning",
-  BLOCKED: "danger",
-  COMPLETED: "success",
-  CANCELLED: "neutral",
-} as const;
-
-const TASK_STATUS_LABEL = {
-  TODO: "To do",
-  IN_PROGRESS: "In progress",
-  IN_REVIEW: "In review",
-  BLOCKED: "Blocked",
-  COMPLETED: "Completed",
-  CANCELLED: "Cancelled",
-} as const;
+import { TaskStatusSelect } from "@/components/projects/TaskStatusSelect";
 
 const PRIORITY_TONE = {
   LOW: "neutral",
@@ -36,7 +19,7 @@ const PRIORITY_LABEL = {
 type Task = {
   id: string;
   title: string;
-  status: keyof typeof TASK_STATUS_LABEL;
+  status: string;
   priority: keyof typeof PRIORITY_TONE;
   dueDate: Date | null;
   assignee: { fullName: string } | null;
@@ -82,10 +65,7 @@ export function TasksPanel({
                   label={PRIORITY_LABEL[task.priority]}
                   tone={PRIORITY_TONE[task.priority]}
                 />
-                <StatusBadge
-                  label={TASK_STATUS_LABEL[task.status]}
-                  tone={TASK_STATUS_TONE[task.status]}
-                />
+                <TaskStatusSelect taskId={task.id} status={task.status} />
               </div>
             </li>
           ))}

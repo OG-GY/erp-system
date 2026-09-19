@@ -1,21 +1,21 @@
 import Link from "next/link";
 import { LogOut, UserRound } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
-import { initials } from "@/lib/format";
+import { Avatar } from "@/components/ui/Avatar";
 
 export function UserMenu({
   fullName,
   designation,
+  profilePictureUrl,
 }: {
   fullName: string;
   designation: string | null;
+  profilePictureUrl: string | null;
 }) {
   return (
     <details className="group relative">
       <summary className="flex cursor-pointer list-none items-center gap-2.5 rounded-md px-2 py-1.5 hover:bg-black/[.04] dark:hover:bg-white/[.06] [&::-webkit-details-marker]:hidden">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">
-          {initials(fullName)}
-        </span>
+        <Avatar fullName={fullName} url={profilePictureUrl} size={28} />
         <span className="flex min-w-0 flex-col text-left">
           <span className="truncate text-sm font-medium text-foreground">
             {fullName}
