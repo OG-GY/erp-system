@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import { initials, employmentStatusLabel } from "@/lib/format";
 
 const STATUS_TONE = {
@@ -23,6 +24,7 @@ function Field({ label, value }: { label: string; value: string }) {
 export default async function EmployeeDetailPage({
   params,
 }: PageProps<"/employees/[id]">) {
+  await requireAdmin();
   const { id } = await params;
 
   const employee = await prisma.employee.findUnique({

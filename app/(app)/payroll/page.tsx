@@ -1,5 +1,59 @@
-import { ComingSoon } from "@/components/layout/ComingSoon";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { PayslipList } from "@/components/payroll/PayslipList";
+import { requireEmployee, isAdmin } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-export default function PayrollPage() {
-  return <ComingSoon title="Payroll" />;
+export default async function PayrollPage() {
+  const employee = await requireEmployee();
+
+  if (isAdmin(employee.role)) {
+    const payslips = await prisma.payslip.findMany({
+      orderBy: { periodStart: "desc" },
+      take: 200,
+      select: {
+        id: true,
+        periodStart: true,
+        periodEnd: true,
+        netSalary: true,
+        status: true,
+        employee: { select: { fullName: true } },
+      },
+    });
+
+    return (
+      <>
+        <PageHeader title="Payroll" description="All employee payslips" />
+        <div className="p-6">
+          <PayslipList
+            payslips={payslips.map((p) => ({
+              ...p,
+              netSalary: Number(p.netSalary),
+            }))}
+          />
+        </div>
+      </>
+    );
+  }
+
+  const payslips = await prisma.payslip.findMany({
+    where: { employeeId: employee.id },
+    orderBy: { periodStart: "desc" },
+  });
+
+  return (
+    <>
+      <PageHeader title="Payroll" description="Your payslips" />
+      <div className="p-6">
+        <PayslipList
+          payslips={payslips.map((p) => ({
+            id: p.id,
+            periodStart: p.periodStart,
+            periodEnd: p.periodEnd,
+            netSalary: Number(p.netSalary),
+            status: p.status,
+          }))}
+        />
+      </div>
+    </>
+  );
 }

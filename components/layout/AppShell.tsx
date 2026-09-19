@@ -1,14 +1,17 @@
 import type { ReactNode } from "react";
+import type { Role } from "@prisma/client";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { UserMenu } from "@/components/layout/UserMenu";
 
 export function AppShell({
   fullName,
   designation,
+  role,
   children,
 }: {
   fullName: string;
   designation: string | null;
+  role: Role;
   children: ReactNode;
 }) {
   return (
@@ -21,7 +24,7 @@ export function AppShell({
         </div>
 
         <div className="flex-1 overflow-y-auto py-1">
-          <SidebarNav />
+          <SidebarNav role={role} />
         </div>
 
         <div className="border-t border-border p-2">

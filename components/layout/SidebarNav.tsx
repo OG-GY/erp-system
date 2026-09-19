@@ -11,8 +11,16 @@ import {
   Wallet,
   BarChart3,
 } from "lucide-react";
+import type { Role } from "@prisma/client";
 
-const NAV_ITEMS = [
+const EMPLOYEE_NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
+  { href: "/leave", label: "Leave", icon: CalendarClock },
+  { href: "/projects", label: "Projects", icon: FolderKanban },
+  { href: "/payroll", label: "Payroll", icon: Wallet },
+] as const;
+
+const ADMIN_NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/employees", label: "Employees", icon: Users },
   { href: "/attendance", label: "Attendance", icon: CalendarCheck },
@@ -22,12 +30,13 @@ const NAV_ITEMS = [
   { href: "/reports", label: "Reports", icon: BarChart3 },
 ] as const;
 
-export function SidebarNav() {
+export function SidebarNav({ role }: { role: Role }) {
   const pathname = usePathname();
+  const items = role === "EMPLOYEE" ? EMPLOYEE_NAV_ITEMS : ADMIN_NAV_ITEMS;
 
   return (
     <nav aria-label="Main" className="flex flex-col gap-0.5 px-2">
-      {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+      {items.map(({ href, label, icon: Icon }) => {
         const isActive =
           pathname === href || pathname.startsWith(`${href}/`);
 

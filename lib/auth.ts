@@ -37,3 +37,26 @@ export function assertRole(role: Role, allowed: Role[]) {
     throw new Error("Forbidden: insufficient role for this action.");
   }
 }
+
+/**
+ * The product only has two real user types today: a regular Employee, and
+ * everyone else ("admin side" — Super Admin, HR Manager, Manager), who all
+ * see the management views. This is the single place that distinction is
+ * decided, so it can be refined later without touching every page.
+ */
+export function isAdmin(role: Role) {
+  return role !== "EMPLOYEE";
+}
+
+/**
+ * Page-level guard for admin-only routes (e.g. /employees, /reports).
+ * Hiding the nav link is UX only — this is the actual authorization check,
+ * required even if the employee navigates there directly by URL.
+ */
+export async function requireAdmin() {
+  const employee = await requireEmployee();
+  if (!isAdmin(employee.role)) {
+    redirect("/dashboard");
+  }
+  return employee;
+}

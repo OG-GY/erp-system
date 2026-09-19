@@ -10,7 +10,11 @@ export default async function ProtectedLayout({
   const employee = await requireEmployee();
 
   return (
-    <AppShell fullName={employee.fullName} designation={employee.designation}>
+    <AppShell
+      fullName={employee.fullName}
+      designation={employee.designation}
+      role={employee.role}
+    >
       {children}
     </AppShell>
   );

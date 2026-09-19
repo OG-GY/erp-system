@@ -2,6 +2,7 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { prisma } from "@/lib/prisma";
+import { requireAdmin } from "@/lib/auth";
 import { initials, employmentStatusLabel } from "@/lib/format";
 
 const STATUS_TONE = {
@@ -15,6 +16,8 @@ const STATUS_TONE = {
 const MAX_EMPLOYEES = 500;
 
 export default async function EmployeesPage() {
+  await requireAdmin();
+
   const employees = await prisma.employee.findMany({
     take: MAX_EMPLOYEES,
     orderBy: { fullName: "asc" },
