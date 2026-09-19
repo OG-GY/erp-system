@@ -14,7 +14,7 @@ export default async function NewEmployeePage() {
   return (
     <>
       <PageHeader title="Add employee" description="Create a login and profile" />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-2xl rounded-lg border border-border bg-surface p-6">
           <CreateEmployeeForm departments={departments} />
         </div>

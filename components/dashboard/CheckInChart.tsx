@@ -29,7 +29,7 @@ export function CheckInChart({ points }: { points: DayPoint[] }) {
       {values.length === 0 ? (
         <p className="text-sm text-foreground-muted">No check-ins yet.</p>
       ) : (
-        <>
+        <div className="overflow-x-auto">
           <svg
             role="img"
             aria-label={`Check-in time for the last ${points.length} days`}
@@ -129,7 +129,7 @@ export function CheckInChart({ points }: { points: DayPoint[] }) {
               ))}
             </tbody>
           </table>
-        </>
+        </div>
       )}
     </div>
   );

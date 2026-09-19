@@ -8,7 +8,7 @@ export default async function NewProjectPage() {
   return (
     <>
       <PageHeader title="New project" />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-2xl rounded-lg border border-border bg-surface p-6">
           <CreateProjectForm />
         </div>

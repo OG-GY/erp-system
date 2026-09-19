@@ -62,8 +62,8 @@ export default async function EmployeesPage() {
           </Link>
         </div>
       ) : (
-        <div className="p-6">
-          <div className="overflow-hidden rounded-lg border border-border bg-surface">
+        <div className="p-4 sm:p-6">
+          <div className="overflow-x-auto rounded-lg border border-border bg-surface">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border text-xs text-foreground-muted">

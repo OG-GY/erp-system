@@ -35,7 +35,7 @@ export default async function PayrollPage() {
             </Link>
           }
         />
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <PayslipList
             payslips={payslips.map((p) => ({
               ...p,
@@ -55,7 +55,7 @@ export default async function PayrollPage() {
   return (
     <>
       <PageHeader title="Payroll" description="Your payslips" />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <PayslipList
           payslips={payslips.map((p) => ({
             id: p.id,

@@ -112,7 +112,7 @@ export default async function ReportsPage() {
   return (
     <>
       <PageHeader title="Reports" description="Organization overview" />
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-4 p-4 sm:p-6">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatCard label="Active employees" value={activeEmployees} />
           <StatCard label="Attendance rate (30d)" value={`${attendanceRate}%`} />

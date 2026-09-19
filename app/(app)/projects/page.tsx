@@ -50,7 +50,7 @@ export default async function ProjectsPage() {
             </Link>
           }
         />
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {projects.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
               <p className="text-sm font-medium text-foreground">No projects yet</p>
@@ -62,7 +62,7 @@ export default async function ProjectsPage() {
               </Link>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-border bg-surface">
+            <div className="overflow-x-auto rounded-lg border border-border bg-surface">
               <table className="w-full text-left text-sm">
                 <thead>
                   <tr className="border-b border-border text-xs text-foreground-muted">
@@ -125,7 +125,7 @@ export default async function ProjectsPage() {
   return (
     <>
       <PageHeader title="Projects" description="Projects you're assigned to" />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <MyProjectsList projects={projects} />
       </div>
     </>

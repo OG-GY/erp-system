@@ -48,7 +48,7 @@ export async function EmployeeDashboard({
   return (
     <>
       <PageHeader title="Dashboard" description={`Welcome back, ${firstName}`} />
-      <div className="flex flex-col gap-4 p-6">
+      <div className="flex flex-col gap-4 p-4 sm:p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <CheckInCard
             checkInTime={todayRecord?.checkIn ?? null}

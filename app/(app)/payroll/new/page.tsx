@@ -16,7 +16,7 @@ export default async function NewPayslipPage() {
   return (
     <>
       <PageHeader title="Add payslip" />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-2xl rounded-lg border border-border bg-surface p-6">
           <CreatePayslipForm employees={employees} />
         </div>

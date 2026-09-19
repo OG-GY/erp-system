@@ -34,12 +34,12 @@ export function CreateEmployeeForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field id="fullName" name="fullName" label="Full name" type="text" required disabled={isPending} />
         <Field id="designation" name="designation" label="Designation" type="text" disabled={isPending} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field id="email" name="email" label="Work email" type="email" required disabled={isPending} />
         <Field
           id="password"
@@ -52,7 +52,7 @@ export function CreateEmployeeForm({
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="role" className="text-sm font-medium text-foreground-muted">
             Role

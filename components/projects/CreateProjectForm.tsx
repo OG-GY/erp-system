@@ -51,7 +51,7 @@ export function CreateProjectForm() {
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="status" className="text-sm font-medium text-foreground-muted">
             Status

@@ -52,7 +52,7 @@ export default async function EmployeeDetailPage({
   return (
     <>
       <PageHeader title={employee.fullName} description={employee.employeeNumber} />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-2xl rounded-lg border border-border bg-surface p-6">
           <div className="mb-6 flex items-center gap-3">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent/12 text-sm font-semibold text-accent">
@@ -71,7 +71,7 @@ export default async function EmployeeDetailPage({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Official email" value={employee.officialEmail} />
             <Field label="Phone" value={employee.phone ?? "—"} />
             <Field label="Department" value={employee.department?.name ?? "—"} />

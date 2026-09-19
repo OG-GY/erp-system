@@ -51,7 +51,7 @@ export default async function AttendancePage() {
         title="Attendance"
         description={`Today · ${records.length} ${records.length === 1 ? "record" : "records"}`}
       />
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {records.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-1 py-12 text-center">
             <p className="text-sm font-medium text-foreground">
@@ -62,7 +62,7 @@ export default async function AttendancePage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-lg border border-border bg-surface">
+          <div className="overflow-x-auto rounded-lg border border-border bg-surface">
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-border text-xs text-foreground-muted">
