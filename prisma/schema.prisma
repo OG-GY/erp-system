@@ -1,0 +1,360 @@
+// Prisma schema for the Employee Management System.
+// MVP scope: see docs/mvp-scope.md. Entities below cover checklist §1-10 (employees,
+// accounts/roles, attendance, time tracking, leave, projects/tasks) plus payroll basics
+// and audit logging.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  // Pooled (PgBouncer/Supavisor) connection — used at runtime.
+  url       = env("DATABASE_URL")
+  // Direct connection — required by `prisma migrate` because the pooler
+  // doesn't support the prepared statements migrations rely on.
+  directUrl = env("DIRECT_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Accounts, roles, org structure
+// ---------------------------------------------------------------------------
+
+enum Role {
+  SUPER_ADMIN
+  HR_MANAGER
+  MANAGER
+  EMPLOYEE
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  INTERN
+  CONTRACT
+}
+
+model Department {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  headId    String?  @unique
+  head      Employee? @relation("DepartmentHead", fields: [headId], references: [id])
+  employees Employee[] @relation("DepartmentMembers")
+  teams     Team[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Team {
+  id           String     @id @default(cuid())
+  name         String
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id])
+  leadId       String?    @unique
+  lead         Employee?  @relation("TeamLead", fields: [leadId], references: [id])
+  members      Employee[] @relation("TeamMembers")
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@unique([departmentId, name])
+}
+
+// Supabase Auth owns credentials (auth.users). This table mirrors the app-level
+// identity: id == Supabase auth user id. Never store passwords here.
+model Employee {
+  id               String            @id // Supabase auth.users.id
+  employeeNumber   String            @unique
+  fullName         String
+  officialEmail    String            @unique
+  // --- Self-service fields: the employee fills these in from /profile. ---
+  personalEmail    String?
+  phone            String?
+  profilePictureUrl String?
+  dateOfBirth      DateTime?         @db.Date
+  gender           String?
+  residentialAddress String?
+  emergencyContactName  String?
+  emergencyContactPhone String?
+
+  // --- Admin/HR-only fields: never writable from the self-service profile action. ---
+  role             Role              @default(EMPLOYEE)
+  designation      String?
+  employmentStatus EmploymentStatus  @default(ACTIVE)
+  employmentType   EmploymentType    @default(FULL_TIME)
+  joiningDate      DateTime
+  terminationDate  DateTime?
+
+  departmentId     String?
+  department       Department?       @relation("DepartmentMembers", fields: [departmentId], references: [id])
+  teamId           String?
+  team             Team?             @relation("TeamMembers", fields: [teamId], references: [id])
+  managerId        String?
+  manager          Employee?         @relation("ManagerReports", fields: [managerId], references: [id])
+  reports          Employee[]        @relation("ManagerReports")
+
+  departmentHeadOf Department?       @relation("DepartmentHead")
+  teamLeadOf       Team?             @relation("TeamLead")
+
+  attendanceRecords AttendanceRecord[]
+  leaveRequests    LeaveRequest[]    @relation("LeaveApplicant")
+  leaveApprovals   LeaveRequest[]    @relation("LeaveApprover")
+  timeEntries      TimeEntry[]
+  timesheets       Timesheet[]
+  projectMembers   ProjectMember[]
+  assignedTasks    Task[]            @relation("TaskAssignee")
+  createdTasks     Task[]            @relation("TaskCreator")
+  payslips         Payslip[]
+  auditLogs        AuditLog[]
+
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([departmentId])
+  @@index([teamId])
+  @@index([managerId])
+}
+
+// ---------------------------------------------------------------------------
+// Attendance
+// ---------------------------------------------------------------------------
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  HALF_DAY
+  ON_LEAVE
+  HOLIDAY
+}
+
+model AttendanceRecord {
+  id            String            @id @default(cuid())
+  employeeId    String
+  employee      Employee          @relation(fields: [employeeId], references: [id])
+  date          DateTime          @db.Date
+  checkIn       DateTime?
+  checkOut      DateTime?
+  status        AttendanceStatus  @default(PRESENT)
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([employeeId, date])
+  @@index([date])
+}
+
+// ---------------------------------------------------------------------------
+// Leave management
+// ---------------------------------------------------------------------------
+
+enum LeaveType {
+  CASUAL
+  SICK
+  ANNUAL
+  UNPAID
+  EMERGENCY
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model LeaveRequest {
+  id           String      @id @default(cuid())
+  employeeId   String
+  employee     Employee    @relation("LeaveApplicant", fields: [employeeId], references: [id])
+  leaveType    LeaveType
+  startDate    DateTime    @db.Date
+  endDate      DateTime    @db.Date
+  daysCount    Decimal     @db.Decimal(4, 1)
+  reason       String
+  status       LeaveStatus @default(PENDING)
+  approverId   String?
+  approver     Employee?   @relation("LeaveApprover", fields: [approverId], references: [id])
+  approvedAt   DateTime?
+  rejectionReason String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([employeeId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Projects and tasks
+// ---------------------------------------------------------------------------
+
+enum ProjectStatus {
+  PLANNING
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  ARCHIVED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  IN_REVIEW
+  BLOCKED
+  COMPLETED
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Project {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  status      ProjectStatus   @default(PLANNING)
+  startDate   DateTime?       @db.Date
+  endDate     DateTime?       @db.Date
+  members     ProjectMember[]
+  tasks       Task[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model ProjectMember {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  addedAt    DateTime @default(now())
+
+  @@unique([projectId, employeeId])
+}
+
+model Task {
+  id           String       @id @default(cuid())
+  projectId    String
+  project      Project      @relation(fields: [projectId], references: [id])
+  title        String
+  description  String?
+  status       TaskStatus   @default(TODO)
+  priority     TaskPriority @default(MEDIUM)
+  assigneeId   String?
+  assignee     Employee?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdById  String
+  createdBy    Employee     @relation("TaskCreator", fields: [createdById], references: [id])
+  dueDate      DateTime?    @db.Date
+  estimatedHours Decimal?   @db.Decimal(6, 2)
+  timeEntries  TimeEntry[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  @@index([projectId])
+  @@index([assigneeId])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Time tracking
+// ---------------------------------------------------------------------------
+
+enum TimesheetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model TimeEntry {
+  id          String    @id @default(cuid())
+  employeeId  String
+  employee    Employee  @relation(fields: [employeeId], references: [id])
+  taskId      String?
+  task        Task?     @relation(fields: [taskId], references: [id])
+  timesheetId String?
+  timesheet   Timesheet? @relation(fields: [timesheetId], references: [id])
+  date        DateTime  @db.Date
+  durationMinutes Int
+  description String?
+  billable    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([employeeId, date])
+  @@index([taskId])
+}
+
+model Timesheet {
+  id         String           @id @default(cuid())
+  employeeId String
+  employee   Employee         @relation(fields: [employeeId], references: [id])
+  periodStart DateTime        @db.Date
+  periodEnd   DateTime        @db.Date
+  status     TimesheetStatus  @default(DRAFT)
+  entries    TimeEntry[]
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([employeeId, periodStart, periodEnd])
+}
+
+// ---------------------------------------------------------------------------
+// Payroll (minimal — expand once local tax rules are confirmed)
+// ---------------------------------------------------------------------------
+
+enum PayslipStatus {
+  DRAFT
+  APPROVED
+  PAID
+}
+
+model Payslip {
+  id           String        @id @default(cuid())
+  employeeId   String
+  employee     Employee      @relation(fields: [employeeId], references: [id])
+  periodStart  DateTime      @db.Date
+  periodEnd    DateTime      @db.Date
+  basicSalary  Decimal       @db.Decimal(12, 2)
+  allowances   Decimal       @default(0) @db.Decimal(12, 2)
+  deductions   Decimal       @default(0) @db.Decimal(12, 2)
+  netSalary    Decimal       @db.Decimal(12, 2)
+  status       PayslipStatus @default(DRAFT)
+  paidAt       DateTime?
+  pdfUrl       String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([employeeId, periodStart, periodEnd])
+}
+
+// ---------------------------------------------------------------------------
+// Audit log
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  employeeId String?
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  action     String
+  entityType String
+  entityId   String
+  previousValue Json?
+  newValue   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([employeeId])
+}
