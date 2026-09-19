@@ -1,5 +1,6 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { TRUSTED_USER_ID_HEADER } from "@/lib/supabase/trusted-user-header";
 
 const PUBLIC_PATHS = ["/login", "/auth"];
 
@@ -14,9 +15,15 @@ function isPublicPath(pathname: string) {
  * This is UX/defense-in-depth only — every Server Component, Route Handler,
  * and Server Action that touches sensitive data must still independently
  * verify auth + authorization (rule: proxy/middleware is not the only auth layer).
+ * See lib/supabase/trusted-user-header.ts for how pages avoid re-verifying
+ * with a second network round-trip.
  */
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  // Never trust a client-supplied value for this header — always start clean.
+  request.headers.delete(TRUSTED_USER_ID_HEADER);
+
+  let cookiesToApply: { name: string; value: string; options?: CookieOptions }[] =
+    [];
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,10 +37,7 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          );
+          cookiesToApply = cookiesToSet;
         },
       },
     },
@@ -49,5 +53,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+  if (user) {
+    request.headers.set(TRUSTED_USER_ID_HEADER, user.id);
+  }
+
+  const response = NextResponse.next({ request });
+  cookiesToApply.forEach(({ name, value, options }) =>
+    response.cookies.set(name, value, options),
+  );
   return response;
 }

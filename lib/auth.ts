@@ -1,6 +1,8 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { TRUSTED_USER_ID_HEADER } from "@/lib/supabase/trusted-user-header";
 import type { Role } from "@prisma/client";
 
 /**
@@ -9,20 +11,29 @@ import type { Role } from "@prisma/client";
  *
  * Every protected Server Component / Route Handler / Server Action that
  * reads or mutates sensitive data must call this (middleware alone is not
- * authorization).
+ * authorization). The proxy already calls supabase.auth.getUser() — a real
+ * network round-trip — on every request, so this trusts its verified result
+ * via a request header instead of paying for a second one here. Falls back
+ * to a full re-check if the header is somehow missing.
  */
 export async function requireEmployee() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const headerList = await headers();
+  let userId = headerList.get(TRUSTED_USER_ID_HEADER);
 
-  if (!user) {
-    redirect("/login");
+  if (!userId) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      redirect("/login");
+    }
+    userId = user.id;
   }
 
   const employee = await prisma.employee.findUnique({
-    where: { id: user.id },
+    where: { id: userId },
   });
 
   if (!employee) {

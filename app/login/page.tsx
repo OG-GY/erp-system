@@ -1,14 +1,14 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { TRUSTED_USER_ID_HEADER } from "@/lib/supabase/trusted-user-header";
 
 export default async function LoginPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (user) {
+  // The proxy already verified the session (or not) for this request — see
+  // lib/supabase/trusted-user-header.ts — so no need to call Supabase Auth
+  // again just to redirect an already-logged-in visitor away.
+  const headerList = await headers();
+  if (headerList.get(TRUSTED_USER_ID_HEADER)) {
     redirect("/dashboard");
   }
 
