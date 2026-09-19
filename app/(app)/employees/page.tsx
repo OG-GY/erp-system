@@ -36,16 +36,30 @@ export default async function EmployeesPage() {
       <PageHeader
         title="Employees"
         description={`${employees.length} ${employees.length === 1 ? "employee" : "employees"}`}
+        actions={
+          <Link
+            href="/employees/new"
+            className="flex h-8 items-center rounded-md bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+          >
+            Add employee
+          </Link>
+        }
       />
 
       {employees.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center">
           <p className="text-sm font-medium text-foreground">
             No employees yet
           </p>
           <p className="text-sm text-foreground-muted">
-            Employees added by HR will show up here.
+            Add your first employee to get started.
           </p>
+          <Link
+            href="/employees/new"
+            className="mt-2 flex h-9 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+          >
+            Add employee
+          </Link>
         </div>
       ) : (
         <div className="p-6">
