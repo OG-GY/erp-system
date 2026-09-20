@@ -36,7 +36,7 @@ export function ActiveCheckInsList({
               className="flex items-center justify-between gap-2 rounded-md px-1 py-1.5 text-sm"
             >
               <span className="flex min-w-0 items-center gap-2.5">
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent/12 text-[10px] font-semibold text-accent">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent/12 text-[10px] font-semibold text-accent">
                   {initials(employee.fullName)}
                 </span>
                 <span className="min-w-0">

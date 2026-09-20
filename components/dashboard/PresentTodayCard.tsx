@@ -34,7 +34,7 @@ export function PresentTodayCard({
               <span
                 key={employee.id}
                 title={employee.fullName}
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/12 text-[10px] font-semibold text-accent ring-2 ring-surface"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent/12 text-[10px] font-semibold text-accent ring-2 ring-surface"
               >
                 {initials(employee.fullName)}
               </span>

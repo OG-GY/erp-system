@@ -17,7 +17,7 @@ export function Avatar({
         alt={fullName}
         width={size}
         height={size}
-        className="shrink-0 rounded-full object-cover"
+        className="shrink-0 rounded-lg object-cover"
       />
     );
   }
@@ -25,7 +25,7 @@ export function Avatar({
   return (
     <span
       style={{ width: size, height: size, fontSize: Math.round(size * 0.36) }}
-      className="flex shrink-0 items-center justify-center rounded-full bg-accent/12 font-semibold text-accent"
+      className="flex shrink-0 items-center justify-center rounded-lg bg-accent/12 font-semibold text-accent"
     >
       {initials(fullName)}
     </span>

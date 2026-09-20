@@ -55,7 +55,7 @@ export default async function EmployeeDetailPage({
       <div className="p-4 sm:p-6">
         <div className="max-w-2xl rounded-lg border border-border bg-surface p-6">
           <div className="mb-6 flex items-center gap-3">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent/12 text-sm font-semibold text-accent">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-accent/12 text-sm font-semibold text-accent">
               {initials(employee.fullName)}
             </span>
             <div>

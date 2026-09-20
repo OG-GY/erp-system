@@ -37,7 +37,7 @@ export function DesktopSidebar({
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         aria-expanded={!collapsed}
         onClick={() => setCollapsed((c) => !c)}
-        className="absolute -right-3 top-16 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-surface text-foreground-muted shadow-sm hover:text-foreground"
+        className="absolute -right-3 top-16 flex h-6 w-6 items-center justify-center rounded-md border border-border bg-surface text-foreground-muted shadow-sm hover:text-foreground"
       >
         {collapsed ? (
           <ChevronsRight className="h-3.5 w-3.5" aria-hidden="true" />

@@ -24,7 +24,7 @@ export function MembersPanel({
               className="flex items-center justify-between gap-2 rounded-md px-1 py-1 text-sm"
             >
               <span className="flex items-center gap-2 text-foreground">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/12 text-[10px] font-semibold text-accent">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent/12 text-[10px] font-semibold text-accent">
                   {initials(member.fullName)}
                 </span>
                 {member.fullName}
