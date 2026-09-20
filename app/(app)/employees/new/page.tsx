@@ -1,15 +1,12 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CreateEmployeeForm } from "@/components/employees/CreateEmployeeForm";
 import { requireAdmin } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCachedDepartments } from "@/lib/cache/departments";
 
 export default async function NewEmployeePage() {
   await requireAdmin();
 
-  const departments = await prisma.department.findMany({
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
+  const departments = await getCachedDepartments();
 
   return (
     <>

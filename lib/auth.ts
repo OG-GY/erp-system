@@ -1,9 +1,22 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { TRUSTED_USER_ID_HEADER } from "@/lib/supabase/trusted-user-header";
 import type { Role } from "@prisma/client";
+
+/**
+ * Request-scoped memoization (React cache — resets between requests, never
+ * shared across users) — requireEmployee() runs once in the (app) layout
+ * and again in every page/action on top of it, which was two identical
+ * Employee lookups (two Tokyo round-trips) per navigation. See
+ * docs/caching.md for the full caching strategy and what's deliberately
+ * NOT cached.
+ */
+const getEmployeeById = cache((id: string) =>
+  prisma.employee.findUnique({ where: { id } }),
+);
 
 /**
  * Resolves the current authenticated Employee record.
@@ -32,9 +45,7 @@ export async function requireEmployee() {
     userId = user.id;
   }
 
-  const employee = await prisma.employee.findUnique({
-    where: { id: userId },
-  });
+  const employee = await getEmployeeById(userId);
 
   if (!employee) {
     redirect("/login");

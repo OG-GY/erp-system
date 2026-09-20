@@ -58,6 +58,7 @@ export async function applyForLeave(
   });
 
   revalidatePath("/leave");
+  revalidatePath("/dashboard");
   return { error: null, success: true };
 }
 
@@ -81,6 +82,7 @@ export async function cancelLeaveRequest(leaveRequestId: string) {
   });
 
   revalidatePath("/leave");
+  revalidatePath("/dashboard");
 }
 
 export async function approveLeaveRequest(leaveRequestId: string) {
@@ -92,6 +94,7 @@ export async function approveLeaveRequest(leaveRequestId: string) {
   });
 
   revalidatePath("/leave");
+  revalidatePath("/dashboard");
 }
 
 export async function rejectLeaveRequest(leaveRequestId: string) {
@@ -107,4 +110,5 @@ export async function rejectLeaveRequest(leaveRequestId: string) {
   });
 
   revalidatePath("/leave");
+  revalidatePath("/dashboard");
 }

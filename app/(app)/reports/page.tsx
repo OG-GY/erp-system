@@ -4,6 +4,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
+import { getCachedDepartments } from "@/lib/cache/departments";
 
 const LEAVE_STATUS_LABEL: Record<string, string> = {
   PENDING: "Pending",
@@ -76,7 +77,7 @@ export default async function ReportsPage() {
       where: { employmentStatus: "ACTIVE" },
       _count: { _all: true },
     }),
-    prisma.department.findMany({ select: { id: true, name: true } }),
+    getCachedDepartments(),
     prisma.leaveRequest.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.project.groupBy({ by: ["status"], _count: { _all: true } }),
     prisma.payslip.aggregate({

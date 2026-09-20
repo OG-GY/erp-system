@@ -122,5 +122,6 @@ export async function createTask(
   });
 
   revalidatePath(`/projects/${projectId}`);
+  revalidatePath("/dashboard");
   return { error: null };
 }
