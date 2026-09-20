@@ -5,6 +5,7 @@ import {
   changePassword,
   type ChangePasswordState,
 } from "@/lib/actions/password";
+import { Input } from "@/components/ui/Input";
 
 const initialState: ChangePasswordState = { error: null, success: false };
 
@@ -27,14 +28,13 @@ export function ChangePasswordForm() {
         >
           Current password
         </label>
-        <input
+        <Input
           id="currentPassword"
           name="currentPassword"
           type="password"
           autoComplete="current-password"
           required
           disabled={isPending}
-          className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
       </div>
 
@@ -45,7 +45,7 @@ export function ChangePasswordForm() {
         >
           New password
         </label>
-        <input
+        <Input
           id="newPassword"
           name="newPassword"
           type="password"
@@ -53,7 +53,6 @@ export function ChangePasswordForm() {
           required
           minLength={8}
           disabled={isPending}
-          className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
         <p className="text-xs text-foreground-muted">At least 8 characters.</p>
       </div>
@@ -65,7 +64,7 @@ export function ChangePasswordForm() {
         >
           Confirm new password
         </label>
-        <input
+        <Input
           id="confirmPassword"
           name="confirmPassword"
           type="password"
@@ -73,7 +72,6 @@ export function ChangePasswordForm() {
           required
           minLength={8}
           disabled={isPending}
-          className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
       </div>
 

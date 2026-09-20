@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { signIn, type SignInState } from "@/lib/actions/auth";
+import { Input } from "@/components/ui/Input";
 
 const initialState: SignInState = { error: null };
 
@@ -20,14 +21,14 @@ export function LoginForm() {
         >
           Email
         </label>
-        <input
+        <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
           disabled={isPending}
-          className="h-10 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
+          className="h-10"
         />
       </div>
 
@@ -38,14 +39,14 @@ export function LoginForm() {
         >
           Password
         </label>
-        <input
+        <Input
           id="password"
           name="password"
           type="password"
           autoComplete="current-password"
           required
           disabled={isPending}
-          className="h-10 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
+          className="h-10"
         />
       </div>
 

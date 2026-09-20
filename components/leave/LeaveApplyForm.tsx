@@ -2,6 +2,9 @@
 
 import { useActionState } from "react";
 import { applyForLeave, type LeaveActionState } from "@/lib/actions/leave";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Select } from "@/components/ui/Select";
 
 const initialState: LeaveActionState = { error: null, success: false };
 
@@ -30,44 +33,37 @@ export function LeaveApplyForm() {
           <label htmlFor="leaveType" className="text-sm font-medium text-foreground-muted">
             Leave type
           </label>
-          <select
+          <Select
             id="leaveType"
             name="leaveType"
             required
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-          >
-            {LEAVE_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+            defaultValue="CASUAL"
+            options={LEAVE_TYPES}
+          />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="startDate" className="text-sm font-medium text-foreground-muted">
             Start date
           </label>
-          <input
+          <Input
             id="startDate"
             name="startDate"
             type="date"
             required
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="endDate" className="text-sm font-medium text-foreground-muted">
             End date
           </label>
-          <input
+          <Input
             id="endDate"
             name="endDate"
             type="date"
             required
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
       </div>
@@ -76,13 +72,12 @@ export function LeaveApplyForm() {
         <label htmlFor="reason" className="text-sm font-medium text-foreground-muted">
           Reason
         </label>
-        <textarea
+        <Textarea
           id="reason"
           name="reason"
           rows={2}
           required
           disabled={isPending}
-          className="rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
       </div>
 

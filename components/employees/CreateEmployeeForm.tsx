@@ -6,6 +6,8 @@ import {
   type CreateEmployeeState,
 } from "@/lib/actions/employees";
 import { SalaryFields } from "@/components/employees/SalaryFields";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 const initialState: CreateEmployeeState = { error: null };
 
@@ -58,40 +60,28 @@ export function CreateEmployeeForm({
           <label htmlFor="role" className="text-sm font-medium text-foreground-muted">
             Role
           </label>
-          <select
+          <Select
             id="role"
             name="role"
             required
             defaultValue="EMPLOYEE"
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-          >
-            {ROLES.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </select>
+            options={ROLES}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="employmentType" className="text-sm font-medium text-foreground-muted">
             Employment type
           </label>
-          <select
+          <Select
             id="employmentType"
             name="employmentType"
             required
             defaultValue="FULL_TIME"
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-          >
-            {EMPLOYMENT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+            options={EMPLOYMENT_TYPES}
+          />
         </div>
 
         <Field
@@ -109,20 +99,18 @@ export function CreateEmployeeForm({
         <label htmlFor="departmentId" className="text-sm font-medium text-foreground-muted">
           Department
         </label>
-        <select
+        <Select
           id="departmentId"
           name="departmentId"
           disabled={isPending}
           defaultValue=""
-          className="h-9 w-full max-w-xs rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-        >
-          <option value="">No department</option>
-          {departments.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+          placeholder="No department"
+          className="max-w-xs"
+          options={[
+            { value: "", label: "No department" },
+            ...departments.map((d) => ({ value: d.id, label: d.name })),
+          ]}
+        />
       </div>
 
       <SalaryFields disabled={isPending} />
@@ -168,14 +156,13 @@ function Field({
       <label htmlFor={id} className="text-sm font-medium text-foreground-muted">
         {label}
       </label>
-      <input
+      <Input
         id={id}
         name={name}
         type={type}
         required={required}
         disabled={disabled}
         defaultValue={defaultValue}
-        className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
       />
       {helpText ? (
         <p className="text-xs text-foreground-muted">{helpText}</p>

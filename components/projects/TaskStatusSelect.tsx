@@ -3,6 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateTaskStatus } from "@/lib/actions/tasks";
+import { Select } from "@/components/ui/Select";
 
 const STATUS_OPTIONS = [
   { value: "TODO", label: "To do" },
@@ -24,24 +25,18 @@ export function TaskStatusSelect({
   const [isPending, startTransition] = useTransition();
 
   return (
-    <select
+    <Select
       value={status}
       disabled={isPending}
       aria-label="Task status"
-      onChange={(e) => {
-        const next = e.target.value;
+      className="w-36"
+      onChange={(next) => {
         startTransition(async () => {
           await updateTaskStatus(taskId, next);
           router.refresh();
         });
       }}
-      className="h-7 rounded-md border border-border-strong bg-surface px-1.5 text-xs text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-    >
-      {STATUS_OPTIONS.map((s) => (
-        <option key={s.value} value={s.value}>
-          {s.label}
-        </option>
-      ))}
-    </select>
+      options={STATUS_OPTIONS}
+    />
   );
 }

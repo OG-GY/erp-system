@@ -5,6 +5,7 @@ import {
   createDepartment,
   type CreateDepartmentState,
 } from "@/lib/actions/departments";
+import { Input } from "@/components/ui/Input";
 
 const initialState: CreateDepartmentState = { error: null, success: false };
 
@@ -28,13 +29,12 @@ export function CreateDepartmentForm() {
           >
             Department name
           </label>
-          <input
+          <Input
             id="name"
             name="name"
             type="text"
             required
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
         <button

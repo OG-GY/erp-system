@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 const SALARY_TYPES = [
   { value: "", label: "Not set yet" },
@@ -37,20 +39,15 @@ export function SalaryFields({
         >
           Salary type
         </label>
-        <select
+        <Select
           id="salaryType"
           name="salaryType"
           value={salaryType}
-          onChange={(e) => setSalaryType(e.target.value)}
+          onChange={setSalaryType}
           disabled={disabled}
-          className="h-9 w-full max-w-xs rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-        >
-          {SALARY_TYPES.map((t) => (
-            <option key={t.value || "unset"} value={t.value}>
-              {t.label}
-            </option>
-          ))}
-        </select>
+          className="max-w-xs"
+          options={SALARY_TYPES}
+        />
       </div>
 
       {salaryType === "FIXED" ? (
@@ -61,7 +58,7 @@ export function SalaryFields({
           >
             Base salary (PKR)
           </label>
-          <input
+          <Input
             id="baseSalary"
             name="baseSalary"
             type="number"
@@ -70,7 +67,7 @@ export function SalaryFields({
             required
             defaultValue={defaultBaseSalary ?? ""}
             disabled={disabled}
-            className="h-9 w-full max-w-xs rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
+            className="max-w-xs"
           />
         </div>
       ) : null}
@@ -83,7 +80,7 @@ export function SalaryFields({
           >
             Commission per project (PKR)
           </label>
-          <input
+          <Input
             id="commissionPerProject"
             name="commissionPerProject"
             type="number"
@@ -92,7 +89,7 @@ export function SalaryFields({
             required
             defaultValue={defaultCommissionPerProject ?? ""}
             disabled={disabled}
-            className="h-9 w-full max-w-xs rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
+            className="max-w-xs"
           />
         </div>
       ) : null}

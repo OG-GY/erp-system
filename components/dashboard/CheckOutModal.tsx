@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import { checkOut, type AttendanceActionState } from "@/lib/actions/attendance";
+import { Textarea } from "@/components/ui/Textarea";
 
 const initialState: AttendanceActionState = { error: null, success: false };
 
@@ -59,7 +60,7 @@ export function CheckOutModal({ onClose }: { onClose: () => void }) {
             >
               Standup
             </label>
-            <textarea
+            <Textarea
               ref={textareaRef}
               id="standup"
               name="standup"
@@ -67,7 +68,6 @@ export function CheckOutModal({ onClose }: { onClose: () => void }) {
               required
               disabled={isPending}
               placeholder="Worked on…"
-              className="rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
             />
           </div>
 

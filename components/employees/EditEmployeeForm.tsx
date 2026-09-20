@@ -5,6 +5,8 @@ import {
   updateEmployeeDetails,
   type UpdateEmployeeState,
 } from "@/lib/actions/employees";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 const initialState: UpdateEmployeeState = { error: null, success: false };
 
@@ -83,20 +85,14 @@ export function EditEmployeeForm({
           <label htmlFor="role" className="text-sm font-medium text-foreground-muted">
             Role
           </label>
-          <select
+          <Select
             id="role"
             name="role"
             required
             defaultValue={defaultRole}
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-          >
-            {ROLES.map((r) => (
-              <option key={r.value} value={r.value}>
-                {r.label}
-              </option>
-            ))}
-          </select>
+            options={ROLES}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -106,20 +102,14 @@ export function EditEmployeeForm({
           >
             Employment type
           </label>
-          <select
+          <Select
             id="employmentType"
             name="employmentType"
             required
             defaultValue={defaultEmploymentType}
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-          >
-            {EMPLOYMENT_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+            options={EMPLOYMENT_TYPES}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -129,20 +119,14 @@ export function EditEmployeeForm({
           >
             Status
           </label>
-          <select
+          <Select
             id="employmentStatus"
             name="employmentStatus"
             required
             defaultValue={defaultEmploymentStatus}
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-          >
-            {EMPLOYMENT_STATUSES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+            options={EMPLOYMENT_STATUSES}
+          />
         </div>
       </div>
 
@@ -163,20 +147,17 @@ export function EditEmployeeForm({
           >
             Department
           </label>
-          <select
+          <Select
             id="departmentId"
             name="departmentId"
             disabled={isPending}
             defaultValue={defaultDepartmentId}
-            className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-          >
-            <option value="">No department</option>
-            {departments.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+            placeholder="No department"
+            options={[
+              { value: "", label: "No department" },
+              ...departments.map((d) => ({ value: d.id, label: d.name })),
+            ]}
+          />
         </div>
       </div>
 
@@ -224,14 +205,13 @@ function Field({
       <label htmlFor={id} className="text-sm font-medium text-foreground-muted">
         {label}
       </label>
-      <input
+      <Input
         id={id}
         name={name}
         type={type}
         required={required}
         disabled={disabled}
         defaultValue={defaultValue}
-        className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
       />
     </div>
   );

@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { updateMyProfile, type UpdateProfileState } from "@/lib/actions/profile";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 
 const initialState: UpdateProfileState = { error: null, success: false };
 
@@ -85,13 +87,12 @@ export function ProfileForm({
         >
           Residential address
         </label>
-        <textarea
+        <Textarea
           id="residentialAddress"
           name="residentialAddress"
           rows={2}
           defaultValue={residentialAddress ?? ""}
           disabled={isPending}
-          className="rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
       </div>
 
@@ -135,13 +136,12 @@ function Field({
       <label htmlFor={id} className="text-sm font-medium text-foreground-muted">
         {label}
       </label>
-      <input
+      <Input
         id={id}
         name={id}
         type={type}
         defaultValue={defaultValue}
         disabled={disabled}
-        className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none transition-colors focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
       />
     </div>
   );

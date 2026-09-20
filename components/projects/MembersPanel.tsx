@@ -1,5 +1,6 @@
 import { addProjectMember, removeProjectMember } from "@/lib/actions/projects";
 import { initials } from "@/lib/format";
+import { Select } from "@/components/ui/Select";
 
 export function MembersPanel({
   projectId,
@@ -49,21 +50,17 @@ export function MembersPanel({
           action={addProjectMember.bind(null, projectId)}
           className="flex gap-2"
         >
-          <select
+          <Select
             name="employeeId"
             required
             defaultValue=""
-            className="h-9 flex-1 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
-          >
-            <option value="" disabled>
-              Add employee…
-            </option>
-            {availableEmployees.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.fullName}
-              </option>
-            ))}
-          </select>
+            placeholder="Add employee…"
+            className="flex-1"
+            options={availableEmployees.map((e) => ({
+              value: e.id,
+              label: e.fullName,
+            }))}
+          />
           <button
             type="submit"
             className="h-9 rounded-sm border border-border-strong px-3 text-sm font-medium text-foreground hover:bg-overlay-hover"

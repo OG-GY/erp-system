@@ -5,6 +5,9 @@ import {
   createProject,
   type CreateProjectState,
 } from "@/lib/actions/projects";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Select } from "@/components/ui/Select";
 
 const initialState: CreateProjectState = { error: null };
 
@@ -28,13 +31,12 @@ export function CreateProjectForm() {
         <label htmlFor="name" className="text-sm font-medium text-foreground-muted">
           Project name
         </label>
-        <input
+        <Input
           id="name"
           name="name"
           type="text"
           required
           disabled={isPending}
-          className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
       </div>
 
@@ -42,12 +44,11 @@ export function CreateProjectForm() {
         <label htmlFor="description" className="text-sm font-medium text-foreground-muted">
           Description
         </label>
-        <textarea
+        <Textarea
           id="description"
           name="description"
           rows={2}
           disabled={isPending}
-          className="rounded-md border border-border-strong bg-surface px-3 py-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
       </div>
 
@@ -56,32 +57,25 @@ export function CreateProjectForm() {
           <label htmlFor="status" className="text-sm font-medium text-foreground-muted">
             Status
           </label>
-          <select
+          <Select
             id="status"
             name="status"
             required
             defaultValue="PLANNING"
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-          >
-            {STATUSES.map((s) => (
-              <option key={s.value} value={s.value}>
-                {s.label}
-              </option>
-            ))}
-          </select>
+            options={STATUSES}
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="startDate" className="text-sm font-medium text-foreground-muted">
             Start date
           </label>
-          <input
+          <Input
             id="startDate"
             name="startDate"
             type="date"
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
 
@@ -89,12 +83,11 @@ export function CreateProjectForm() {
           <label htmlFor="endDate" className="text-sm font-medium text-foreground-muted">
             End date
           </label>
-          <input
+          <Input
             id="endDate"
             name="endDate"
             type="date"
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
       </div>

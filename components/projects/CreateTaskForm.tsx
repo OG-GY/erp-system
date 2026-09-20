@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 import { createTask, type CreateTaskState } from "@/lib/actions/projects";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 const initialState: CreateTaskState = { error: null };
 
@@ -31,13 +33,12 @@ export function CreateTaskForm({
         <label htmlFor="title" className="text-xs font-medium text-foreground-muted">
           Task title
         </label>
-        <input
+        <Input
           id="title"
           name="title"
           type="text"
           required
           disabled={isPending}
-          className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
       </div>
 
@@ -45,51 +46,41 @@ export function CreateTaskForm({
         <label htmlFor="assigneeId" className="text-xs font-medium text-foreground-muted">
           Assignee
         </label>
-        <select
+        <Select
           id="assigneeId"
           name="assigneeId"
           disabled={isPending}
           defaultValue=""
-          className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-        >
-          <option value="">Unassigned</option>
-          {members.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.fullName}
-            </option>
-          ))}
-        </select>
+          placeholder="Unassigned"
+          options={[
+            { value: "", label: "Unassigned" },
+            ...members.map((m) => ({ value: m.id, label: m.fullName })),
+          ]}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="priority" className="text-xs font-medium text-foreground-muted">
           Priority
         </label>
-        <select
+        <Select
           id="priority"
           name="priority"
           disabled={isPending}
           defaultValue="MEDIUM"
-          className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-        >
-          {PRIORITIES.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+          options={PRIORITIES}
+        />
       </div>
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor="dueDate" className="text-xs font-medium text-foreground-muted">
           Due date
         </label>
-        <input
+        <Input
           id="dueDate"
           name="dueDate"
           type="date"
           disabled={isPending}
-          className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
         />
       </div>
 

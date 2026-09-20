@@ -5,6 +5,8 @@ import {
   createPayslip,
   type CreatePayslipState,
 } from "@/lib/actions/payroll";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 const initialState: CreatePayslipState = { error: null };
 
@@ -30,23 +32,15 @@ export function CreatePayslipForm({
         <label htmlFor="employeeId" className="text-sm font-medium text-foreground-muted">
           Employee
         </label>
-        <select
+        <Select
           id="employeeId"
           name="employeeId"
           required
           defaultValue=""
-          className="h-9 rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
+          placeholder="Select employee…"
           disabled={isPending}
-        >
-          <option value="" disabled>
-            Select employee…
-          </option>
-          {employees.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.fullName}
-            </option>
-          ))}
-        </select>
+          options={employees.map((e) => ({ value: e.id, label: e.fullName }))}
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -54,26 +48,24 @@ export function CreatePayslipForm({
           <label htmlFor="periodStart" className="text-sm font-medium text-foreground-muted">
             Period start
           </label>
-          <input
+          <Input
             id="periodStart"
             name="periodStart"
             type="date"
             required
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="periodEnd" className="text-sm font-medium text-foreground-muted">
             Period end
           </label>
-          <input
+          <Input
             id="periodEnd"
             name="periodEnd"
             type="date"
             required
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
       </div>
@@ -83,7 +75,7 @@ export function CreatePayslipForm({
           <label htmlFor="basicSalary" className="text-sm font-medium text-foreground-muted">
             Basic salary (PKR)
           </label>
-          <input
+          <Input
             id="basicSalary"
             name="basicSalary"
             type="number"
@@ -91,14 +83,13 @@ export function CreatePayslipForm({
             step="0.01"
             required
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="allowances" className="text-sm font-medium text-foreground-muted">
             Allowances (PKR)
           </label>
-          <input
+          <Input
             id="allowances"
             name="allowances"
             type="number"
@@ -106,14 +97,13 @@ export function CreatePayslipForm({
             step="0.01"
             defaultValue="0"
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="deductions" className="text-sm font-medium text-foreground-muted">
             Deductions (PKR)
           </label>
-          <input
+          <Input
             id="deductions"
             name="deductions"
             type="number"
@@ -121,7 +111,6 @@ export function CreatePayslipForm({
             step="0.01"
             defaultValue="0"
             disabled={isPending}
-            className="h-9 rounded-md border border-border-strong bg-surface px-3 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
           />
         </div>
       </div>
@@ -130,20 +119,15 @@ export function CreatePayslipForm({
         <label htmlFor="status" className="text-sm font-medium text-foreground-muted">
           Status
         </label>
-        <select
+        <Select
           id="status"
           name="status"
           required
           defaultValue="DRAFT"
           disabled={isPending}
-          className="h-9 w-full max-w-xs rounded-md border border-border-strong bg-surface px-2 text-sm text-foreground outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 disabled:opacity-60"
-        >
-          {STATUSES.map((s) => (
-            <option key={s.value} value={s.value}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+          className="max-w-xs"
+          options={STATUSES}
+        />
       </div>
 
       {state.error ? (
