@@ -4,7 +4,9 @@ import { Building2 } from "lucide-react";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { TRUSTED_USER_ID_HEADER } from "@/lib/supabase/trusted-user-header";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: PageProps<"/login">) {
   // The proxy already verified the session (or not) for this request — see
   // lib/supabase/trusted-user-header.ts — so no need to call Supabase Auth
   // again just to redirect an already-logged-in visitor away.
@@ -12,6 +14,9 @@ export default async function LoginPage() {
   if (headerList.get(TRUSTED_USER_ID_HEADER)) {
     redirect("/dashboard");
   }
+
+  const params = await searchParams;
+  const suspended = params?.suspended === "1";
 
   return (
     <main className="flex min-h-screen flex-1 items-center justify-center bg-background px-4">
@@ -27,6 +32,14 @@ export default async function LoginPage() {
             Sign in with your work email
           </p>
         </div>
+        {suspended ? (
+          <p
+            role="alert"
+            className="mb-4 rounded-md border border-danger/30 bg-danger/10 px-3 py-2 text-sm text-danger"
+          >
+            Your account has been deactivated. Contact an administrator.
+          </p>
+        ) : null}
         <LoginForm />
       </div>
     </main>

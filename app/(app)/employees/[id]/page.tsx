@@ -2,8 +2,12 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SalaryForm } from "@/components/employees/SalaryForm";
+import { EditEmployeeForm } from "@/components/employees/EditEmployeeForm";
+import { SuspendButton } from "@/components/employees/SuspendButton";
+import { DeleteEmployeeButton } from "@/components/employees/DeleteEmployeeButton";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { getCachedDepartments } from "@/lib/cache/departments";
 import { initials, employmentStatusLabel } from "@/lib/format";
 
 const STATUS_TONE = {
@@ -25,29 +29,34 @@ function Field({ label, value }: { label: string; value: string }) {
 export default async function EmployeeDetailPage({
   params,
 }: PageProps<"/employees/[id]">) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const { id } = await params;
 
-  const employee = await prisma.employee.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      fullName: true,
-      employeeNumber: true,
-      officialEmail: true,
-      phone: true,
-      designation: true,
-      employmentStatus: true,
-      employmentType: true,
-      joiningDate: true,
-      department: { select: { name: true } },
-      team: { select: { name: true } },
-      manager: { select: { fullName: true } },
-      salaryType: true,
-      baseSalary: true,
-      commissionPerProject: true,
-    },
-  });
+  const [employee, departments] = await Promise.all([
+    prisma.employee.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        fullName: true,
+        employeeNumber: true,
+        officialEmail: true,
+        phone: true,
+        designation: true,
+        role: true,
+        employmentStatus: true,
+        employmentType: true,
+        joiningDate: true,
+        departmentId: true,
+        department: { select: { name: true } },
+        team: { select: { name: true } },
+        manager: { select: { fullName: true } },
+        salaryType: true,
+        baseSalary: true,
+        commissionPerProject: true,
+      },
+    }),
+    getCachedDepartments(),
+  ]);
 
   if (!employee) {
     notFound();
@@ -92,6 +101,23 @@ export default async function EmployeeDetailPage({
 
         <div className="mt-6 max-w-2xl rounded-lg border border-border bg-surface p-6">
           <h2 className="mb-4 text-sm font-medium text-foreground-muted">
+            Edit details
+          </h2>
+          <EditEmployeeForm
+            employeeId={employee.id}
+            departments={departments}
+            defaultFullName={employee.fullName}
+            defaultDesignation={employee.designation ?? ""}
+            defaultRole={employee.role}
+            defaultEmploymentType={employee.employmentType}
+            defaultEmploymentStatus={employee.employmentStatus}
+            defaultJoiningDate={employee.joiningDate.toISOString().slice(0, 10)}
+            defaultDepartmentId={employee.departmentId ?? ""}
+          />
+        </div>
+
+        <div className="mt-6 max-w-2xl rounded-lg border border-border bg-surface p-6">
+          <h2 className="mb-4 text-sm font-medium text-foreground-muted">
             Salary
           </h2>
           <SalaryForm
@@ -107,6 +133,31 @@ export default async function EmployeeDetailPage({
             }
           />
         </div>
+
+        {employee.id !== admin.id ? (
+          <div className="mt-6 max-w-2xl rounded-lg border border-danger/30 bg-surface p-6">
+            <h2 className="mb-1 text-sm font-medium text-foreground-muted">
+              Danger zone
+            </h2>
+            <p className="mb-4 text-sm text-foreground-muted">
+              Suspend to temporarily block access, or delete if this
+              employee has no attendance, task, or payroll history.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {employee.employmentStatus === "ACTIVE" ||
+              employee.employmentStatus === "INACTIVE" ? (
+                <SuspendButton
+                  employeeId={employee.id}
+                  isActive={employee.employmentStatus === "ACTIVE"}
+                />
+              ) : null}
+              <DeleteEmployeeButton
+                employeeId={employee.id}
+                employeeName={employee.fullName}
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
     </>
   );

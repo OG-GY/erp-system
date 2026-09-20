@@ -51,6 +51,16 @@ export async function requireEmployee() {
     redirect("/login");
   }
 
+  // Suspended (INACTIVE) or TERMINATED employees keep their Supabase
+  // credentials but lose app access here — sign them out so the proxy's
+  // session check fails on their next request instead of bouncing between
+  // /login and /dashboard forever (both would otherwise see a valid session).
+  if (employee.employmentStatus === "INACTIVE" || employee.employmentStatus === "TERMINATED") {
+    const supabase = await createClient();
+    await supabase.auth.signOut();
+    redirect("/login?suspended=1");
+  }
+
   return employee;
 }
 
