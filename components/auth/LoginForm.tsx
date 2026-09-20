@@ -58,7 +58,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={isPending}
-        className="mt-2 h-10 rounded-lg bg-accent text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+        className="mt-2 h-10 rounded-sm bg-accent text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {isPending ? "Signing in…" : "Sign in"}
       </button>

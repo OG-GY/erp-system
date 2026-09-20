@@ -34,7 +34,7 @@ export function AvatarUploader({
         <button
           type="submit"
           disabled={isPending}
-          className="h-8 w-fit rounded-lg border border-border-strong px-3 text-xs font-medium text-foreground transition-colors hover:bg-overlay-hover disabled:opacity-60"
+          className="h-8 w-fit rounded-sm border border-border-strong px-3 text-xs font-medium text-foreground transition-colors hover:bg-overlay-hover disabled:opacity-60"
         >
           {isPending ? "Uploading…" : "Upload photo"}
         </button>

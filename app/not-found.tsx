@@ -9,7 +9,7 @@ export default function NotFound() {
       </p>
       <Link
         href="/dashboard"
-        className="mt-2 h-9 rounded-lg bg-accent px-4 text-sm font-medium leading-9 text-accent-foreground hover:opacity-90"
+        className="mt-2 h-9 rounded-sm bg-accent px-4 text-sm font-medium leading-9 text-accent-foreground hover:opacity-90"
       >
         Back to dashboard
       </Link>

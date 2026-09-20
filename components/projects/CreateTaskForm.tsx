@@ -96,7 +96,7 @@ export function CreateTaskForm({
       <button
         type="submit"
         disabled={isPending}
-        className="h-9 rounded-lg bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+        className="h-9 rounded-sm bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {isPending ? "Adding…" : "Add task"}
       </button>

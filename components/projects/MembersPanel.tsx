@@ -66,7 +66,7 @@ export function MembersPanel({
           </select>
           <button
             type="submit"
-            className="h-9 rounded-lg border border-border-strong px-3 text-sm font-medium text-foreground hover:bg-overlay-hover"
+            className="h-9 rounded-sm border border-border-strong px-3 text-sm font-medium text-foreground hover:bg-overlay-hover"
           >
             Add
           </button>

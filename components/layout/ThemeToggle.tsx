@@ -44,7 +44,7 @@ export function ThemeToggle({ collapsed = false }: { collapsed?: boolean }) {
       aria-label={label}
       title={collapsed ? label : undefined}
       suppressHydrationWarning
-      className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm text-foreground-muted transition-colors hover:bg-overlay-hover ${collapsed ? "justify-center" : ""}`}
+      className={`flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm text-foreground-muted transition-colors hover:bg-overlay-hover ${collapsed ? "justify-center" : ""}`}
     >
       {theme === "dark" ? (
         <Sun className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
