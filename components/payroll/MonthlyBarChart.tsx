@@ -1,5 +1,3 @@
-import { formatCurrency } from "@/lib/format";
-
 function monthLabel(year: number, month: number) {
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
@@ -8,32 +6,18 @@ function monthLabel(year: number, month: number) {
   }).format(new Date(Date.UTC(year, month, 1)));
 }
 
-export function EarningsChart({
-  payslips,
+export function MonthlyBarChart({
+  title,
+  months,
+  formatValue,
+  colorClassName = "fill-accent",
 }: {
-  payslips: { periodStart: Date; netSalary: number }[];
+  title: string;
+  months: { year: number; month: number; value: number }[];
+  formatValue: (value: number) => string;
+  colorClassName?: string;
 }) {
-  // Payslip periods are @db.Date (timezone-agnostic) columns, so bucket by
-  // UTC year/month to match how they're stored — same convention used
-  // elsewhere for date-only fields (see lib/date.ts).
-  const byMonth = new Map<string, { year: number; month: number; total: number }>();
-  for (const p of payslips) {
-    const year = p.periodStart.getUTCFullYear();
-    const month = p.periodStart.getUTCMonth();
-    const key = `${year}-${month}`;
-    const existing = byMonth.get(key);
-    if (existing) {
-      existing.total += p.netSalary;
-    } else {
-      byMonth.set(key, { year, month, total: p.netSalary });
-    }
-  }
-
-  const months = Array.from(byMonth.values()).sort((a, b) =>
-    a.year !== b.year ? a.year - b.year : a.month - b.month,
-  );
-
-  const max = Math.max(...months.map((m) => m.total), 1);
+  const max = Math.max(...months.map((m) => m.value), 1);
   const barWidth = 28;
   const gap = 12;
   const chartHeight = 120;
@@ -41,24 +25,23 @@ export function EarningsChart({
 
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
-      <p className="mb-3 text-xs text-foreground-muted">Earnings per month</p>
+      <p className="mb-3 text-xs text-foreground-muted">{title}</p>
 
       {months.length === 0 ? (
-        <p className="text-sm text-foreground-muted">No payslips yet.</p>
+        <p className="text-sm text-foreground-muted">No data yet.</p>
       ) : (
         <div className="overflow-x-auto">
           <svg
             role="img"
-            aria-label={`Earnings per month for the last ${months.length} months`}
+            aria-label={`${title} for the last ${months.length} months`}
             width={width}
             height={chartHeight + 34}
             viewBox={`0 0 ${width} ${chartHeight + 34}`}
             className="overflow-visible"
           >
-            {months.map((m) => {
-              const i = months.indexOf(m);
+            {months.map((m, i) => {
               const x = i * (barWidth + gap);
-              const barHeight = Math.max(4, (m.total / max) * chartHeight);
+              const barHeight = Math.max(4, (m.value / max) * chartHeight);
               const y = chartHeight - barHeight;
 
               return (
@@ -69,10 +52,10 @@ export function EarningsChart({
                     width={barWidth}
                     height={barHeight}
                     rx={4}
-                    className="fill-accent"
+                    className={colorClassName}
                   >
                     <title>
-                      {monthLabel(m.year, m.month)}: {formatCurrency(m.total)}
+                      {monthLabel(m.year, m.month)}: {formatValue(m.value)}
                     </title>
                   </rect>
                   <text
@@ -89,18 +72,18 @@ export function EarningsChart({
           </svg>
 
           <table className="sr-only">
-            <caption>Earnings per month</caption>
+            <caption>{title}</caption>
             <thead>
               <tr>
                 <th scope="col">Month</th>
-                <th scope="col">Net earnings</th>
+                <th scope="col">Value</th>
               </tr>
             </thead>
             <tbody>
               {months.map((m) => (
                 <tr key={`${m.year}-${m.month}`}>
                   <td>{monthLabel(m.year, m.month)}</td>
-                  <td>{formatCurrency(m.total)}</td>
+                  <td>{formatValue(m.value)}</td>
                 </tr>
               ))}
             </tbody>

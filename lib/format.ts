@@ -35,3 +35,22 @@ export function totalBreakMinutes(
   }, 0);
   return Math.round(totalMs / 60000);
 }
+
+/**
+ * Net worked milliseconds for one attendance record (breaks subtracted).
+ * 0 for a record that isn't a completed shift (no checkIn/checkOut) — only
+ * finished days count toward "hours worked" figures.
+ */
+export function workedMs(record: {
+  checkIn: Date | null;
+  checkOut: Date | null;
+  breaks: { startedAt: Date; endedAt: Date | null }[];
+}) {
+  if (!record.checkIn || !record.checkOut) return 0;
+  const grossMs = record.checkOut.getTime() - record.checkIn.getTime();
+  const breakMs = record.breaks.reduce((sum, b) => {
+    const end = b.endedAt ?? record.checkOut!;
+    return sum + (end.getTime() - b.startedAt.getTime());
+  }, 0);
+  return Math.max(0, grossMs - breakMs);
+}

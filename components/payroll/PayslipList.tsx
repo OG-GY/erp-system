@@ -27,6 +27,7 @@ type Payslip = {
   netSalary: number;
   status: keyof typeof STATUS_LABEL;
   employee?: { fullName: string };
+  hoursWorked?: number;
 };
 
 export function PayslipList({ payslips }: { payslips: Payslip[] }) {
@@ -44,6 +45,9 @@ export function PayslipList({ payslips }: { payslips: Payslip[] }) {
             ) : null}
             <th className="px-4 py-2 font-medium">Period</th>
             <th className="px-4 py-2 font-medium">Net salary</th>
+            {payslips[0]?.hoursWorked !== undefined ? (
+              <th className="px-4 py-2 font-medium">Hours worked</th>
+            ) : null}
             <th className="px-4 py-2 font-medium">Status</th>
           </tr>
         </thead>
@@ -61,6 +65,11 @@ export function PayslipList({ payslips }: { payslips: Payslip[] }) {
               <td className="px-4 py-2.5 text-foreground">
                 {formatCurrency(payslip.netSalary)}
               </td>
+              {payslip.hoursWorked !== undefined ? (
+                <td className="px-4 py-2.5 text-foreground-muted">
+                  {payslip.hoursWorked.toFixed(1)}h
+                </td>
+              ) : null}
               <td className="px-4 py-2.5">
                 <StatusBadge
                   label={STATUS_LABEL[payslip.status]}
