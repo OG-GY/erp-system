@@ -23,6 +23,7 @@ export async function EmployeeDashboard({
     prisma.attendanceRecord.findMany({
       where: { employeeId, date: { gte: rangeStart, lte: today } },
       orderBy: { date: "desc" },
+      include: { breaks: { where: { endedAt: null }, take: 1 } },
     }),
     prisma.projectMember.findMany({
       where: { employeeId },
@@ -53,6 +54,7 @@ export async function EmployeeDashboard({
           <CheckInCard
             checkInTime={todayRecord?.checkIn ?? null}
             checkOutTime={todayRecord?.checkOut ?? null}
+            openBreakStartedAt={todayRecord?.breaks[0]?.startedAt ?? null}
           />
           <CheckInChart points={chartPoints} />
           <AssignedProjectsCard

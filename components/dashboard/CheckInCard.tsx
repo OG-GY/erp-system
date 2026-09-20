@@ -2,7 +2,13 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { checkIn, checkOut } from "@/lib/actions/attendance";
+import {
+  checkOut,
+  startBreak,
+  resumeFromBreak,
+  type AttendanceActionState,
+} from "@/lib/actions/attendance";
+import { CheckInModal } from "@/components/dashboard/CheckInModal";
 
 function formatTime(date: Date | null) {
   if (!date) return null;
@@ -15,15 +21,18 @@ function formatTime(date: Date | null) {
 export function CheckInCard({
   checkInTime,
   checkOutTime,
+  openBreakStartedAt,
 }: {
   checkInTime: Date | null;
   checkOutTime: Date | null;
+  openBreakStartedAt: Date | null;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  function handle(action: () => Promise<{ error: string | null }>) {
+  function handle(action: () => Promise<AttendanceActionState>) {
     setError(null);
     startTransition(async () => {
       const result = await action();
@@ -44,32 +53,56 @@ export function CheckInCard({
           <p className="mt-1 text-sm text-foreground">Not checked in yet</p>
           <button
             type="button"
-            disabled={isPending}
-            onClick={() => handle(checkIn)}
-            className="mt-3 h-9 rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+            onClick={() => setModalOpen(true)}
+            className="mt-3 h-9 rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
           >
-            {isPending ? "Checking in…" : "Check in"}
-          </button>
-        </>
-      ) : !checkOutTime ? (
-        <>
-          <p className="mt-1 text-sm text-foreground">
-            Checked in at {formatTime(checkInTime)}
-          </p>
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => handle(checkOut)}
-            className="mt-3 h-9 rounded-md border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
-          >
-            {isPending ? "Checking out…" : "Check out"}
+            Check in
           </button>
         </>
       ) : (
-        <p className="mt-1 text-sm text-foreground">
-          Checked in at {formatTime(checkInTime)} · Checked out at{" "}
-          {formatTime(checkOutTime)}
-        </p>
+        <>
+          <p className="mt-1 text-sm text-foreground">
+            Checked in at {formatTime(checkInTime)}
+            {checkOutTime ? ` · Checked out at ${formatTime(checkOutTime)}` : ""}
+          </p>
+          {openBreakStartedAt ? (
+            <p className="mt-1 text-xs text-warning">
+              On break since {formatTime(openBreakStartedAt)}
+            </p>
+          ) : null}
+
+          {!checkOutTime ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {openBreakStartedAt ? (
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handle(resumeFromBreak)}
+                  className="h-9 rounded-md border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
+                >
+                  {isPending ? "Resuming…" : "Resume"}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => handle(startBreak)}
+                  className="h-9 rounded-md border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
+                >
+                  {isPending ? "Starting…" : "Start break"}
+                </button>
+              )}
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={() => handle(checkOut)}
+                className="h-9 rounded-md border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
+              >
+                {isPending ? "Checking out…" : "Check out"}
+              </button>
+            </div>
+          ) : null}
+        </>
       )}
 
       {error ? (
@@ -77,6 +110,8 @@ export function CheckInCard({
           {error}
         </p>
       ) : null}
+
+      {modalOpen ? <CheckInModal onClose={() => setModalOpen(false)} /> : null}
     </div>
   );
 }
