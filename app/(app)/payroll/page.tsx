@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { Wallet } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { PayslipList } from "@/components/payroll/PayslipList";
+import { EarningsChart } from "@/components/payroll/EarningsChart";
+import { StatCard } from "@/components/ui/StatCard";
 import { requireEmployee, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { formatCurrency } from "@/lib/format";
 
 export default async function PayrollPage() {
   const employee = await requireEmployee();
@@ -52,19 +56,35 @@ export default async function PayrollPage() {
     orderBy: { periodStart: "desc" },
   });
 
+  const payslipsWithNumberSalary = payslips.map((p) => ({
+    id: p.id,
+    periodStart: p.periodStart,
+    periodEnd: p.periodEnd,
+    netSalary: Number(p.netSalary),
+    status: p.status,
+  }));
+
+  const totalEarnings = payslipsWithNumberSalary.reduce(
+    (sum, p) => sum + p.netSalary,
+    0,
+  );
+
   return (
     <>
       <PageHeader title="Payroll" description="Your payslips" />
-      <div className="p-4 sm:p-6">
-        <PayslipList
-          payslips={payslips.map((p) => ({
-            id: p.id,
-            periodStart: p.periodStart,
-            periodEnd: p.periodEnd,
-            netSalary: Number(p.netSalary),
-            status: p.status,
-          }))}
-        />
+      <div className="flex flex-col gap-4 p-4 sm:p-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatCard
+            label="Total earnings"
+            value={formatCurrency(totalEarnings)}
+            icon={Wallet}
+            tone="amber"
+          />
+          <div className="sm:col-span-2">
+            <EarningsChart payslips={payslipsWithNumberSalary} />
+          </div>
+        </div>
+        <PayslipList payslips={payslipsWithNumberSalary} />
       </div>
     </>
   );

@@ -81,7 +81,7 @@ export function CreatePayslipForm({
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="basicSalary" className="text-sm font-medium text-foreground-muted">
-            Basic salary
+            Basic salary (PKR)
           </label>
           <input
             id="basicSalary"
@@ -96,7 +96,7 @@ export function CreatePayslipForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="allowances" className="text-sm font-medium text-foreground-muted">
-            Allowances
+            Allowances (PKR)
           </label>
           <input
             id="allowances"
@@ -111,7 +111,7 @@ export function CreatePayslipForm({
         </div>
         <div className="flex flex-col gap-1.5">
           <label htmlFor="deductions" className="text-sm font-medium text-foreground-muted">
-            Deductions
+            Deductions (PKR)
           </label>
           <input
             id="deductions"

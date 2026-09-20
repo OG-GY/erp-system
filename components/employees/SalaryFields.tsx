@@ -59,7 +59,7 @@ export function SalaryFields({
             htmlFor="baseSalary"
             className="text-sm font-medium text-foreground-muted"
           >
-            Base salary
+            Base salary (PKR)
           </label>
           <input
             id="baseSalary"
@@ -81,7 +81,7 @@ export function SalaryFields({
             htmlFor="commissionPerProject"
             className="text-sm font-medium text-foreground-muted"
           >
-            Commission per project
+            Commission per project (PKR)
           </label>
           <input
             id="commissionPerProject"

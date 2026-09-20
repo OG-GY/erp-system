@@ -1,4 +1,5 @@
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { formatCurrency } from "@/lib/format";
 
 const STATUS_TONE = {
   DRAFT: "neutral",
@@ -11,13 +12,6 @@ const STATUS_LABEL = {
   APPROVED: "Approved",
   PAID: "Paid",
 } as const;
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
-}
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("en-US", {

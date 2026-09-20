@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
 import { getCachedDepartments } from "@/lib/cache/departments";
+import { formatCurrency } from "@/lib/format";
 
 const LEAVE_STATUS_LABEL: Record<string, string> = {
   PENDING: "Pending",
@@ -136,10 +137,7 @@ export default async function ReportsPage() {
           />
           <StatCard
             label="Total paid"
-            value={new Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: "USD",
-            }).format(Number(paidTotal._sum.netSalary ?? 0))}
+            value={formatCurrency(Number(paidTotal._sum.netSalary ?? 0))}
             icon={Wallet}
             tone="amber"
           />

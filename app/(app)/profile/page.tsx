@@ -3,7 +3,7 @@ import { ProfileForm } from "@/components/profile/ProfileForm";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
 import { ChangePasswordForm } from "@/components/profile/ChangePasswordForm";
 import { requireEmployee } from "@/lib/auth";
-import { employmentStatusLabel } from "@/lib/format";
+import { employmentStatusLabel, formatCurrency } from "@/lib/format";
 
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
@@ -19,19 +19,14 @@ function formatCompensation(employee: {
   baseSalary: unknown;
   commissionPerProject: unknown;
 }) {
-  const currency = (value: unknown) =>
-    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
-      Number(value),
-    );
-
   if (employee.salaryType === "FIXED" && employee.baseSalary != null) {
-    return `${currency(employee.baseSalary)} (fixed)`;
+    return `${formatCurrency(Number(employee.baseSalary))} (fixed)`;
   }
   if (
     employee.salaryType === "COMMISSION" &&
     employee.commissionPerProject != null
   ) {
-    return `${currency(employee.commissionPerProject)} per project (commission)`;
+    return `${formatCurrency(Number(employee.commissionPerProject))} per project (commission)`;
   }
   return "Not set";
 }

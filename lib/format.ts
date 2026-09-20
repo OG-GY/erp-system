@@ -18,6 +18,13 @@ export function employmentStatusLabel(status: string) {
   return EMPLOYMENT_STATUS_LABELS[status] ?? status;
 }
 
+export function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("en-PK", {
+    style: "currency",
+    currency: "PKR",
+  }).format(amount);
+}
+
 /** Sum of break durations in minutes. An open break (no endedAt) counts up to now. */
 export function totalBreakMinutes(
   breaks: { startedAt: Date; endedAt: Date | null }[],
