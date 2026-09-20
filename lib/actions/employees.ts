@@ -7,6 +7,47 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+// Shared by createEmployee and updateEmployeeSalary — "not set yet" is a
+// valid choice (salaryType absent), otherwise the matching amount is
+// required.
+const salaryFieldsSchema = z
+  .object({
+    salaryType: z.enum(["FIXED", "COMMISSION"]).optional(),
+    baseSalary: z.coerce.number().nonnegative().optional(),
+    commissionPerProject: z.coerce.number().nonnegative().optional(),
+  })
+  .refine((data) => data.salaryType !== "FIXED" || data.baseSalary !== undefined, {
+    message: "Enter a base salary.",
+    path: ["baseSalary"],
+  })
+  .refine(
+    (data) =>
+      data.salaryType !== "COMMISSION" ||
+      data.commissionPerProject !== undefined,
+    { message: "Enter a commission amount.", path: ["commissionPerProject"] },
+  );
+
+function readSalaryFields(formData: FormData) {
+  const salaryTypeRaw = formData.get("salaryType");
+  return {
+    salaryType:
+      salaryTypeRaw === "FIXED" || salaryTypeRaw === "COMMISSION"
+        ? salaryTypeRaw
+        : undefined,
+    baseSalary: formData.get("baseSalary") || undefined,
+    commissionPerProject: formData.get("commissionPerProject") || undefined,
+  };
+}
+
+function salaryUpdateData(salary: z.infer<typeof salaryFieldsSchema>) {
+  return {
+    salaryType: salary.salaryType ?? null,
+    baseSalary: salary.salaryType === "FIXED" ? salary.baseSalary : null,
+    commissionPerProject:
+      salary.salaryType === "COMMISSION" ? salary.commissionPerProject : null,
+  };
+}
+
 const createEmployeeSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, "Password must be at least 8 characters."),
@@ -42,6 +83,13 @@ export async function createEmployee(
     return { error: parsed.error.issues[0]?.message ?? "Please check the fields." };
   }
   const data = parsed.data;
+
+  const salaryParsed = salaryFieldsSchema.safeParse(readSalaryFields(formData));
+  if (!salaryParsed.success) {
+    return {
+      error: salaryParsed.error.issues[0]?.message ?? "Please check the salary fields.",
+    };
+  }
 
   const existing = await prisma.employee.findUnique({
     where: { officialEmail: data.email },
@@ -89,6 +137,7 @@ export async function createEmployee(
         employmentStatus: "ACTIVE",
         joiningDate: new Date(data.joiningDate),
         departmentId: data.departmentId || null,
+        ...salaryUpdateData(salaryParsed.data),
       },
     });
   } catch (err) {
@@ -102,17 +151,6 @@ export async function createEmployee(
   redirect("/employees");
 }
 
-const salarySchema = z.discriminatedUnion("salaryType", [
-  z.object({
-    salaryType: z.literal("FIXED"),
-    baseSalary: z.coerce.number().nonnegative(),
-  }),
-  z.object({
-    salaryType: z.literal("COMMISSION"),
-    commissionPerProject: z.coerce.number().nonnegative(),
-  }),
-]);
-
 export type UpdateSalaryState = { error: string | null; success: boolean };
 
 export async function updateEmployeeSalary(
@@ -122,41 +160,17 @@ export async function updateEmployeeSalary(
 ): Promise<UpdateSalaryState> {
   await requireAdmin();
 
-  const salaryType = formData.get("salaryType");
-  const raw =
-    salaryType === "COMMISSION"
-      ? {
-          salaryType: "COMMISSION" as const,
-          commissionPerProject: formData.get("commissionPerProject"),
-        }
-      : {
-          salaryType: "FIXED" as const,
-          baseSalary: formData.get("baseSalary"),
-        };
-
-  const parsed = salarySchema.safeParse(raw);
+  const parsed = salaryFieldsSchema.safeParse(readSalaryFields(formData));
   if (!parsed.success) {
     return {
       error: parsed.error.issues[0]?.message ?? "Enter a valid amount.",
       success: false,
     };
   }
-  const data = parsed.data;
 
   await prisma.employee.update({
     where: { id: employeeId },
-    data:
-      data.salaryType === "FIXED"
-        ? {
-            salaryType: "FIXED",
-            baseSalary: data.baseSalary,
-            commissionPerProject: null,
-          }
-        : {
-            salaryType: "COMMISSION",
-            commissionPerProject: data.commissionPerProject,
-            baseSalary: null,
-          },
+    data: salaryUpdateData(parsed.data),
   });
 
   revalidatePath(`/employees/${employeeId}`);

@@ -5,6 +5,7 @@ import {
   createEmployee,
   type CreateEmployeeState,
 } from "@/lib/actions/employees";
+import { SalaryFields } from "@/components/employees/SalaryFields";
 
 const initialState: CreateEmployeeState = { error: null };
 
@@ -123,6 +124,8 @@ export function CreateEmployeeForm({
           ))}
         </select>
       </div>
+
+      <SalaryFields disabled={isPending} />
 
       {state.error ? (
         <p role="alert" className="text-sm text-danger">
