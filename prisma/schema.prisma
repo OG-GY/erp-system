@@ -153,6 +153,7 @@ model AttendanceRecord {
   checkOut      DateTime?
   status        AttendanceStatus  @default(PRESENT)
   notes         String?
+  standup       String?
   breaks        AttendanceBreak[]
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt

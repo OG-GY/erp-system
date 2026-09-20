@@ -3,12 +3,12 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
-  checkOut,
   startBreak,
   resumeFromBreak,
   type AttendanceActionState,
 } from "@/lib/actions/attendance";
 import { CheckInModal } from "@/components/dashboard/CheckInModal";
+import { CheckOutModal } from "@/components/dashboard/CheckOutModal";
 import {
   LiveDurationTimer,
   formatDuration,
@@ -37,6 +37,7 @@ export function CheckInCard({
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [checkOutModalOpen, setCheckOutModalOpen] = useState(false);
 
   // If check-in/break state changed elsewhere (another tab, another device)
   // while this tab was in the background, refetch on refocus rather than
@@ -141,11 +142,10 @@ export function CheckInCard({
               )}
               <button
                 type="button"
-                disabled={isPending}
-                onClick={() => handle(checkOut)}
+                onClick={() => setCheckOutModalOpen(true)}
                 className="h-9 rounded-sm border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover disabled:opacity-60"
               >
-                {isPending ? "Checking out…" : "Check out"}
+                Check out
               </button>
             </div>
           ) : null}
@@ -159,6 +159,9 @@ export function CheckInCard({
       ) : null}
 
       {modalOpen ? <CheckInModal onClose={() => setModalOpen(false)} /> : null}
+      {checkOutModalOpen ? (
+        <CheckOutModal onClose={() => setCheckOutModalOpen(false)} />
+      ) : null}
     </div>
   );
 }

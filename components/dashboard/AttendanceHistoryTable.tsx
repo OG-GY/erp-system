@@ -34,6 +34,7 @@ export function AttendanceHistoryTable({
     checkIn: Date | null;
     checkOut: Date | null;
     status: keyof typeof STATUS_LABEL;
+    standup: string | null;
     breaks: { startedAt: Date; endedAt: Date | null }[];
   }[];
 }) {
@@ -47,12 +48,13 @@ export function AttendanceHistoryTable({
             <th className="px-4 py-2 font-medium">Check-out</th>
             <th className="px-4 py-2 font-medium">Breaks</th>
             <th className="px-4 py-2 font-medium">Status</th>
+            <th className="px-4 py-2 font-medium">Standup</th>
           </tr>
         </thead>
         <tbody>
           {records.length === 0 ? (
             <tr>
-              <td colSpan={5} className="px-4 py-6 text-center text-foreground-muted">
+              <td colSpan={6} className="px-4 py-6 text-center text-foreground-muted">
                 No attendance records yet.
               </td>
             </tr>
@@ -81,6 +83,12 @@ export function AttendanceHistoryTable({
                     label={STATUS_LABEL[record.status]}
                     tone={STATUS_TONE[record.status]}
                   />
+                </td>
+                <td
+                  className="max-w-xs truncate px-4 py-2.5 text-foreground-muted"
+                  title={record.standup ?? undefined}
+                >
+                  {record.standup ?? "—"}
                 </td>
               </tr>
             ))

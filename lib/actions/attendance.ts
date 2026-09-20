@@ -27,6 +27,21 @@ function timeStringToToday(time: string): Date {
   );
 }
 
+/**
+ * The employee's in-progress shift, if any — checked in but not checked out
+ * yet. Looked up by state (not by "today's" date) so a shift that started
+ * before midnight and is still running after it (e.g. 11pm-4am) keeps
+ * resolving to the record it started on. That record's `date` is fixed at
+ * check-in time, so the whole shift stays attributed to the day it began.
+ */
+function findOpenRecord(employeeId: string) {
+  return prisma.attendanceRecord.findFirst({
+    where: { employeeId, checkIn: { not: null }, checkOut: null },
+    orderBy: { checkIn: "desc" },
+    include: { breaks: { where: { endedAt: null } } },
+  });
+}
+
 export async function checkIn(
   _prevState: AttendanceActionState,
   formData: FormData,
@@ -43,12 +58,21 @@ export async function checkIn(
     return { error: "Check-in time can't be in the future.", success: false };
   }
 
+  // A still-open shift blocks a new check-in regardless of what calendar
+  // date it's dated under — this is what makes an overnight shift work
+  // correctly: you can't start a second one until you check out of the
+  // first, even after the calendar date has rolled over past midnight.
+  const openRecord = await findOpenRecord(employee.id);
+  if (openRecord) {
+    return { error: "You're already checked in.", success: false };
+  }
+
   const date = todayDateOnly();
-  const existing = await prisma.attendanceRecord.findUnique({
+  const existingToday = await prisma.attendanceRecord.findUnique({
     where: { employeeId_date: { employeeId: employee.id, date } },
   });
 
-  if (existing?.checkIn) {
+  if (existingToday?.checkIn) {
     return { error: "You already checked in today.", success: false };
   }
 
@@ -67,27 +91,36 @@ export async function checkIn(
   return { error: null, success: true };
 }
 
-export async function checkOut(): Promise<AttendanceActionState> {
+const standupSchema = z
+  .string()
+  .trim()
+  .min(1, "Enter a standup before checking out.")
+  .max(4000, "Keep the standup under 4000 characters.");
+
+export async function checkOut(
+  _prevState: AttendanceActionState,
+  formData: FormData,
+): Promise<AttendanceActionState> {
   const employee = await requireEmployee();
-  const date = todayDateOnly();
 
-  const existing = await prisma.attendanceRecord.findUnique({
-    where: { employeeId_date: { employeeId: employee.id, date } },
-    include: { breaks: { where: { endedAt: null } } },
-  });
-
-  if (!existing?.checkIn) {
-    return { error: "Check in before checking out.", success: false };
+  const parsedStandup = standupSchema.safeParse(formData.get("standup"));
+  if (!parsedStandup.success) {
+    return {
+      error: parsedStandup.error.issues[0]?.message ?? "Enter a standup.",
+      success: false,
+    };
   }
-  if (existing.checkOut) {
-    return { error: "You already checked out today.", success: false };
+
+  const existing = await findOpenRecord(employee.id);
+  if (!existing) {
+    return { error: "Check in before checking out.", success: false };
   }
 
   const now = new Date();
   await prisma.$transaction([
     prisma.attendanceRecord.update({
       where: { id: existing.id },
-      data: { checkOut: now },
+      data: { checkOut: now, standup: parsedStandup.data },
     }),
     // Auto-close any still-open break rather than leaving it dangling.
     ...existing.breaks.map((b) =>
@@ -104,18 +137,10 @@ export async function checkOut(): Promise<AttendanceActionState> {
 
 export async function startBreak(): Promise<AttendanceActionState> {
   const employee = await requireEmployee();
-  const date = todayDateOnly();
 
-  const record = await prisma.attendanceRecord.findUnique({
-    where: { employeeId_date: { employeeId: employee.id, date } },
-    include: { breaks: { where: { endedAt: null } } },
-  });
-
-  if (!record?.checkIn) {
+  const record = await findOpenRecord(employee.id);
+  if (!record) {
     return { error: "Check in before starting a break.", success: false };
-  }
-  if (record.checkOut) {
-    return { error: "You've already checked out today.", success: false };
   }
   if (record.breaks.length > 0) {
     return { error: "You're already on a break.", success: false };
@@ -131,13 +156,8 @@ export async function startBreak(): Promise<AttendanceActionState> {
 
 export async function resumeFromBreak(): Promise<AttendanceActionState> {
   const employee = await requireEmployee();
-  const date = todayDateOnly();
 
-  const record = await prisma.attendanceRecord.findUnique({
-    where: { employeeId_date: { employeeId: employee.id, date } },
-    include: { breaks: { where: { endedAt: null }, take: 1 } },
-  });
-
+  const record = await findOpenRecord(employee.id);
   const openBreak = record?.breaks[0];
   if (!openBreak) {
     return { error: "You're not currently on a break.", success: false };

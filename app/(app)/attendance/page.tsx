@@ -42,6 +42,7 @@ export default async function AttendancePage() {
       checkIn: true,
       checkOut: true,
       status: true,
+      standup: true,
       employee: { select: { id: true, fullName: true } },
       breaks: { select: { startedAt: true, endedAt: true } },
     },
@@ -73,6 +74,7 @@ export default async function AttendancePage() {
                   <th className="px-4 py-2 font-medium">Check-out</th>
                   <th className="px-4 py-2 font-medium">Breaks</th>
                   <th className="px-4 py-2 font-medium">Status</th>
+                  <th className="px-4 py-2 font-medium">Standup</th>
                 </tr>
               </thead>
               <tbody>
@@ -97,6 +99,12 @@ export default async function AttendancePage() {
                         label={STATUS_LABEL[record.status]}
                         tone={STATUS_TONE[record.status]}
                       />
+                    </td>
+                    <td
+                      className="max-w-xs truncate px-4 py-2.5 text-foreground-muted"
+                      title={record.standup ?? undefined}
+                    >
+                      {record.standup ?? "—"}
                     </td>
                   </tr>
                 ))}

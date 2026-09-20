@@ -32,7 +32,13 @@ export async function EmployeeDashboard({
     }),
   ]);
 
-  const todayRecord = records.find((r) => r.date.getTime() === today.getTime());
+  // An overnight shift (e.g. checked in 11pm, still running past midnight)
+  // stays dated to the day it started, so once the calendar date rolls over
+  // it's no longer "today's" record by date — look for a still-open shift
+  // first, and only fall back to an exact date match otherwise.
+  const openRecord = records.find((r) => r.checkIn && !r.checkOut);
+  const todayRecord =
+    openRecord ?? records.find((r) => r.date.getTime() === today.getTime());
 
   // Exact milliseconds, not the rounded-to-the-minute totalBreakMinutes()
   // helper — this feeds a live per-second timer, where rounding would show
