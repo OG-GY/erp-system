@@ -17,3 +17,14 @@ const EMPLOYMENT_STATUS_LABELS: Record<string, string> = {
 export function employmentStatusLabel(status: string) {
   return EMPLOYMENT_STATUS_LABELS[status] ?? status;
 }
+
+/** Sum of break durations in minutes. An open break (no endedAt) counts up to now. */
+export function totalBreakMinutes(
+  breaks: { startedAt: Date; endedAt: Date | null }[],
+) {
+  const totalMs = breaks.reduce((sum, b) => {
+    const end = b.endedAt ?? new Date();
+    return sum + (end.getTime() - b.startedAt.getTime());
+  }, 0);
+  return Math.round(totalMs / 60000);
+}

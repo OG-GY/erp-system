@@ -3,6 +3,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
+import { totalBreakMinutes } from "@/lib/format";
 
 const STATUS_TONE = {
   PRESENT: "success",
@@ -42,6 +43,7 @@ export default async function AttendancePage() {
       checkOut: true,
       status: true,
       employee: { select: { id: true, fullName: true } },
+      breaks: { select: { startedAt: true, endedAt: true } },
     },
   });
 
@@ -69,6 +71,7 @@ export default async function AttendancePage() {
                   <th className="px-4 py-2 font-medium">Employee</th>
                   <th className="px-4 py-2 font-medium">Check-in</th>
                   <th className="px-4 py-2 font-medium">Check-out</th>
+                  <th className="px-4 py-2 font-medium">Breaks</th>
                   <th className="px-4 py-2 font-medium">Status</th>
                 </tr>
               </thead>
@@ -83,6 +86,11 @@ export default async function AttendancePage() {
                     </td>
                     <td className="px-4 py-2.5 text-foreground-muted">
                       {formatTime(record.checkOut)}
+                    </td>
+                    <td className="px-4 py-2.5 text-foreground-muted">
+                      {record.breaks.length === 0
+                        ? "—"
+                        : `${record.breaks.length} · ${totalBreakMinutes(record.breaks)} min`}
                     </td>
                     <td className="px-4 py-2.5">
                       <StatusBadge

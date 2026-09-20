@@ -1,4 +1,5 @@
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { totalBreakMinutes } from "@/lib/format";
 
 const STATUS_TONE = {
   PRESENT: "success",
@@ -33,6 +34,7 @@ export function AttendanceHistoryTable({
     checkIn: Date | null;
     checkOut: Date | null;
     status: keyof typeof STATUS_LABEL;
+    breaks: { startedAt: Date; endedAt: Date | null }[];
   }[];
 }) {
   return (
@@ -43,13 +45,14 @@ export function AttendanceHistoryTable({
             <th className="px-4 py-2 font-medium">Date</th>
             <th className="px-4 py-2 font-medium">Check-in</th>
             <th className="px-4 py-2 font-medium">Check-out</th>
+            <th className="px-4 py-2 font-medium">Breaks</th>
             <th className="px-4 py-2 font-medium">Status</th>
           </tr>
         </thead>
         <tbody>
           {records.length === 0 ? (
             <tr>
-              <td colSpan={4} className="px-4 py-6 text-center text-foreground-muted">
+              <td colSpan={5} className="px-4 py-6 text-center text-foreground-muted">
                 No attendance records yet.
               </td>
             </tr>
@@ -67,6 +70,11 @@ export function AttendanceHistoryTable({
                 </td>
                 <td className="px-4 py-2.5 text-foreground-muted">
                   {formatTime(record.checkOut)}
+                </td>
+                <td className="px-4 py-2.5 text-foreground-muted">
+                  {record.breaks.length === 0
+                    ? "—"
+                    : `${record.breaks.length} · ${totalBreakMinutes(record.breaks)} min`}
                 </td>
                 <td className="px-4 py-2.5">
                   <StatusBadge
