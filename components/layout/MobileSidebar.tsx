@@ -52,7 +52,7 @@ export function MobileSidebar({
           aria-label="Open menu"
           aria-expanded={open}
           onClick={() => setOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-black/[.04] dark:hover:bg-white/[.06]"
+          className="flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-overlay-hover"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
@@ -79,7 +79,7 @@ export function MobileSidebar({
               type="button"
               aria-label="Close menu"
               onClick={() => setOpen(false)}
-              className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-black/[.04] dark:hover:bg-white/[.06]"
+              className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-overlay-hover"
             >
               <X className="h-5 w-5" aria-hidden="true" />
             </button>

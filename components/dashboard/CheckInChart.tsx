@@ -54,7 +54,7 @@ export function CheckInChart({ points }: { points: DayPoint[] }) {
                       width={barWidth}
                       height={4}
                       rx={2}
-                      className="fill-black/[.08] dark:fill-white/[.1]"
+                      className="fill-overlay-neutral"
                     />
                     <text
                       x={x + barWidth / 2}

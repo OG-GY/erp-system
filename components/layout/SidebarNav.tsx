@@ -57,7 +57,7 @@ export function SidebarNav({
             } ${
               isActive
                 ? "bg-accent/12 font-semibold text-accent"
-                : "text-foreground-muted hover:bg-black/[.04] dark:hover:bg-white/[.06]"
+                : "text-foreground-muted hover:bg-overlay-hover"
             }`}
           >
             <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />

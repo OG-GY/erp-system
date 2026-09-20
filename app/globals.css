@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
+
   --background: #f7f7fb;
   --surface: #ffffff;
   --surface-translucent: rgb(255 255 255 / 0.72);
@@ -16,6 +18,8 @@
   --danger: #ef4444;
   --warning: #f59e0b;
   --success: #22c55e;
+  --overlay-hover: rgb(0 0 0 / 0.04);
+  --overlay-neutral: rgb(0 0 0 / 0.06);
 
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -23,8 +27,12 @@
   --radius-xl: 1.5rem;
 }
 
+/* Follows the OS/browser preference until the user picks explicitly
+   (see ThemeToggle, which stamps data-theme and wins over this). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
     --background: #14141b;
     --surface: #1e1e28;
     --surface-translucent: rgb(30 30 40 / 0.72);
@@ -40,7 +48,36 @@
     --danger: #f87171;
     --warning: #f59e0b;
     --success: #4ade80;
+    --overlay-hover: rgb(255 255 255 / 0.06);
+    --overlay-neutral: rgb(255 255 255 / 0.08);
   }
+}
+
+/* Explicit user choice (ThemeToggle), overrides system preference either way. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --background: #14141b;
+  --surface: #1e1e28;
+  --surface-translucent: rgb(30 30 40 / 0.72);
+  --foreground: #f1f5f9;
+  --foreground-muted: #94a3b8;
+  --border: rgb(255 255 255 / 0.08);
+  --border-strong: rgb(255 255 255 / 0.14);
+  --accent: #6366f1;
+  --accent-foreground: #ffffff;
+  --accent-secondary: #f59e0b;
+  --accent-secondary-foreground: #1d1d1f;
+  --info: #a78bfa;
+  --danger: #f87171;
+  --warning: #f59e0b;
+  --success: #4ade80;
+  --overlay-hover: rgb(255 255 255 / 0.06);
+  --overlay-neutral: rgb(255 255 255 / 0.08);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
 @theme inline {
@@ -59,6 +96,8 @@
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-success: var(--success);
+  --color-overlay-hover: var(--overlay-hover);
+  --color-overlay-neutral: var(--overlay-neutral);
 
   --radius-sm: var(--radius-sm);
   --radius-md: var(--radius-md);

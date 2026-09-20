@@ -15,7 +15,7 @@ export function PresentTodayCard({
   return (
     <Link
       href="#active-checkins"
-      className="flex flex-col rounded-xl border border-border bg-surface p-4 transition-colors hover:bg-black/[.02] dark:hover:bg-white/[.03]"
+      className="flex flex-col rounded-xl border border-border bg-surface p-4 transition-colors hover:bg-overlay-hover"
     >
       <div className="flex items-center gap-3">
         <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/12 text-success">

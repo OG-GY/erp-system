@@ -1,5 +1,5 @@
 const TONE_CLASSES: Record<"neutral" | "success" | "warning" | "danger", string> = {
-  neutral: "bg-black/[.06] text-foreground-muted dark:bg-white/[.08]",
+  neutral: "bg-overlay-neutral text-foreground-muted",
   success: "bg-success/12 text-success",
   warning: "bg-warning/12 text-warning",
   danger: "bg-danger/12 text-danger",

@@ -2,6 +2,7 @@ import { Building2 } from "lucide-react";
 import type { Role } from "@prisma/client";
 import { SidebarNav } from "@/components/layout/SidebarNav";
 import { UserMenu } from "@/components/layout/UserMenu";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 export function SidebarContent({
   fullName,
@@ -36,6 +37,7 @@ export function SidebarContent({
       </div>
 
       <div className="border-t border-border p-2">
+        <ThemeToggle collapsed={collapsed} />
         <UserMenu
           fullName={fullName}
           designation={designation}

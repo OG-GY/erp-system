@@ -36,7 +36,7 @@ export function AssignedProjectsCard({
             <li key={project.id}>
               <Link
                 href={`/projects#${project.id}`}
-                className="flex items-center justify-between gap-2 rounded-md px-1 py-1 text-sm hover:bg-black/[.04] dark:hover:bg-white/[.06]"
+                className="flex items-center justify-between gap-2 rounded-md px-1 py-1 text-sm hover:bg-overlay-hover"
               >
                 <span className="truncate text-foreground">{project.name}</span>
                 <StatusBadge
