@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   checkOut,
@@ -9,6 +9,10 @@ import {
   type AttendanceActionState,
 } from "@/lib/actions/attendance";
 import { CheckInModal } from "@/components/dashboard/CheckInModal";
+import {
+  LiveDurationTimer,
+  formatDuration,
+} from "@/components/dashboard/LiveDurationTimer";
 
 function formatTime(date: Date | null) {
   if (!date) return null;
@@ -22,15 +26,30 @@ export function CheckInCard({
   checkInTime,
   checkOutTime,
   openBreakStartedAt,
+  completedBreakMs,
 }: {
   checkInTime: Date | null;
   checkOutTime: Date | null;
   openBreakStartedAt: Date | null;
+  completedBreakMs: number;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+
+  // If check-in/break state changed elsewhere (another tab, another device)
+  // while this tab was in the background, refetch on refocus rather than
+  // polling continuously — the state here is only ever a few actions deep,
+  // so "catch up when looked at again" is enough.
+  useEffect(() => {
+    function handleVisibility() {
+      if (document.visibilityState === "visible") router.refresh();
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
+  }, [router]);
 
   function handle(action: () => Promise<AttendanceActionState>) {
     setError(null);
@@ -65,10 +84,38 @@ export function CheckInCard({
             Checked in at {formatTime(checkInTime)}
             {checkOutTime ? ` · Checked out at ${formatTime(checkOutTime)}` : ""}
           </p>
-          {openBreakStartedAt ? (
-            <p className="mt-1 text-xs text-warning">
-              On break since {formatTime(openBreakStartedAt)}
-            </p>
+
+          {!checkOutTime ? (
+            <div className="mt-2">
+              {openBreakStartedAt ? (
+                <>
+                  <p className="text-xs text-foreground-muted">Worked so far</p>
+                  <p className="text-2xl font-bold tabular-nums text-foreground">
+                    {formatDuration(
+                      openBreakStartedAt.getTime() -
+                        checkInTime.getTime() -
+                        completedBreakMs,
+                    )}
+                  </p>
+                  <p className="mt-2 text-xs text-warning">
+                    On break since {formatTime(openBreakStartedAt)}
+                  </p>
+                  <LiveDurationTimer
+                    anchor={openBreakStartedAt}
+                    className="text-lg font-semibold tabular-nums text-warning"
+                  />
+                </>
+              ) : (
+                <>
+                  <p className="text-xs text-foreground-muted">Worked so far</p>
+                  <LiveDurationTimer
+                    anchor={checkInTime}
+                    pausedMs={completedBreakMs}
+                    className="text-2xl font-bold tabular-nums text-foreground"
+                  />
+                </>
+              )}
+            </div>
           ) : null}
 
           {!checkOutTime ? (

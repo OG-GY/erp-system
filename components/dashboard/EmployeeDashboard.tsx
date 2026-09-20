@@ -34,6 +34,15 @@ export async function EmployeeDashboard({
 
   const todayRecord = records.find((r) => r.date.getTime() === today.getTime());
 
+  // Exact milliseconds, not the rounded-to-the-minute totalBreakMinutes()
+  // helper — this feeds a live per-second timer, where rounding would show
+  // as a visible jump.
+  const completedBreakMs =
+    todayRecord?.breaks.reduce((sum, b) => {
+      if (!b.endedAt) return sum;
+      return sum + (b.endedAt.getTime() - b.startedAt.getTime());
+    }, 0) ?? 0;
+
   const recordsByDate = new Map(
     records.map((r) => [r.date.toISOString().slice(0, 10), r]),
   );
@@ -57,6 +66,7 @@ export async function EmployeeDashboard({
             openBreakStartedAt={
               todayRecord?.breaks.find((b) => !b.endedAt)?.startedAt ?? null
             }
+            completedBreakMs={completedBreakMs}
           />
           <CheckInChart points={chartPoints} />
           <AssignedProjectsCard
