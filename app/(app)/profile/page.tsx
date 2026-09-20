@@ -1,6 +1,7 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { AvatarUploader } from "@/components/profile/AvatarUploader";
+import { ChangePasswordForm } from "@/components/profile/ChangePasswordForm";
 import { requireEmployee } from "@/lib/auth";
 import { employmentStatusLabel } from "@/lib/format";
 
@@ -68,6 +69,13 @@ export default async function ProfilePage() {
             emergencyContactName={employee.emergencyContactName}
             emergencyContactPhone={employee.emergencyContactPhone}
           />
+        </section>
+
+        <section className="max-w-2xl rounded-lg border border-border bg-surface p-6">
+          <h2 className="mb-4 text-sm font-medium text-foreground-muted">
+            Password
+          </h2>
+          <ChangePasswordForm />
         </section>
       </div>
     </>
