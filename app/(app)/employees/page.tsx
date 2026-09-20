@@ -39,7 +39,7 @@ export default async function EmployeesPage() {
         actions={
           <Link
             href="/employees/new"
-            className="flex h-8 items-center rounded-full bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+            className="flex h-8 items-center rounded-lg bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
           >
             Add employee
           </Link>
@@ -56,7 +56,7 @@ export default async function EmployeesPage() {
           </p>
           <Link
             href="/employees/new"
-            className="mt-2 flex h-9 items-center rounded-full bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+            className="mt-2 flex h-9 items-center rounded-lg bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
           >
             Add employee
           </Link>
@@ -85,7 +85,7 @@ export default async function EmployeesPage() {
                         href={`/employees/${employee.id}`}
                         className="flex items-center gap-2.5 font-medium text-foreground hover:text-accent"
                       >
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/12 text-[10px] font-semibold text-accent">
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-accent/12 text-[10px] font-semibold text-accent">
                           {initials(employee.fullName)}
                         </span>
                         {employee.fullName}

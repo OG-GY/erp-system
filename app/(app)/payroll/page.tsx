@@ -29,7 +29,7 @@ export default async function PayrollPage() {
           actions={
             <Link
               href="/payroll/new"
-              className="flex h-8 items-center rounded-full bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+              className="flex h-8 items-center rounded-lg bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
             >
               Add payslip
             </Link>

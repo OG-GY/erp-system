@@ -133,7 +133,7 @@ export function CreateEmployeeForm({
       <button
         type="submit"
         disabled={isPending}
-        className="h-9 w-fit rounded-full bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+        className="h-9 w-fit rounded-lg bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
       >
         {isPending ? "Creating…" : "Create employee"}
       </button>

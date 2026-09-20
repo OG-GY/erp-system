@@ -44,7 +44,7 @@ export default async function ProjectsPage() {
           actions={
             <Link
               href="/projects/new"
-              className="flex h-8 items-center rounded-full bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+              className="flex h-8 items-center rounded-lg bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
             >
               New project
             </Link>
@@ -56,7 +56,7 @@ export default async function ProjectsPage() {
               <p className="text-sm font-medium text-foreground">No projects yet</p>
               <Link
                 href="/projects/new"
-                className="mt-2 flex h-9 items-center rounded-full bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+                className="mt-2 flex h-9 items-center rounded-lg bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
               >
                 New project
               </Link>

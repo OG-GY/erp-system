@@ -89,14 +89,14 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="h-9 rounded-full border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover disabled:opacity-60"
+              className="h-9 rounded-lg border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover disabled:opacity-60"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="h-9 rounded-full bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+              className="h-9 rounded-lg bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >
               {isPending ? "Checking in…" : "Check in"}
             </button>
