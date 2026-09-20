@@ -2,12 +2,12 @@ import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 /**
- * The department list is shared, non-sensitive (just names/ids), and has no
- * write path yet — nothing in the app creates/edits departments today. Safe
- * to cache across users. See docs/caching.md.
+ * The department list is shared and non-sensitive (just names/ids), so it's
+ * safe to cache across users. See docs/caching.md.
  *
- * If a "manage departments" feature is ever added, its create/update/delete
- * action MUST call `revalidateTag("departments")`, or this list will serve
+ * Write path: lib/actions/departments.ts's createDepartment calls
+ * revalidateTag("departments") right after writing — any new write path
+ * added later (rename/delete) MUST do the same, or this list will serve
  * stale data for up to 5 minutes.
  */
 export const getCachedDepartments = unstable_cache(

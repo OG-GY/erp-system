@@ -37,12 +37,20 @@ export default async function EmployeesPage() {
         title="Employees"
         description={`${employees.length} ${employees.length === 1 ? "employee" : "employees"}`}
         actions={
-          <Link
-            href="/employees/new"
-            className="flex h-8 items-center rounded-sm bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-          >
-            Add employee
-          </Link>
+          <>
+            <Link
+              href="/departments"
+              className="flex h-8 items-center rounded-sm border border-border-strong px-3 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover"
+            >
+              Departments
+            </Link>
+            <Link
+              href="/employees/new"
+              className="flex h-8 items-center rounded-sm bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+            >
+              Add employee
+            </Link>
+          </>
         }
       />
 

@@ -101,3 +101,65 @@ export async function createEmployee(
   revalidatePath("/employees");
   redirect("/employees");
 }
+
+const salarySchema = z.discriminatedUnion("salaryType", [
+  z.object({
+    salaryType: z.literal("FIXED"),
+    baseSalary: z.coerce.number().nonnegative(),
+  }),
+  z.object({
+    salaryType: z.literal("COMMISSION"),
+    commissionPerProject: z.coerce.number().nonnegative(),
+  }),
+]);
+
+export type UpdateSalaryState = { error: string | null; success: boolean };
+
+export async function updateEmployeeSalary(
+  employeeId: string,
+  _prevState: UpdateSalaryState,
+  formData: FormData,
+): Promise<UpdateSalaryState> {
+  await requireAdmin();
+
+  const salaryType = formData.get("salaryType");
+  const raw =
+    salaryType === "COMMISSION"
+      ? {
+          salaryType: "COMMISSION" as const,
+          commissionPerProject: formData.get("commissionPerProject"),
+        }
+      : {
+          salaryType: "FIXED" as const,
+          baseSalary: formData.get("baseSalary"),
+        };
+
+  const parsed = salarySchema.safeParse(raw);
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Enter a valid amount.",
+      success: false,
+    };
+  }
+  const data = parsed.data;
+
+  await prisma.employee.update({
+    where: { id: employeeId },
+    data:
+      data.salaryType === "FIXED"
+        ? {
+            salaryType: "FIXED",
+            baseSalary: data.baseSalary,
+            commissionPerProject: null,
+          }
+        : {
+            salaryType: "COMMISSION",
+            commissionPerProject: data.commissionPerProject,
+            baseSalary: null,
+          },
+  });
+
+  revalidatePath(`/employees/${employeeId}`);
+  revalidatePath("/profile");
+  return { error: null, success: true };
+}

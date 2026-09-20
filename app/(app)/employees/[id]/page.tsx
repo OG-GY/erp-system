@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { SalaryForm } from "@/components/employees/SalaryForm";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { initials, employmentStatusLabel } from "@/lib/format";
@@ -42,6 +43,9 @@ export default async function EmployeeDetailPage({
       department: { select: { name: true } },
       team: { select: { name: true } },
       manager: { select: { fullName: true } },
+      salaryType: true,
+      baseSalary: true,
+      commissionPerProject: true,
     },
   });
 
@@ -84,6 +88,24 @@ export default async function EmployeeDetailPage({
               }).format(employee.joiningDate)}
             />
           </div>
+        </div>
+
+        <div className="mt-6 max-w-2xl rounded-lg border border-border bg-surface p-6">
+          <h2 className="mb-4 text-sm font-medium text-foreground-muted">
+            Salary
+          </h2>
+          <SalaryForm
+            employeeId={employee.id}
+            currentSalaryType={employee.salaryType}
+            currentBaseSalary={
+              employee.baseSalary ? Number(employee.baseSalary) : null
+            }
+            currentCommissionPerProject={
+              employee.commissionPerProject
+                ? Number(employee.commissionPerProject)
+                : null
+            }
+          />
         </div>
       </div>
     </>

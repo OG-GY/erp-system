@@ -37,6 +37,16 @@ the rendering model. If Cache Components ever gets adopted here, it should
 be its own deliberate project with its own review, not a side effect of a
 caching pass.
 
+**One version-specific gotcha**: in this Next.js release, `revalidateTag(tag)`
+with a single argument is deprecated — TypeScript now requires a second
+"profile" argument, even for plain `unstable_cache` usage that has nothing
+to do with Cache Components. The profile Next recommends (`"max"`) is
+calibrated for the new `cacheLife` system; it is **not** what you want here.
+Use `revalidateTag(tag, { expire: 0 })` — that's the literal replacement for
+the old deprecated single-arg behavior (invalidate immediately), which is
+what actually pairs correctly with a plain `unstable_cache({ tags, revalidate })`
+call. See `lib/actions/departments.ts` for the working example.
+
 ## What is cached
 
 ### 1. Per-request auth dedup (`lib/auth.ts`)
@@ -79,15 +89,16 @@ headcount-by-department breakdown.
 
 Why this is safe to share across users: it's just department names and
 ids — not sensitive, identical for every viewer (there's no per-user
-filtering of the department list), and there is currently **no UI that
-creates, renames, or deletes a department** — so staleness risk is
-already close to zero even before the 5-minute TTL.
+filtering of the department list).
 
-**If a "manage departments" feature is ever built**, its
-create/update/delete action **must** call `revalidateTag("departments")` —
-otherwise the dropdown and reports can serve a stale list for up to 5
-minutes. This is the one piece of debt this cache introduces; it's flagged
-in a comment at the top of the file too.
+**Write path**: `/departments` (admin-only) now has a real "add department"
+form (`lib/actions/departments.ts`). Its `createDepartment` action calls
+`revalidateTag("departments")` immediately after the write, so the dropdown
+and reports pick up a new department right away rather than waiting out the
+5-minute TTL. The management page itself (`/departments`) deliberately does
+**not** use `getCachedDepartments()` — it queries Postgres directly, so an
+admin managing the list always sees the true current state, not a
+potentially-5-minutes-stale cached copy of their own list.
 
 ## What is deliberately NOT cached, and why
 

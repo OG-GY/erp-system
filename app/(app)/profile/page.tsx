@@ -14,6 +14,28 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
   );
 }
 
+function formatCompensation(employee: {
+  salaryType: "FIXED" | "COMMISSION" | null;
+  baseSalary: unknown;
+  commissionPerProject: unknown;
+}) {
+  const currency = (value: unknown) =>
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(
+      Number(value),
+    );
+
+  if (employee.salaryType === "FIXED" && employee.baseSalary != null) {
+    return `${currency(employee.baseSalary)} (fixed)`;
+  }
+  if (
+    employee.salaryType === "COMMISSION" &&
+    employee.commissionPerProject != null
+  ) {
+    return `${currency(employee.commissionPerProject)} per project (commission)`;
+  }
+  return "Not set";
+}
+
 export default async function ProfilePage() {
   const employee = await requireEmployee();
 
@@ -52,6 +74,10 @@ export default async function ProfilePage() {
               value={new Intl.DateTimeFormat("en-US", {
                 dateStyle: "medium",
               }).format(employee.joiningDate)}
+            />
+            <ReadOnlyField
+              label="Compensation"
+              value={formatCompensation(employee)}
             />
           </div>
         </section>
