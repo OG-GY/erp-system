@@ -1,4 +1,5 @@
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { StandupModalButton } from "@/components/dashboard/StandupModalButton";
 import { totalBreakMinutes } from "@/lib/format";
 
 const STATUS_TONE = {
@@ -84,11 +85,18 @@ export function AttendanceHistoryTable({
                     tone={STATUS_TONE[record.status]}
                   />
                 </td>
-                <td
-                  className="max-w-xs truncate px-4 py-2.5 text-foreground-muted"
-                  title={record.standup ?? undefined}
-                >
-                  {record.standup ?? "—"}
+                <td className="px-4 py-2.5">
+                  {record.standup ? (
+                    <StandupModalButton
+                      standup={record.standup}
+                      label={new Intl.DateTimeFormat("en-US", {
+                        dateStyle: "medium",
+                        timeZone: "UTC",
+                      }).format(record.date)}
+                    />
+                  ) : (
+                    <span className="text-foreground-muted">—</span>
+                  )}
                 </td>
               </tr>
             ))

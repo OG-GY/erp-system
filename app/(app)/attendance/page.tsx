@@ -1,5 +1,6 @@
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { StandupModalButton } from "@/components/dashboard/StandupModalButton";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
@@ -100,11 +101,15 @@ export default async function AttendancePage() {
                         tone={STATUS_TONE[record.status]}
                       />
                     </td>
-                    <td
-                      className="max-w-xs truncate px-4 py-2.5 text-foreground-muted"
-                      title={record.standup ?? undefined}
-                    >
-                      {record.standup ?? "—"}
+                    <td className="px-4 py-2.5">
+                      {record.standup ? (
+                        <StandupModalButton
+                          standup={record.standup}
+                          label={record.employee.fullName}
+                        />
+                      ) : (
+                        <span className="text-foreground-muted">—</span>
+                      )}
                     </td>
                   </tr>
                 ))}
