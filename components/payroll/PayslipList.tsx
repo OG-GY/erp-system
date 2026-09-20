@@ -1,4 +1,5 @@
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { PayslipStatusSelect } from "@/components/payroll/PayslipStatusSelect";
 import { formatCurrency } from "@/lib/format";
 
 const STATUS_TONE = {
@@ -30,7 +31,13 @@ type Payslip = {
   hoursWorked?: number;
 };
 
-export function PayslipList({ payslips }: { payslips: Payslip[] }) {
+export function PayslipList({
+  payslips,
+  editableStatus = false,
+}: {
+  payslips: Payslip[];
+  editableStatus?: boolean;
+}) {
   if (payslips.length === 0) {
     return <p className="text-sm text-foreground-muted">No payslips yet.</p>;
   }
@@ -71,10 +78,17 @@ export function PayslipList({ payslips }: { payslips: Payslip[] }) {
                 </td>
               ) : null}
               <td className="px-4 py-2.5">
-                <StatusBadge
-                  label={STATUS_LABEL[payslip.status]}
-                  tone={STATUS_TONE[payslip.status]}
-                />
+                {editableStatus ? (
+                  <PayslipStatusSelect
+                    payslipId={payslip.id}
+                    currentStatus={payslip.status}
+                  />
+                ) : (
+                  <StatusBadge
+                    label={STATUS_LABEL[payslip.status]}
+                    tone={STATUS_TONE[payslip.status]}
+                  />
+                )}
               </td>
             </tr>
           ))}

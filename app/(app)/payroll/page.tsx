@@ -69,6 +69,7 @@ export default async function PayrollPage() {
               ...p,
               netSalary: Number(p.netSalary),
             }))}
+            editableStatus
           />
         </div>
       </>

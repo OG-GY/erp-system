@@ -77,3 +77,32 @@ export async function createPayslip(
   revalidatePath("/payroll");
   redirect("/payroll");
 }
+
+const payslipStatusSchema = z.enum(["DRAFT", "APPROVED", "PAID"]);
+
+export type UpdatePayslipStatusState = { error: string | null };
+
+export async function updatePayslipStatus(
+  payslipId: string,
+  status: string,
+): Promise<UpdatePayslipStatusState> {
+  await requireAdmin();
+
+  const parsed = payslipStatusSchema.safeParse(status);
+  if (!parsed.success) {
+    return { error: "Invalid status." };
+  }
+
+  await prisma.payslip.update({
+    where: { id: payslipId },
+    data: {
+      status: parsed.data,
+      // Only a PAID payslip has a paidAt — moving off PAID clears it, same
+      // as the initial value createPayslip sets when a slip starts PAID.
+      paidAt: parsed.data === "PAID" ? new Date() : null,
+    },
+  });
+
+  revalidatePath("/payroll");
+  return { error: null };
+}
