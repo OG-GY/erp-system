@@ -54,7 +54,7 @@ export function CheckInCard({
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="mt-3 h-9 rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+            className="mt-3 h-9 rounded-full bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
           >
             Check in
           </button>
@@ -78,7 +78,7 @@ export function CheckInCard({
                   type="button"
                   disabled={isPending}
                   onClick={() => handle(resumeFromBreak)}
-                  className="h-9 rounded-md border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
+                  className="h-9 rounded-full border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
                 >
                   {isPending ? "Resuming…" : "Resume"}
                 </button>
@@ -87,7 +87,7 @@ export function CheckInCard({
                   type="button"
                   disabled={isPending}
                   onClick={() => handle(startBreak)}
-                  className="h-9 rounded-md border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
+                  className="h-9 rounded-full border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
                 >
                   {isPending ? "Starting…" : "Start break"}
                 </button>
@@ -96,7 +96,7 @@ export function CheckInCard({
                 type="button"
                 disabled={isPending}
                 onClick={() => handle(checkOut)}
-                className="h-9 rounded-md border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
+                className="h-9 rounded-full border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-black/[.04] disabled:opacity-60 dark:hover:bg-white/[.06]"
               >
                 {isPending ? "Checking out…" : "Check out"}
               </button>

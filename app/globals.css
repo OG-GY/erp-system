@@ -1,39 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f5f7;
+  --background: #f7f7fb;
   --surface: #ffffff;
   --surface-translucent: rgb(255 255 255 / 0.72);
-  --foreground: #1d1d1f;
-  --foreground-muted: #6e6e73;
-  --border: rgb(0 0 0 / 0.08);
-  --border-strong: rgb(0 0 0 / 0.12);
-  --accent: #0a84ff;
+  --foreground: #0f172a;
+  --foreground-muted: #64748b;
+  --border: rgb(15 23 42 / 0.08);
+  --border-strong: rgb(15 23 42 / 0.14);
+  --accent: #4f46e5;
   --accent-foreground: #ffffff;
-  --danger: #ff3b30;
-  --warning: #ff9f0a;
-  --success: #34c759;
+  --accent-secondary: #f59e0b;
+  --accent-secondary-foreground: #1d1d1f;
+  --info: #7c3aed;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #22c55e;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.125rem;
+  --radius-xl: 1.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1c1c1e;
-    --surface: #2c2c2e;
-    --surface-translucent: rgb(44 44 46 / 0.72);
-    --foreground: #f5f5f7;
-    --foreground-muted: #98989d;
+    --background: #14141b;
+    --surface: #1e1e28;
+    --surface-translucent: rgb(30 30 40 / 0.72);
+    --foreground: #f1f5f9;
+    --foreground-muted: #94a3b8;
     --border: rgb(255 255 255 / 0.08);
     --border-strong: rgb(255 255 255 / 0.14);
-    --accent: #0a84ff;
+    --accent: #6366f1;
     --accent-foreground: #ffffff;
-    --danger: #ff453a;
-    --warning: #ff9f0a;
-    --success: #30d158;
+    --accent-secondary: #f59e0b;
+    --accent-secondary-foreground: #1d1d1f;
+    --info: #a78bfa;
+    --danger: #f87171;
+    --warning: #f59e0b;
+    --success: #4ade80;
   }
 }
 
@@ -47,6 +53,9 @@
   --color-border-strong: var(--border-strong);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-secondary-foreground: var(--accent-secondary-foreground);
+  --color-info: var(--info);
   --color-danger: var(--danger);
   --color-warning: var(--warning);
   --color-success: var(--success);

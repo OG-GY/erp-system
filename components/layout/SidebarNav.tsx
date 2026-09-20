@@ -30,12 +30,18 @@ const ADMIN_NAV_ITEMS = [
   { href: "/reports", label: "Reports", icon: BarChart3 },
 ] as const;
 
-export function SidebarNav({ role }: { role: Role }) {
+export function SidebarNav({
+  role,
+  collapsed = false,
+}: {
+  role: Role;
+  collapsed?: boolean;
+}) {
   const pathname = usePathname();
   const items = role === "EMPLOYEE" ? EMPLOYEE_NAV_ITEMS : ADMIN_NAV_ITEMS;
 
   return (
-    <nav aria-label="Main" className="flex flex-col gap-0.5 px-2">
+    <nav aria-label="Main" className="flex flex-col gap-1 px-2">
       {items.map(({ href, label, icon: Icon }) => {
         const isActive =
           pathname === href || pathname.startsWith(`${href}/`);
@@ -45,14 +51,21 @@ export function SidebarNav({ role }: { role: Role }) {
             key={href}
             href={href}
             aria-current={isActive ? "page" : undefined}
-            className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm transition-colors ${
+            title={collapsed ? label : undefined}
+            className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors ${
+              collapsed ? "justify-center" : ""
+            } ${
               isActive
-                ? "bg-accent/12 font-medium text-accent"
+                ? "bg-accent/12 font-semibold text-accent"
                 : "text-foreground-muted hover:bg-black/[.04] dark:hover:bg-white/[.06]"
             }`}
           >
-            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-            {label}
+            <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+            {collapsed ? (
+              <span className="sr-only">{label}</span>
+            ) : (
+              <span className="truncate">{label}</span>
+            )}
           </Link>
         );
       })}

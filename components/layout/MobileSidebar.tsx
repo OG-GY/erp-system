@@ -56,8 +56,8 @@ export function MobileSidebar({
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
-        <span className="text-sm font-semibold tracking-tight text-foreground">
-          Employee Management
+        <span className="text-sm font-bold tracking-tight text-foreground">
+          Elevloop Internal
         </span>
       </header>
 

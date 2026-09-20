@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { initials } from "@/lib/format";
 
 export function PresentTodayCard({
@@ -14,13 +15,20 @@ export function PresentTodayCard({
   return (
     <Link
       href="#active-checkins"
-      className="flex flex-col rounded-lg border border-border bg-surface p-4 transition-colors hover:bg-black/[.02] dark:hover:bg-white/[.03]"
+      className="flex flex-col rounded-xl border border-border bg-surface p-4 transition-colors hover:bg-black/[.02] dark:hover:bg-white/[.03]"
     >
-      <p className="text-xs text-foreground-muted">Present today</p>
-      <p className="mt-1 text-2xl font-semibold text-foreground">{count}</p>
+      <div className="flex items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-success/12 text-success">
+          <CheckCircle2 className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-xs text-foreground-muted">Present today</p>
+          <p className="mt-0.5 text-2xl font-extrabold text-foreground">{count}</p>
+        </div>
+      </div>
 
       {activeNow.length > 0 ? (
-        <div className="mt-2 flex items-center">
+        <div className="mt-3 flex items-center">
           <div className="flex -space-x-2">
             {preview.map((employee) => (
               <span

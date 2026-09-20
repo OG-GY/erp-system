@@ -19,7 +19,7 @@ export default function GlobalError({
         <button
           type="button"
           onClick={reset}
-          className="mt-2 h-9 rounded-md bg-accent px-4 text-sm font-medium text-accent-foreground hover:opacity-90"
+          className="mt-2 h-9 rounded-full bg-accent px-4 text-sm font-medium text-accent-foreground hover:opacity-90"
         >
           Try again
         </button>

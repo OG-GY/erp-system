@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Role } from "@prisma/client";
-import { SidebarContent } from "@/components/layout/SidebarContent";
+import { DesktopSidebar } from "@/components/layout/DesktopSidebar";
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
 
 export function AppShell({
@@ -18,14 +18,12 @@ export function AppShell({
 }) {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-surface-translucent backdrop-blur-xl md:flex">
-        <SidebarContent
-          fullName={fullName}
-          designation={designation}
-          role={role}
-          profilePictureUrl={profilePictureUrl}
-        />
-      </aside>
+      <DesktopSidebar
+        fullName={fullName}
+        designation={designation}
+        role={role}
+        profilePictureUrl={profilePictureUrl}
+      />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <MobileSidebar

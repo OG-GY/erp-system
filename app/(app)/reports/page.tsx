@@ -1,3 +1,4 @@
+import { Users, TrendingUp, FolderKanban, Wallet } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { requireAdmin } from "@/lib/auth";
@@ -114,15 +115,32 @@ export default async function ReportsPage() {
       <PageHeader title="Reports" description="Organization overview" />
       <div className="flex flex-col gap-4 p-4 sm:p-6">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard label="Active employees" value={activeEmployees} />
-          <StatCard label="Attendance rate (30d)" value={`${attendanceRate}%`} />
-          <StatCard label="Active projects" value={activeProjects} />
+          <StatCard
+            label="Active employees"
+            value={activeEmployees}
+            icon={Users}
+            tone="accent"
+          />
+          <StatCard
+            label="Attendance rate (30d)"
+            value={`${attendanceRate}%`}
+            icon={TrendingUp}
+            tone="success"
+          />
+          <StatCard
+            label="Active projects"
+            value={activeProjects}
+            icon={FolderKanban}
+            tone="info"
+          />
           <StatCard
             label="Total paid"
             value={new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "USD",
             }).format(Number(paidTotal._sum.netSalary ?? 0))}
+            icon={Wallet}
+            tone="amber"
           />
         </div>
 

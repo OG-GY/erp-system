@@ -1,3 +1,4 @@
+import { Users, CalendarClock, ListTodo } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { PresentTodayCard } from "@/components/dashboard/PresentTodayCard";
@@ -42,10 +43,25 @@ export async function AdminDashboard({ firstName }: { firstName: string }) {
       <PageHeader title="Dashboard" description={`Welcome back, ${firstName}`} />
       <div className="flex flex-col gap-4 p-4 sm:p-6">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard label="Active employees" value={totalEmployees} />
+          <StatCard
+            label="Active employees"
+            value={totalEmployees}
+            icon={Users}
+            tone="accent"
+          />
           <PresentTodayCard count={todayRecords.length} activeNow={activeCheckIns} />
-          <StatCard label="Pending leave requests" value={pendingLeave} />
-          <StatCard label="Open tasks" value={openTasks} />
+          <StatCard
+            label="Pending leave requests"
+            value={pendingLeave}
+            icon={CalendarClock}
+            tone="amber"
+          />
+          <StatCard
+            label="Open tasks"
+            value={openTasks}
+            icon={ListTodo}
+            tone="info"
+          />
         </div>
 
         <ActiveCheckInsList employees={activeCheckIns} />
