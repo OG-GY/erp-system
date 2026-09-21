@@ -46,6 +46,8 @@ export default async function EmployeeDetailPage({
         employmentStatus: true,
         employmentType: true,
         joiningDate: true,
+        dateOfBirth: true,
+        idCardNumber: true,
         departmentId: true,
         department: { select: { name: true } },
         team: { select: { name: true } },
@@ -96,6 +98,18 @@ export default async function EmployeeDetailPage({
                 dateStyle: "medium",
               }).format(employee.joiningDate)}
             />
+            <Field
+              label="Date of birth"
+              value={
+                employee.dateOfBirth
+                  ? new Intl.DateTimeFormat("en-US", {
+                      dateStyle: "medium",
+                      timeZone: "UTC",
+                    }).format(employee.dateOfBirth)
+                  : "—"
+              }
+            />
+            <Field label="ID card number" value={employee.idCardNumber ?? "—"} />
           </div>
         </div>
 
@@ -113,6 +127,7 @@ export default async function EmployeeDetailPage({
             defaultEmploymentStatus={employee.employmentStatus}
             defaultJoiningDate={employee.joiningDate.toISOString().slice(0, 10)}
             defaultDepartmentId={employee.departmentId ?? ""}
+            defaultIdCardNumber={employee.idCardNumber ?? ""}
           />
         </div>
 

@@ -58,6 +58,8 @@ const createEmployeeSchema = z.object({
   employmentType: z.enum(["FULL_TIME", "PART_TIME", "INTERN", "CONTRACT"]),
   joiningDate: z.string().min(1),
   departmentId: z.string().optional(),
+  dateOfBirth: z.string().optional(),
+  idCardNumber: z.string().max(50).optional(),
 });
 
 export type CreateEmployeeState = { error: string | null };
@@ -77,6 +79,8 @@ export async function createEmployee(
     employmentType: formData.get("employmentType"),
     joiningDate: formData.get("joiningDate"),
     departmentId: formData.get("departmentId") || undefined,
+    dateOfBirth: formData.get("dateOfBirth") || undefined,
+    idCardNumber: formData.get("idCardNumber") || undefined,
   };
 
   const parsed = createEmployeeSchema.safeParse(raw);
@@ -152,6 +156,8 @@ export async function createEmployee(
             employmentStatus: "ACTIVE",
             joiningDate: new Date(data.joiningDate),
             departmentId: data.departmentId || null,
+            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
+            idCardNumber: data.idCardNumber || null,
             ...salaryUpdateData(salaryParsed.data),
           },
         });
@@ -218,6 +224,7 @@ const updateEmployeeSchema = z.object({
   employmentStatus: z.enum(["ACTIVE", "INACTIVE", "ON_LEAVE", "TERMINATED"]),
   joiningDate: z.string().min(1),
   departmentId: z.string().optional(),
+  idCardNumber: z.string().max(50).optional(),
 });
 
 export type UpdateEmployeeState = { error: string | null; success: boolean };
@@ -237,6 +244,7 @@ export async function updateEmployeeDetails(
     employmentStatus: formData.get("employmentStatus"),
     joiningDate: formData.get("joiningDate"),
     departmentId: formData.get("departmentId") || undefined,
+    idCardNumber: formData.get("idCardNumber") || undefined,
   });
 
   if (!parsed.success) {
@@ -291,6 +299,7 @@ export async function updateEmployeeDetails(
       employmentStatus: data.employmentStatus,
       joiningDate: new Date(data.joiningDate),
       departmentId: data.departmentId || null,
+      idCardNumber: data.idCardNumber || null,
       ...(becomingTerminated ? { terminationDate: new Date() } : {}),
       ...(leavingTerminated ? { terminationDate: null } : {}),
     },

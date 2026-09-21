@@ -74,6 +74,10 @@ export default async function ProfilePage() {
               label="Compensation"
               value={formatCompensation(employee)}
             />
+            <ReadOnlyField
+              label="ID card number"
+              value={employee.idCardNumber ?? "—"}
+            />
           </div>
         </section>
 

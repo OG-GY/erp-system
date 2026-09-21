@@ -91,6 +91,7 @@ model Employee {
   // --- Admin/HR-only fields: never writable from the self-service profile action. ---
   role             Role              @default(EMPLOYEE)
   designation      String?
+  idCardNumber     String?
   employmentStatus EmploymentStatus  @default(ACTIVE)
   employmentType   EmploymentType    @default(FULL_TIME)
   joiningDate      DateTime

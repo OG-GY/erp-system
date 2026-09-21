@@ -41,6 +41,7 @@ export function EditEmployeeForm({
   defaultEmploymentStatus,
   defaultJoiningDate,
   defaultDepartmentId,
+  defaultIdCardNumber,
 }: {
   employeeId: string;
   departments: { id: string; name: string }[];
@@ -51,6 +52,7 @@ export function EditEmployeeForm({
   defaultEmploymentStatus: (typeof EMPLOYMENT_STATUSES)[number]["value"];
   defaultJoiningDate: string;
   defaultDepartmentId: string;
+  defaultIdCardNumber: string;
 }) {
   const boundAction = updateEmployeeDetails.bind(null, employeeId);
   const [state, formAction, isPending] = useActionState(
@@ -160,6 +162,15 @@ export function EditEmployeeForm({
           />
         </div>
       </div>
+
+      <Field
+        id="idCardNumber"
+        name="idCardNumber"
+        label="ID card number"
+        type="text"
+        disabled={isPending}
+        defaultValue={defaultIdCardNumber}
+      />
 
       {state.error ? (
         <p role="alert" className="text-sm text-danger">

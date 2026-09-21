@@ -5,14 +5,13 @@ import { PresentTodayCard } from "@/components/dashboard/PresentTodayCard";
 import { ActiveCheckInsList } from "@/components/dashboard/ActiveCheckInsList";
 import { UpcomingBirthdaysCard } from "@/components/dashboard/UpcomingBirthdaysCard";
 import { prisma } from "@/lib/prisma";
-import { todayDateOnly, daysUntilNextOccurrence } from "@/lib/date";
-
-const UPCOMING_BIRTHDAY_WINDOW_DAYS = 30;
+import { todayDateOnly } from "@/lib/date";
+import { getUpcomingBirthdays } from "@/lib/birthdays";
 
 export async function AdminDashboard({ firstName }: { firstName: string }) {
   const today = todayDateOnly();
 
-  const [totalEmployees, todayRecords, pendingLeave, openTasks, employeesWithBirthday] =
+  const [totalEmployees, todayRecords, pendingLeave, openTasks, upcomingBirthdays] =
     await Promise.all([
       prisma.employee.count({ where: { employmentStatus: "ACTIVE" } }),
       prisma.attendanceRecord.findMany({
@@ -29,21 +28,8 @@ export async function AdminDashboard({ firstName }: { firstName: string }) {
       prisma.task.count({
         where: { status: { in: ["TODO", "IN_PROGRESS", "IN_REVIEW"] } },
       }),
-      prisma.employee.findMany({
-        where: { employmentStatus: "ACTIVE", dateOfBirth: { not: null } },
-        select: { id: true, fullName: true, dateOfBirth: true },
-      }),
+      getUpcomingBirthdays(),
     ]);
-
-  const upcomingBirthdays = employeesWithBirthday
-    .map((e) => ({
-      id: e.id,
-      fullName: e.fullName,
-      dateOfBirth: e.dateOfBirth!,
-      daysUntil: daysUntilNextOccurrence(e.dateOfBirth!, today),
-    }))
-    .filter((e) => e.daysUntil <= UPCOMING_BIRTHDAY_WINDOW_DAYS)
-    .sort((a, b) => a.daysUntil - b.daysUntil);
 
   const activeCheckIns = todayRecords
     .filter((r) => r.checkIn && !r.checkOut)

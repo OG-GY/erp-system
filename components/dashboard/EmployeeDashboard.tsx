@@ -3,8 +3,10 @@ import { CheckInCard } from "@/components/dashboard/CheckInCard";
 import { CheckInChart } from "@/components/dashboard/CheckInChart";
 import { AttendanceHistoryTable } from "@/components/dashboard/AttendanceHistoryTable";
 import { AssignedProjectsCard } from "@/components/dashboard/AssignedProjectsCard";
+import { UpcomingBirthdaysCard } from "@/components/dashboard/UpcomingBirthdaysCard";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
+import { getUpcomingBirthdays } from "@/lib/birthdays";
 
 const HISTORY_DAYS = 14;
 
@@ -19,7 +21,7 @@ export async function EmployeeDashboard({
   const DAY_MS = 24 * 60 * 60 * 1000;
   const rangeStart = new Date(today.getTime() - (HISTORY_DAYS - 1) * DAY_MS);
 
-  const [records, projectMembers] = await Promise.all([
+  const [records, projectMembers, upcomingBirthdays] = await Promise.all([
     prisma.attendanceRecord.findMany({
       where: { employeeId, date: { gte: rangeStart, lte: today } },
       orderBy: { date: "desc" },
@@ -30,6 +32,7 @@ export async function EmployeeDashboard({
       select: { project: { select: { id: true, name: true, status: true } } },
       take: 20,
     }),
+    getUpcomingBirthdays(),
   ]);
 
   // An overnight shift (e.g. checked in 11pm, still running past midnight)
@@ -78,6 +81,10 @@ export async function EmployeeDashboard({
           <AssignedProjectsCard
             projects={projectMembers.map((m) => m.project)}
           />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <UpcomingBirthdaysCard birthdays={upcomingBirthdays} />
         </div>
 
         <div>

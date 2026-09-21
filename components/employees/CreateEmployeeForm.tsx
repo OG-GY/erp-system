@@ -113,6 +113,23 @@ export function CreateEmployeeForm({
         />
       </div>
 
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field
+          id="dateOfBirth"
+          name="dateOfBirth"
+          label="Date of birth (optional)"
+          type="date"
+          disabled={isPending}
+        />
+        <Field
+          id="idCardNumber"
+          name="idCardNumber"
+          label="ID card number (optional)"
+          type="text"
+          disabled={isPending}
+        />
+      </div>
+
       <SalaryFields disabled={isPending} />
 
       {state.error ? (
