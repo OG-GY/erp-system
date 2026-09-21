@@ -123,24 +123,50 @@ export async function createEmployee(
   }
 
   try {
-    const employeeCount = await prisma.employee.count();
-    const employeeNumber = `EMP-${String(employeeCount + 1).padStart(4, "0")}`;
+    // Derived from the highest employeeNumber ever issued, not the current
+    // row count — count() drops when an employee is deleted, which would
+    // regenerate an already-used number and collide on the unique
+    // constraint. Zero-padding to a fixed width keeps lexicographic order
+    // equal to numeric order, so ordering by the string column is safe.
+    let attempt = 0;
+    for (;;) {
+      const last = await prisma.employee.findFirst({
+        orderBy: { employeeNumber: "desc" },
+        select: { employeeNumber: true },
+      });
+      const lastN = last
+        ? parseInt(last.employeeNumber.replace(/^EMP-/, ""), 10) || 0
+        : 0;
+      const employeeNumber = `EMP-${String(lastN + 1).padStart(4, "0")}`;
 
-    await prisma.employee.create({
-      data: {
-        id: authData.user.id,
-        employeeNumber,
-        fullName: data.fullName,
-        officialEmail: data.email,
-        role: data.role,
-        designation: data.designation || null,
-        employmentType: data.employmentType,
-        employmentStatus: "ACTIVE",
-        joiningDate: new Date(data.joiningDate),
-        departmentId: data.departmentId || null,
-        ...salaryUpdateData(salaryParsed.data),
-      },
-    });
+      try {
+        await prisma.employee.create({
+          data: {
+            id: authData.user.id,
+            employeeNumber,
+            fullName: data.fullName,
+            officialEmail: data.email,
+            role: data.role,
+            designation: data.designation || null,
+            employmentType: data.employmentType,
+            employmentStatus: "ACTIVE",
+            joiningDate: new Date(data.joiningDate),
+            departmentId: data.departmentId || null,
+            ...salaryUpdateData(salaryParsed.data),
+          },
+        });
+        break;
+      } catch (err) {
+        attempt += 1;
+        const isNumberConflict =
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === "P2002" &&
+          (err.meta?.target as string[] | undefined)?.includes("employeeNumber");
+        // A concurrent create can still race us for the same number —
+        // regenerate and retry a few times before giving up.
+        if (!isNumberConflict || attempt >= 5) throw err;
+      }
+    }
   } catch (err) {
     // Roll back the auth user so we don't leave an orphaned login with no
     // Employee row — the two writes aren't in one transaction.
