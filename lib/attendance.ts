@@ -4,7 +4,7 @@ import { AUTO_CHECKOUT_MS } from "@/lib/attendance-constants";
 export { AUTO_CHECKOUT_MS };
 
 const AUTO_CHECKOUT_STANDUP =
-  "Auto checkout — reached the 12-hour limit without checking out.";
+  "Auto checkout — reached the 11-hour limit without checking out.";
 
 /**
  * The employee's in-progress shift, if any — checked in but not checked out
@@ -34,7 +34,7 @@ async function closeStaleRecord(record: {
       data: { checkOut: autoCheckOutTime, standup: AUTO_CHECKOUT_STANDUP },
     }),
     // A break that started after the retroactive checkout time (possible if
-    // this runs well past the 12h mark) would otherwise end up with endedAt
+    // this runs well past the limit) would otherwise end up with endedAt
     // before startedAt.
     ...record.breaks.map((b) =>
       prisma.attendanceBreak.update({

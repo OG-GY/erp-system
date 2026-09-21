@@ -6,9 +6,9 @@
  * the browser bundle) rather than a plain server-side env var.
  *
  * Overridable via NEXT_PUBLIC_AUTO_CHECKOUT_MINUTES for local testing —
- * unset in production, so it defaults to the real 12h limit there.
+ * unset in production, so it defaults to the real 11h limit there.
  */
-const DEFAULT_MINUTES = 12 * 60;
+const DEFAULT_MINUTES = 11 * 60;
 
 const configuredMinutes = Number(process.env.NEXT_PUBLIC_AUTO_CHECKOUT_MINUTES);
 

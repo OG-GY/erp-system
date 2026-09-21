@@ -141,10 +141,11 @@ export async function startBreak(): Promise<AttendanceActionState> {
 }
 
 /**
- * Called by the client-side timer in CheckInCard once it reaches 12h since
- * check-in. The client is only a wake-up call — this re-verifies checkIn
- * server-side (autoCheckOutIfStale) before closing anything, so a fast,
- * slow, or tampered client clock can't force an early or fake checkout.
+ * Called by the client-side timer in CheckInCard once the auto-checkout
+ * limit has passed since check-in. The client is only a wake-up call — this
+ * re-verifies checkIn server-side (autoCheckOutIfStale) before closing
+ * anything, so a fast, slow, or tampered client clock can't force an early
+ * or fake checkout.
  */
 export async function checkAutoCheckOut(): Promise<AttendanceActionState> {
   const employee = await requireEmployee();
