@@ -52,29 +52,6 @@ async function closeStaleRecord(record: {
 }
 
 /**
- * Sweeps every employee's open shifts for anything past the 12h mark. Used
- * by the Vercel Cron backstop (see /api/cron/auto-checkout) — on the Hobby
- * plan that only runs once a day, so it's a fallback for whenever the
- * client-side trigger below didn't fire (device off, tab never reopened).
- */
-export async function autoCheckOutStaleShifts() {
-  const cutoff = new Date(Date.now() - AUTO_CHECKOUT_HOURS * 60 * 60 * 1000);
-
-  const staleRecords = await prisma.attendanceRecord.findMany({
-    where: { checkIn: { not: null, lte: cutoff }, checkOut: null },
-    include: { breaks: { where: { endedAt: null } } },
-  });
-
-  for (const record of staleRecords) {
-    await closeStaleRecord(
-      record as { id: string; checkIn: Date; breaks: { id: string; startedAt: Date }[] },
-    );
-  }
-
-  return staleRecords.length;
-}
-
-/**
  * Closes one employee's open shift if it's genuinely been 12h+ since
  * check-in. Meant to be triggered by a client-side timer reaching the 12h
  * mark, but never trusts that claim — re-reads checkIn from the database
