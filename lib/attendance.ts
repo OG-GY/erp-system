@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
-import { AUTO_CHECKOUT_HOURS } from "@/lib/attendance-constants";
+import { AUTO_CHECKOUT_MS } from "@/lib/attendance-constants";
 
-export { AUTO_CHECKOUT_HOURS };
+export { AUTO_CHECKOUT_MS };
 
 const AUTO_CHECKOUT_STANDUP =
   "Auto checkout — reached the 12-hour limit without checking out.";
@@ -26,9 +26,7 @@ async function closeStaleRecord(record: {
   checkIn: Date;
   breaks: { id: string; startedAt: Date }[];
 }) {
-  const autoCheckOutTime = new Date(
-    record.checkIn.getTime() + AUTO_CHECKOUT_HOURS * 60 * 60 * 1000,
-  );
+  const autoCheckOutTime = new Date(record.checkIn.getTime() + AUTO_CHECKOUT_MS);
 
   await prisma.$transaction([
     prisma.attendanceRecord.update({
@@ -52,18 +50,18 @@ async function closeStaleRecord(record: {
 }
 
 /**
- * Closes one employee's open shift if it's genuinely been 12h+ since
- * check-in. Meant to be triggered by a client-side timer reaching the 12h
- * mark, but never trusts that claim — re-reads checkIn from the database
- * and only acts if the server's own clock agrees, so a wrong or tampered
- * client clock can't force an early checkout. Returns whether it closed
- * anything.
+ * Closes one employee's open shift if it's genuinely past the
+ * AUTO_CHECKOUT_MS mark since check-in. Meant to be triggered by a
+ * client-side timer reaching that point, but never trusts that claim —
+ * re-reads checkIn from the database and only acts if the server's own
+ * clock agrees, so a wrong or tampered client clock can't force an early
+ * checkout. Returns whether it closed anything.
  */
 export async function autoCheckOutIfStale(employeeId: string) {
   const record = await findOpenRecord(employeeId);
   if (!record || !record.checkIn) return false;
 
-  const cutoff = record.checkIn.getTime() + AUTO_CHECKOUT_HOURS * 60 * 60 * 1000;
+  const cutoff = record.checkIn.getTime() + AUTO_CHECKOUT_MS;
   if (Date.now() < cutoff) return false;
 
   await closeStaleRecord({ ...record, checkIn: record.checkIn });
