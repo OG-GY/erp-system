@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
 import { todayDateOnly } from "@/lib/date";
+import { findOpenRecord, autoCheckOutIfStale } from "@/lib/attendance";
 
 export type AttendanceActionState = { error: string | null; success: boolean };
 
@@ -25,21 +26,6 @@ function timeStringToToday(time: string): Date {
     0,
     0,
   );
-}
-
-/**
- * The employee's in-progress shift, if any — checked in but not checked out
- * yet. Looked up by state (not by "today's" date) so a shift that started
- * before midnight and is still running after it (e.g. 11pm-4am) keeps
- * resolving to the record it started on. That record's `date` is fixed at
- * check-in time, so the whole shift stays attributed to the day it began.
- */
-function findOpenRecord(employeeId: string) {
-  return prisma.attendanceRecord.findFirst({
-    where: { employeeId, checkIn: { not: null }, checkOut: null },
-    orderBy: { checkIn: "desc" },
-    include: { breaks: { where: { endedAt: null } } },
-  });
 }
 
 export async function checkIn(
@@ -152,6 +138,21 @@ export async function startBreak(): Promise<AttendanceActionState> {
 
   revalidatePath("/dashboard");
   return { error: null, success: true };
+}
+
+/**
+ * Called by the client-side timer in CheckInCard once it reaches 12h since
+ * check-in. The client is only a wake-up call — this re-verifies checkIn
+ * server-side (autoCheckOutIfStale) before closing anything, so a fast,
+ * slow, or tampered client clock can't force an early or fake checkout.
+ */
+export async function checkAutoCheckOut(): Promise<AttendanceActionState> {
+  const employee = await requireEmployee();
+  const closed = await autoCheckOutIfStale(employee.id);
+  if (closed) {
+    revalidatePath("/dashboard");
+  }
+  return { error: null, success: closed };
 }
 
 export async function resumeFromBreak(): Promise<AttendanceActionState> {

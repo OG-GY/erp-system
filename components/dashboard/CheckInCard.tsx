@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import {
   startBreak,
   resumeFromBreak,
+  checkAutoCheckOut,
   type AttendanceActionState,
 } from "@/lib/actions/attendance";
+import { AUTO_CHECKOUT_HOURS } from "@/lib/attendance-constants";
 import { CheckInModal } from "@/components/dashboard/CheckInModal";
 import { CheckOutModal } from "@/components/dashboard/CheckOutModal";
 import {
@@ -51,6 +53,36 @@ export function CheckInCard({
     return () =>
       document.removeEventListener("visibilitychange", handleVisibility);
   }, [router]);
+
+  // Auto-checkout at 12h since check-in. This timer is only a wake-up call —
+  // checkAutoCheckOut() re-verifies checkIn against the server's own clock
+  // before closing anything, so a wrong or throttled client timer can't
+  // force an early or fake checkout. Checking immediately (not just
+  // scheduling the timeout) covers reopening the tab after 12h already
+  // passed while it was closed.
+  useEffect(() => {
+    if (!checkInTime || checkOutTime) return;
+
+    function verifyAndAutoCheckOut() {
+      startTransition(async () => {
+        const result = await checkAutoCheckOut();
+        if (result.success) router.refresh();
+      });
+    }
+
+    const msUntilAutoCheckOut =
+      checkInTime.getTime() +
+      AUTO_CHECKOUT_HOURS * 60 * 60 * 1000 -
+      Date.now();
+
+    if (msUntilAutoCheckOut <= 0) {
+      verifyAndAutoCheckOut();
+      return;
+    }
+
+    const timeoutId = setTimeout(verifyAndAutoCheckOut, msUntilAutoCheckOut);
+    return () => clearTimeout(timeoutId);
+  }, [checkInTime, checkOutTime, router]);
 
   function handle(action: () => Promise<AttendanceActionState>) {
     setError(null);
