@@ -3,13 +3,16 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { PresentTodayCard } from "@/components/dashboard/PresentTodayCard";
 import { ActiveCheckInsList } from "@/components/dashboard/ActiveCheckInsList";
+import { UpcomingBirthdaysCard } from "@/components/dashboard/UpcomingBirthdaysCard";
 import { prisma } from "@/lib/prisma";
-import { todayDateOnly } from "@/lib/date";
+import { todayDateOnly, daysUntilNextOccurrence } from "@/lib/date";
+
+const UPCOMING_BIRTHDAY_WINDOW_DAYS = 30;
 
 export async function AdminDashboard({ firstName }: { firstName: string }) {
   const today = todayDateOnly();
 
-  const [totalEmployees, todayRecords, pendingLeave, openTasks] =
+  const [totalEmployees, todayRecords, pendingLeave, openTasks, employeesWithBirthday] =
     await Promise.all([
       prisma.employee.count({ where: { employmentStatus: "ACTIVE" } }),
       prisma.attendanceRecord.findMany({
@@ -26,7 +29,21 @@ export async function AdminDashboard({ firstName }: { firstName: string }) {
       prisma.task.count({
         where: { status: { in: ["TODO", "IN_PROGRESS", "IN_REVIEW"] } },
       }),
+      prisma.employee.findMany({
+        where: { employmentStatus: "ACTIVE", dateOfBirth: { not: null } },
+        select: { id: true, fullName: true, dateOfBirth: true },
+      }),
     ]);
+
+  const upcomingBirthdays = employeesWithBirthday
+    .map((e) => ({
+      id: e.id,
+      fullName: e.fullName,
+      dateOfBirth: e.dateOfBirth!,
+      daysUntil: daysUntilNextOccurrence(e.dateOfBirth!, today),
+    }))
+    .filter((e) => e.daysUntil <= UPCOMING_BIRTHDAY_WINDOW_DAYS)
+    .sort((a, b) => a.daysUntil - b.daysUntil);
 
   const activeCheckIns = todayRecords
     .filter((r) => r.checkIn && !r.checkOut)
@@ -64,7 +81,10 @@ export async function AdminDashboard({ firstName }: { firstName: string }) {
           />
         </div>
 
-        <ActiveCheckInsList employees={activeCheckIns} />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <ActiveCheckInsList employees={activeCheckIns} />
+          <UpcomingBirthdaysCard birthdays={upcomingBirthdays} />
+        </div>
       </div>
     </>
   );
