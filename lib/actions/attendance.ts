@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireEmployee } from "@/lib/auth";
-import { todayDateOnly } from "@/lib/date";
 import { findOpenRecord, autoCheckOutIfStale } from "@/lib/attendance";
 
 export type AttendanceActionState = { error: string | null; success: boolean };
@@ -53,17 +52,25 @@ export async function checkIn(
     return { error: "Check-in time can't be in the future.", success: false };
   }
 
-  // A date-only string parses as UTC midnight per the ES spec, matching
-  // how @db.Date columns round-trip — same convention as todayDateOnly().
-  const date = new Date(parsed.data.checkInDate);
-  const today = todayDateOnly();
-  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-  if (date.getTime() > today.getTime() || date.getTime() < yesterday.getTime()) {
+  // Bounded by elapsed time (a rolling 48h window), not by comparing
+  // calendar days — comparing checkInDate against todayDateOnly() would
+  // mean "today" as the *server's* UTC clock sees it, which disagrees with
+  // the employee's own "today" for part of every day (Pakistan is UTC+5,
+  // so the server's UTC day doesn't roll over until 5am local) — exactly
+  // the kind of timezone mismatch checkInIso exists to avoid, just moved
+  // into this check instead. 48h comfortably covers "any time yesterday or
+  // today" in any timezone while still blocking arbitrary backdating.
+  const MAX_BACKDATE_MS = 48 * 60 * 60 * 1000;
+  if (Date.now() - checkInTime.getTime() > MAX_BACKDATE_MS) {
     return {
       error: "You can only check in for today or yesterday.",
       success: false,
     };
   }
+
+  // A date-only string parses as UTC midnight per the ES spec, matching
+  // how @db.Date columns round-trip — same convention as todayDateOnly().
+  const date = new Date(parsed.data.checkInDate);
 
   // A still-open shift blocks a new check-in regardless of what calendar
   // date it's dated under — this is what makes an overnight shift work
