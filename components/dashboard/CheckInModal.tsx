@@ -21,8 +21,7 @@ function nowTimeString() {
 /**
  * Combines a picked "YYYY-MM-DD" date and "HH:MM" time into a real Date —
  * resolved in the browser's own timezone (the employee's), not the
- * server's. Sent as a full ISO timestamp rather than bare digits, so the
- * server never has to guess what timezone/day they were meant in.
+ * server's.
  */
 function combineDateAndTime(dateStr: string, timeStr: string): Date {
   const [year, month, day] = dateStr.split("-").map(Number);
@@ -30,11 +29,38 @@ function combineDateAndTime(dateStr: string, timeStr: string): Date {
   return new Date(year, month - 1, day, hours, minutes, 0, 0);
 }
 
+/**
+ * Computes the ISO timestamp from the picked date+time right here, in the
+ * action itself, before handing off to the checkIn Server Action — not via
+ * a hidden input written from onSubmit. That would rely on a DOM write
+ * landing before React's action-form machinery captures FormData, which
+ * isn't a guaranteed ordering (this was the actual bug: a stale/empty
+ * checkInIso value slipping through under that pattern, which is a much
+ * more direct explanation for a wildly wrong stored check-in time than any
+ * timezone math). Computing it inline, synchronously, before the awaited
+ * call below removes that race entirely.
+ */
+async function checkInWithComputedIso(
+  prevState: AttendanceActionState,
+  formData: FormData,
+): Promise<AttendanceActionState> {
+  const dateStr = String(formData.get("checkInDate") ?? "");
+  const timeStr = String(formData.get("checkInTimeOfDay") ?? "");
+  if (dateStr && timeStr) {
+    formData.set(
+      "checkInIso",
+      combineDateAndTime(dateStr, timeStr).toISOString(),
+    );
+  }
+  return checkIn(prevState, formData);
+}
+
 export function CheckInModal({ onClose }: { onClose: () => void }) {
-  const [state, formAction, isPending] = useActionState(checkIn, initialState);
-  const dateInputRef = useRef<HTMLInputElement>(null);
+  const [state, formAction, isPending] = useActionState(
+    checkInWithComputedIso,
+    initialState,
+  );
   const timeInputRef = useRef<HTMLInputElement>(null);
-  const isoInputRef = useRef<HTMLInputElement>(null);
 
   const today = new Date();
   const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
@@ -58,15 +84,6 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
-
-  function handleSubmit() {
-    if (dateInputRef.current?.value && timeInputRef.current?.value && isoInputRef.current) {
-      isoInputRef.current.value = combineDateAndTime(
-        dateInputRef.current.value,
-        timeInputRef.current.value,
-      ).toISOString();
-    }
-  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -93,11 +110,7 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
           in earlier (today or yesterday only).
         </p>
 
-        <form
-          action={formAction}
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4"
-        >
+        <form action={formAction} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <label
@@ -107,7 +120,6 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
                 Date
               </label>
               <Input
-                ref={dateInputRef}
                 id="date"
                 name="checkInDate"
                 type="date"
@@ -129,6 +141,7 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
               <Input
                 ref={timeInputRef}
                 id="time"
+                name="checkInTimeOfDay"
                 type="time"
                 required
                 defaultValue={nowTimeString()}
@@ -136,7 +149,6 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
                 className="h-10"
               />
             </div>
-            <input ref={isoInputRef} type="hidden" name="checkInIso" />
           </div>
 
           {state.error ? (
