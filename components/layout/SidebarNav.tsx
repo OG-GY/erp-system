@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutGrid,
   Users,
+  Users2,
   CalendarCheck,
   CalendarClock,
   FolderKanban,
@@ -15,6 +16,7 @@ import type { Role } from "@prisma/client";
 
 const EMPLOYEE_NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
+  { href: "/teams", label: "Teams", icon: Users2 },
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/payroll", label: "Payroll", icon: Wallet },
@@ -23,6 +25,7 @@ const EMPLOYEE_NAV_ITEMS = [
 const ADMIN_NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/employees", label: "Employees", icon: Users },
+  { href: "/teams", label: "Teams", icon: Users2 },
   { href: "/attendance", label: "Attendance", icon: CalendarCheck },
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/projects", label: "Projects", icon: FolderKanban },

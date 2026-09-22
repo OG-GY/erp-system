@@ -52,23 +52,34 @@ model Department {
   headId    String?  @unique
   head      Employee? @relation("DepartmentHead", fields: [headId], references: [id])
   employees Employee[] @relation("DepartmentMembers")
-  teams     Team[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+// A team is just a named group — no required department, no designated
+// "lead" field baked into the structure. Who does what within a team is
+// just a free-text label on their membership (TeamMembership.role), not a
+// structural hierarchy. An employee can belong to any number of teams.
 model Team {
-  id           String     @id @default(cuid())
-  name         String
-  departmentId String
-  department   Department @relation(fields: [departmentId], references: [id])
-  leadId       String?    @unique
-  lead         Employee?  @relation("TeamLead", fields: [leadId], references: [id])
-  members      Employee[] @relation("TeamMembers")
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  memberships TeamMembership[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
 
-  @@unique([departmentId, name])
+model TeamMembership {
+  id         String   @id @default(cuid())
+  teamId     String
+  team       Team     @relation(fields: [teamId], references: [id])
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  role       String   @default("Member")
+  createdAt  DateTime @default(now())
+
+  @@unique([teamId, employeeId])
+  @@index([employeeId])
 }
 
 // Supabase Auth owns credentials (auth.users). This table mirrors the app-level
@@ -105,14 +116,11 @@ model Employee {
 
   departmentId     String?
   department       Department?       @relation("DepartmentMembers", fields: [departmentId], references: [id])
-  teamId           String?
-  team             Team?             @relation("TeamMembers", fields: [teamId], references: [id])
   managerId        String?
   manager          Employee?         @relation("ManagerReports", fields: [managerId], references: [id])
   reports          Employee[]        @relation("ManagerReports")
 
   departmentHeadOf Department?       @relation("DepartmentHead")
-  teamLeadOf       Team?             @relation("TeamLead")
 
   attendanceRecords AttendanceRecord[]
   leaveRequests    LeaveRequest[]    @relation("LeaveApplicant")
@@ -124,12 +132,12 @@ model Employee {
   createdTasks     Task[]            @relation("TaskCreator")
   payslips         Payslip[]
   auditLogs        AuditLog[]
+  teamMemberships  TeamMembership[]
 
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
   @@index([departmentId])
-  @@index([teamId])
   @@index([managerId])
 }
 

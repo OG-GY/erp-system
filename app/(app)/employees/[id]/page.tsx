@@ -50,7 +50,7 @@ export default async function EmployeeDetailPage({
         idCardNumber: true,
         departmentId: true,
         department: { select: { name: true } },
-        team: { select: { name: true } },
+        teamMemberships: { select: { team: { select: { name: true } } } },
         manager: { select: { fullName: true } },
         salaryType: true,
         baseSalary: true,
@@ -90,7 +90,14 @@ export default async function EmployeeDetailPage({
             <Field label="Official email" value={employee.officialEmail} />
             <Field label="Phone" value={employee.phone ?? "—"} />
             <Field label="Department" value={employee.department?.name ?? "—"} />
-            <Field label="Team" value={employee.team?.name ?? "—"} />
+            <Field
+              label="Teams"
+              value={
+                employee.teamMemberships.length > 0
+                  ? employee.teamMemberships.map((m) => m.team.name).join(", ")
+                  : "—"
+              }
+            />
             <Field label="Manager" value={employee.manager?.fullName ?? "—"} />
             <Field
               label="Joining date"

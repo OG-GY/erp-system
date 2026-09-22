@@ -3,6 +3,7 @@ import { CheckInCard } from "@/components/dashboard/CheckInCard";
 import { CheckInChart } from "@/components/dashboard/CheckInChart";
 import { AttendanceHistoryTable } from "@/components/dashboard/AttendanceHistoryTable";
 import { AssignedProjectsCard } from "@/components/dashboard/AssignedProjectsCard";
+import { MyTeamsCard } from "@/components/dashboard/MyTeamsCard";
 import { UpcomingBirthdaysCard } from "@/components/dashboard/UpcomingBirthdaysCard";
 import { OnLeaveTodayCard } from "@/components/dashboard/OnLeaveTodayCard";
 import { prisma } from "@/lib/prisma";
@@ -23,7 +24,7 @@ export async function EmployeeDashboard({
   const DAY_MS = 24 * 60 * 60 * 1000;
   const rangeStart = new Date(today.getTime() - (HISTORY_DAYS - 1) * DAY_MS);
 
-  const [records, projectMembers, upcomingBirthdays, onLeaveToday] =
+  const [records, projectMembers, teamMemberships, upcomingBirthdays, onLeaveToday] =
     await Promise.all([
       prisma.attendanceRecord.findMany({
         where: { employeeId, date: { gte: rangeStart, lte: today } },
@@ -34,6 +35,10 @@ export async function EmployeeDashboard({
         where: { employeeId },
         select: { project: { select: { id: true, name: true, status: true } } },
         take: 20,
+      }),
+      prisma.teamMembership.findMany({
+        where: { employeeId },
+        select: { role: true, team: { select: { id: true, name: true } } },
       }),
       getUpcomingBirthdays(),
       getEmployeesOnLeaveToday(),
@@ -87,7 +92,14 @@ export async function EmployeeDashboard({
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <MyTeamsCard
+            teams={teamMemberships.map((m) => ({
+              id: m.team.id,
+              name: m.team.name,
+              role: m.role,
+            }))}
+          />
           <OnLeaveTodayCard leaveRequests={onLeaveToday} />
           <UpcomingBirthdaysCard birthdays={upcomingBirthdays} />
         </div>
