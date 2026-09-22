@@ -9,24 +9,21 @@ import { findOpenRecord, autoCheckOutIfStale } from "@/lib/attendance";
 
 export type AttendanceActionState = { error: string | null; success: boolean };
 
-const timeSchema = z
-  .string()
-  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Enter a valid time.");
-
-/** Builds a Date at today's local calendar date + the given local H:M. */
-function timeStringToToday(time: string): Date {
-  const [hours, minutes] = time.split(":").map(Number);
-  const now = new Date();
-  return new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    hours,
-    minutes,
-    0,
-    0,
-  );
-}
+// A full ISO timestamp, not a bare "HH:MM" — the browser resolves the
+// picked time against the employee's own clock/timezone before sending it,
+// so the server never has to guess what timezone the digits were meant in
+// (which broke on Vercel: the server runs in UTC, so a bare "15:00" from a
+// Pakistan-time browser got read as 15:00 UTC — 5 hours ahead of the real
+// moment, tripping the "can't be in the future" check for an entirely
+// ordinary present-time check-in).
+const checkInSchema = z.object({
+  checkInIso: z
+    .string()
+    .min(1, "Enter a check-in time.")
+    .refine((value) => !Number.isNaN(new Date(value).getTime()), {
+      message: "Enter a valid check-in time.",
+    }),
+});
 
 export async function checkIn(
   _prevState: AttendanceActionState,
@@ -34,12 +31,17 @@ export async function checkIn(
 ): Promise<AttendanceActionState> {
   const employee = await requireEmployee();
 
-  const parsed = timeSchema.safeParse(formData.get("time"));
+  const parsed = checkInSchema.safeParse({
+    checkInIso: formData.get("checkInIso"),
+  });
   if (!parsed.success) {
-    return { error: "Enter a valid time.", success: false };
+    return {
+      error: parsed.error.issues[0]?.message ?? "Enter a valid time.",
+      success: false,
+    };
   }
 
-  const checkInTime = timeStringToToday(parsed.data);
+  const checkInTime = new Date(parsed.data.checkInIso);
   if (checkInTime.getTime() > Date.now()) {
     return { error: "Check-in time can't be in the future.", success: false };
   }

@@ -13,9 +13,31 @@ function nowTimeString() {
   ).padStart(2, "0")}`;
 }
 
+/**
+ * Combines today's date with a picked "HH:MM" into a real Date — resolved
+ * in the browser's own timezone (the employee's), not the server's. Sent
+ * to the server as a full ISO timestamp rather than the bare "HH:MM" string
+ * this used to submit, so the server never has to guess what timezone
+ * those digits were meant in.
+ */
+function timeStringToDate(time: string): Date {
+  const [hours, minutes] = time.split(":").map(Number);
+  const now = new Date();
+  return new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    hours,
+    minutes,
+    0,
+    0,
+  );
+}
+
 export function CheckInModal({ onClose }: { onClose: () => void }) {
   const [state, formAction, isPending] = useActionState(checkIn, initialState);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -34,6 +56,14 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
+
+  function handleSubmit() {
+    if (inputRef.current?.value && isoInputRef.current) {
+      isoInputRef.current.value = timeStringToDate(
+        inputRef.current.value,
+      ).toISOString();
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
@@ -59,7 +89,11 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
           Defaults to now — change it if you forgot to check in earlier.
         </p>
 
-        <form action={formAction} className="flex flex-col gap-4">
+        <form
+          action={formAction}
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4"
+        >
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="time"
@@ -70,13 +104,13 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
             <Input
               ref={inputRef}
               id="time"
-              name="time"
               type="time"
               required
               defaultValue={nowTimeString()}
               disabled={isPending}
               className="h-10"
             />
+            <input ref={isoInputRef} type="hidden" name="checkInIso" />
           </div>
 
           {state.error ? (
