@@ -12,6 +12,7 @@ import { todayDateOnly } from "@/lib/date";
 import { getUpcomingBirthdays } from "@/lib/birthdays";
 import { getEmployeesOnLeaveToday } from "@/lib/leave";
 import { getTeammatesCheckInsToday } from "@/lib/teamCheckIns";
+import { minutesSinceMidnight } from "@/lib/format";
 
 const HISTORY_DAYS = 14;
 
@@ -75,7 +76,7 @@ export async function EmployeeDashboard({
     const date = new Date(rangeStart.getTime() + i * DAY_MS);
     const record = recordsByDate.get(date.toISOString().slice(0, 10));
     const checkInMinutes = record?.checkIn
-      ? record.checkIn.getHours() * 60 + record.checkIn.getMinutes()
+      ? minutesSinceMidnight(record.checkIn)
       : null;
     return { date, checkInMinutes };
   });

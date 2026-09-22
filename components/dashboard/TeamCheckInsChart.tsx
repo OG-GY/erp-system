@@ -1,4 +1,4 @@
-import { initials } from "@/lib/format";
+import { initials, minutesSinceMidnight } from "@/lib/format";
 
 type Teammate = {
   id: string;
@@ -17,9 +17,7 @@ function formatMinutes(minutes: number) {
 
 export function TeamCheckInsChart({ teammates }: { teammates: Teammate[] }) {
   const present = teammates.filter((t) => t.checkIn);
-  const values = present.map(
-    (t) => t.checkIn!.getHours() * 60 + t.checkIn!.getMinutes(),
-  );
+  const values = present.map((t) => minutesSinceMidnight(t.checkIn!));
   const min = values.length ? Math.min(...values) - 30 : 480;
   const max = values.length ? Math.max(...values) + 30 : 600;
   const range = Math.max(max - min, 1);
@@ -92,8 +90,7 @@ export function TeamCheckInsChart({ teammates }: { teammates: Teammate[] }) {
                 );
               }
 
-              const minutes =
-                teammate.checkIn.getHours() * 60 + teammate.checkIn.getMinutes();
+              const minutes = minutesSinceMidnight(teammate.checkIn);
               const ratio = (minutes - min) / range;
               const barHeight = Math.max(4, ratio * chartHeight);
               const y = chartHeight - barHeight;
@@ -142,10 +139,7 @@ export function TeamCheckInsChart({ teammates }: { teammates: Teammate[] }) {
                   <td>{teammate.fullName}</td>
                   <td>
                     {teammate.checkIn
-                      ? formatMinutes(
-                          teammate.checkIn.getHours() * 60 +
-                            teammate.checkIn.getMinutes(),
-                        )
+                      ? formatMinutes(minutesSinceMidnight(teammate.checkIn))
                       : "Not checked in"}
                   </td>
                   <td>

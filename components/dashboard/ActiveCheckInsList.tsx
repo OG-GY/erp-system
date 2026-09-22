@@ -1,11 +1,4 @@
-import { initials } from "@/lib/format";
-
-function formatTime(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
+import { initials, formatTimeOfDay } from "@/lib/format";
 
 export function ActiveCheckInsList({
   employees,
@@ -51,7 +44,7 @@ export function ActiveCheckInsList({
                 </span>
               </span>
               <span className="shrink-0 text-xs text-foreground-muted">
-                Since {formatTime(employee.checkIn)}
+                Since {formatTimeOfDay(employee.checkIn)}
               </span>
             </li>
           ))}

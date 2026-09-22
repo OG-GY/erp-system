@@ -1,6 +1,6 @@
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { StandupModalButton } from "@/components/dashboard/StandupModalButton";
-import { totalBreakMinutes } from "@/lib/format";
+import { totalBreakMinutes, formatTimeOfDay } from "@/lib/format";
 
 const STATUS_TONE = {
   PRESENT: "success",
@@ -17,14 +17,6 @@ const STATUS_LABEL = {
   ON_LEAVE: "On leave",
   HOLIDAY: "Holiday",
 } as const;
-
-function formatTime(date: Date | null) {
-  if (!date) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
 
 export function AttendanceHistoryTable({
   records,
@@ -69,10 +61,10 @@ export function AttendanceHistoryTable({
                   }).format(record.date)}
                 </td>
                 <td className="px-4 py-2.5 text-foreground-muted">
-                  {formatTime(record.checkIn)}
+                  {formatTimeOfDay(record.checkIn)}
                 </td>
                 <td className="px-4 py-2.5 text-foreground-muted">
-                  {formatTime(record.checkOut)}
+                  {formatTimeOfDay(record.checkOut)}
                 </td>
                 <td className="px-4 py-2.5 text-foreground-muted">
                   {record.breaks.length === 0

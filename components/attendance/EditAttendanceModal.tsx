@@ -15,6 +15,49 @@ function toDatetimeLocalValue(date: Date | null) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/**
+ * A datetime-local input's value ("2026-09-22T18:15") carries no timezone —
+ * parsing it server-side would resolve it in the server's own runtime
+ * timezone (UTC on Vercel), not the admin's. Parsing it here instead, with
+ * the browser's local Date constructor, resolves it in the admin's actual
+ * timezone before sending an unambiguous ISO string.
+ */
+function datetimeLocalToDate(value: string): Date | null {
+  if (!value) return null;
+  const [datePart, timePart] = value.split("T");
+  if (!datePart || !timePart) return null;
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hours, minutes] = timePart.split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes, 0, 0);
+}
+
+/**
+ * Computes checkInIso/checkOutIso from the datetime-local field values here,
+ * in the action itself, before handing off to the updateAttendanceRecord
+ * Server Action — see checkInWithComputedIso in CheckInModal for the same
+ * pattern and why (a hidden input written from onSubmit isn't guaranteed to
+ * land before React's action-form machinery captures FormData).
+ */
+async function updateAttendanceWithComputedIso(
+  recordId: string,
+  prevState: UpdateAttendanceRecordState,
+  formData: FormData,
+): Promise<UpdateAttendanceRecordState> {
+  const checkInDate = datetimeLocalToDate(String(formData.get("checkIn") ?? ""));
+  const checkOutDate = datetimeLocalToDate(String(formData.get("checkOut") ?? ""));
+
+  if (checkInDate) {
+    formData.set("checkInIso", checkInDate.toISOString());
+  }
+  if (checkOutDate) {
+    formData.set("checkOutIso", checkOutDate.toISOString());
+  } else {
+    formData.delete("checkOutIso");
+  }
+
+  return updateAttendanceRecord(recordId, prevState, formData);
+}
+
 export function EditAttendanceModal({
   recordId,
   employeeName,
@@ -28,7 +71,7 @@ export function EditAttendanceModal({
   checkOut: Date | null;
   onClose: () => void;
 }) {
-  const boundAction = updateAttendanceRecord.bind(null, recordId);
+  const boundAction = updateAttendanceWithComputedIso.bind(null, recordId);
   const [state, formAction, isPending] = useActionState(boundAction, initialState);
   const inputRef = useRef<HTMLInputElement>(null);
 

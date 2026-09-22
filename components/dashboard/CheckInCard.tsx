@@ -15,14 +15,7 @@ import {
   LiveDurationTimer,
   formatDuration,
 } from "@/components/dashboard/LiveDurationTimer";
-
-function formatTime(date: Date | null) {
-  if (!date) return null;
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
+import { formatTimeOfDay } from "@/lib/format";
 
 export function CheckInCard({
   checkInTime,
@@ -112,8 +105,8 @@ export function CheckInCard({
       ) : (
         <>
           <p className="mt-1 text-sm text-foreground">
-            Checked in at {formatTime(checkInTime)}
-            {checkOutTime ? ` · Checked out at ${formatTime(checkOutTime)}` : ""}
+            Checked in at {formatTimeOfDay(checkInTime)}
+            {checkOutTime ? ` · Checked out at ${formatTimeOfDay(checkOutTime)}` : ""}
           </p>
 
           {!checkOutTime ? (
@@ -129,7 +122,7 @@ export function CheckInCard({
                     )}
                   </p>
                   <p className="mt-2 text-xs text-warning">
-                    On break since {formatTime(openBreakStartedAt)}
+                    On break since {formatTimeOfDay(openBreakStartedAt)}
                   </p>
                   <LiveDurationTimer
                     anchor={openBreakStartedAt}

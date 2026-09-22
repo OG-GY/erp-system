@@ -6,7 +6,7 @@ import { AttendanceRowActions } from "@/components/attendance/AttendanceRowActio
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
-import { totalBreakMinutes } from "@/lib/format";
+import { totalBreakMinutes, formatTimeOfDay } from "@/lib/format";
 
 const STATUS_TONE = {
   PRESENT: "success",
@@ -23,14 +23,6 @@ const STATUS_LABEL = {
   ON_LEAVE: "On leave",
   HOLIDAY: "Holiday",
 } as const;
-
-function formatTime(date: Date | null) {
-  if (!date) return "—";
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
-}
 
 function parseDateParam(value: string | undefined) {
   if (!value) return null;
@@ -124,10 +116,10 @@ export default async function AttendancePage({
                       {record.employee.fullName}
                     </td>
                     <td className="px-4 py-2.5 text-foreground-muted">
-                      {formatTime(record.checkIn)}
+                      {formatTimeOfDay(record.checkIn)}
                     </td>
                     <td className="px-4 py-2.5 text-foreground-muted">
-                      {formatTime(record.checkOut)}
+                      {formatTimeOfDay(record.checkOut)}
                     </td>
                     <td className="px-4 py-2.5 text-foreground-muted">
                       {record.breaks.length === 0
