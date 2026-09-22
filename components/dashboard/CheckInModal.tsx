@@ -6,6 +6,11 @@ import { Input } from "@/components/ui/Input";
 
 const initialState: AttendanceActionState = { error: null, success: false };
 
+function dateToDateString(date: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
 function nowTimeString() {
   const now = new Date();
   return `${String(now.getHours()).padStart(2, "0")}:${String(
@@ -14,33 +19,30 @@ function nowTimeString() {
 }
 
 /**
- * Combines today's date with a picked "HH:MM" into a real Date — resolved
- * in the browser's own timezone (the employee's), not the server's. Sent
- * to the server as a full ISO timestamp rather than the bare "HH:MM" string
- * this used to submit, so the server never has to guess what timezone
- * those digits were meant in.
+ * Combines a picked "YYYY-MM-DD" date and "HH:MM" time into a real Date —
+ * resolved in the browser's own timezone (the employee's), not the
+ * server's. Sent as a full ISO timestamp rather than bare digits, so the
+ * server never has to guess what timezone/day they were meant in.
  */
-function timeStringToDate(time: string): Date {
-  const [hours, minutes] = time.split(":").map(Number);
-  const now = new Date();
-  return new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    hours,
-    minutes,
-    0,
-    0,
-  );
+function combineDateAndTime(dateStr: string, timeStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const [hours, minutes] = timeStr.split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes, 0, 0);
 }
 
 export function CheckInModal({ onClose }: { onClose: () => void }) {
   const [state, formAction, isPending] = useActionState(checkIn, initialState);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const timeInputRef = useRef<HTMLInputElement>(null);
   const isoInputRef = useRef<HTMLInputElement>(null);
 
+  const today = new Date();
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  const todayStr = dateToDateString(today);
+  const yesterdayStr = dateToDateString(yesterday);
+
   useEffect(() => {
-    inputRef.current?.focus();
+    timeInputRef.current?.focus();
   }, []);
 
   useEffect(() => {
@@ -58,9 +60,10 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   function handleSubmit() {
-    if (inputRef.current?.value && isoInputRef.current) {
-      isoInputRef.current.value = timeStringToDate(
-        inputRef.current.value,
+    if (dateInputRef.current?.value && timeInputRef.current?.value && isoInputRef.current) {
+      isoInputRef.current.value = combineDateAndTime(
+        dateInputRef.current.value,
+        timeInputRef.current.value,
       ).toISOString();
     }
   }
@@ -86,7 +89,8 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
           Check in
         </h2>
         <p className="mb-4 text-sm text-foreground-muted">
-          Defaults to now — change it if you forgot to check in earlier.
+          Defaults to now — change the date or time if you forgot to check
+          in earlier (today or yesterday only).
         </p>
 
         <form
@@ -94,22 +98,44 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
           onSubmit={handleSubmit}
           className="flex flex-col gap-4"
         >
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="time"
-              className="text-sm font-medium text-foreground-muted"
-            >
-              Time
-            </label>
-            <Input
-              ref={inputRef}
-              id="time"
-              type="time"
-              required
-              defaultValue={nowTimeString()}
-              disabled={isPending}
-              className="h-10"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="date"
+                className="text-sm font-medium text-foreground-muted"
+              >
+                Date
+              </label>
+              <Input
+                ref={dateInputRef}
+                id="date"
+                name="checkInDate"
+                type="date"
+                required
+                defaultValue={todayStr}
+                min={yesterdayStr}
+                max={todayStr}
+                disabled={isPending}
+                className="h-10"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="time"
+                className="text-sm font-medium text-foreground-muted"
+              >
+                Time
+              </label>
+              <Input
+                ref={timeInputRef}
+                id="time"
+                type="time"
+                required
+                defaultValue={nowTimeString()}
+                disabled={isPending}
+                className="h-10"
+              />
+            </div>
             <input ref={isoInputRef} type="hidden" name="checkInIso" />
           </div>
 

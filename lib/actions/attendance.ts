@@ -16,6 +16,11 @@ export type AttendanceActionState = { error: string | null; success: boolean };
 // Pakistan-time browser got read as 15:00 UTC — 5 hours ahead of the real
 // moment, tripping the "can't be in the future" check for an entirely
 // ordinary present-time check-in).
+//
+// checkInDate is sent separately, as the plain "YYYY-MM-DD" the employee
+// picked — deliberately not re-derived from checkInTime here, since doing
+// that would need to know the employee's timezone again, the exact
+// ambiguity checkInIso exists to avoid.
 const checkInSchema = z.object({
   checkInIso: z
     .string()
@@ -23,6 +28,7 @@ const checkInSchema = z.object({
     .refine((value) => !Number.isNaN(new Date(value).getTime()), {
       message: "Enter a valid check-in time.",
     }),
+  checkInDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Enter a valid date."),
 });
 
 export async function checkIn(
@@ -33,6 +39,7 @@ export async function checkIn(
 
   const parsed = checkInSchema.safeParse({
     checkInIso: formData.get("checkInIso"),
+    checkInDate: formData.get("checkInDate"),
   });
   if (!parsed.success) {
     return {
@@ -46,6 +53,18 @@ export async function checkIn(
     return { error: "Check-in time can't be in the future.", success: false };
   }
 
+  // A date-only string parses as UTC midnight per the ES spec, matching
+  // how @db.Date columns round-trip — same convention as todayDateOnly().
+  const date = new Date(parsed.data.checkInDate);
+  const today = todayDateOnly();
+  const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+  if (date.getTime() > today.getTime() || date.getTime() < yesterday.getTime()) {
+    return {
+      error: "You can only check in for today or yesterday.",
+      success: false,
+    };
+  }
+
   // A still-open shift blocks a new check-in regardless of what calendar
   // date it's dated under — this is what makes an overnight shift work
   // correctly: you can't start a second one until you check out of the
@@ -55,13 +74,12 @@ export async function checkIn(
     return { error: "You're already checked in.", success: false };
   }
 
-  const date = todayDateOnly();
-  const existingToday = await prisma.attendanceRecord.findUnique({
+  const existing = await prisma.attendanceRecord.findUnique({
     where: { employeeId_date: { employeeId: employee.id, date } },
   });
 
-  if (existingToday?.checkIn) {
-    return { error: "You already checked in today.", success: false };
+  if (existing?.checkIn) {
+    return { error: "You already checked in for that day.", success: false };
   }
 
   await prisma.attendanceRecord.upsert({
