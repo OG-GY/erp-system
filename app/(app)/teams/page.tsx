@@ -1,10 +1,22 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { MyTeamsList } from "@/components/teams/MyTeamsList";
+import { TeamCheckInTimesChart } from "@/components/teams/TeamCheckInTimesChart";
+import { Input } from "@/components/ui/Input";
 import { requireEmployee, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { todayDateOnly } from "@/lib/date";
+import { getTeamCheckInTimeSeries } from "@/lib/teamCheckIns";
 
-export default async function TeamsPage() {
+function dateOnlyFromParam(value: string | undefined, fallback: Date) {
+  if (!value) return fallback;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return Number.isNaN(parsed.getTime()) ? fallback : parsed;
+}
+
+export default async function TeamsPage({
+  searchParams,
+}: PageProps<"/teams">) {
   const employee = await requireEmployee();
 
   if (isAdmin(employee.role)) {
@@ -19,12 +31,20 @@ export default async function TeamsPage() {
           title="Teams"
           description={`${teams.length} ${teams.length === 1 ? "team" : "teams"}`}
           actions={
-            <Link
-              href="/teams/new"
-              className="flex h-8 items-center rounded-sm bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-            >
-              New team
-            </Link>
+            <>
+              <Link
+                href="/teams/check-ins"
+                className="flex h-8 items-center rounded-sm border border-border-strong px-3 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover"
+              >
+                Check-in times
+              </Link>
+              <Link
+                href="/teams/new"
+                className="flex h-8 items-center rounded-sm bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+              >
+                New team
+              </Link>
+            </>
           }
         />
         <div className="p-4 sm:p-6">
@@ -104,11 +124,68 @@ export default async function TeamsPage() {
     })),
   }));
 
+  const today = todayDateOnly();
+  const defaultStart = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+  const params = await searchParams;
+  const startParam = Array.isArray(params?.startDate) ? params.startDate[0] : params?.startDate;
+  const endParam = Array.isArray(params?.endDate) ? params.endDate[0] : params?.endDate;
+  const startDate = dateOnlyFromParam(startParam, defaultStart);
+  const endDate = dateOnlyFromParam(endParam, today);
+
+  const checkInSeriesByTeam = await Promise.all(
+    teams.map((team) => getTeamCheckInTimeSeries(team.id, startDate, endDate)),
+  );
+
   return (
     <>
       <PageHeader title="Teams" description="Teams you're part of" />
-      <div className="p-4 sm:p-6">
+      <div className="flex flex-col gap-4 p-4 sm:p-6">
+        {teams.length > 0 ? (
+          <form method="get" className="flex flex-wrap items-end gap-2">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="startDate" className="text-xs font-medium text-foreground-muted">
+                Start date
+              </label>
+              <Input
+                id="startDate"
+                name="startDate"
+                type="date"
+                defaultValue={startDate.toISOString().slice(0, 10)}
+                max={today.toISOString().slice(0, 10)}
+                className="w-40"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="endDate" className="text-xs font-medium text-foreground-muted">
+                End date
+              </label>
+              <Input
+                id="endDate"
+                name="endDate"
+                type="date"
+                defaultValue={endDate.toISOString().slice(0, 10)}
+                max={today.toISOString().slice(0, 10)}
+                className="w-40"
+              />
+            </div>
+            <button
+              type="submit"
+              className="h-9 rounded-sm border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover"
+            >
+              Refresh chart
+            </button>
+          </form>
+        ) : null}
+
         <MyTeamsList teams={teams} />
+
+        {checkInSeriesByTeam.map((series, i) => (
+          <TeamCheckInTimesChart
+            key={teams[i].id}
+            members={series.members}
+            points={series.points}
+          />
+        ))}
       </div>
     </>
   );

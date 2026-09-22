@@ -45,3 +45,48 @@ export async function getTeammatesCheckInsToday(teamIds: string[]) {
       return a.fullName.localeCompare(b.fullName);
     });
 }
+
+/**
+ * Check-in time per team member per day, across a date range — the series
+ * behind the "check-in times" trend chart. `startDate`/`endDate` must be
+ * UTC-midnight Dates (matching @db.Date columns, same convention as
+ * todayDateOnly()).
+ */
+export async function getTeamCheckInTimeSeries(
+  teamId: string,
+  startDate: Date,
+  endDate: Date,
+) {
+  const memberships = await prisma.teamMembership.findMany({
+    where: { teamId },
+    select: { employee: { select: { id: true, fullName: true } } },
+    orderBy: { employee: { fullName: "asc" } },
+  });
+  const members = memberships.map((m) => m.employee);
+
+  const records = await prisma.attendanceRecord.findMany({
+    where: {
+      employeeId: { in: members.map((m) => m.id) },
+      date: { gte: startDate, lte: endDate },
+    },
+    select: { employeeId: true, date: true, checkIn: true },
+  });
+  const recordByKey = new Map(
+    records.map((r) => [`${r.employeeId}_${r.date.toISOString().slice(0, 10)}`, r]),
+  );
+
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const dayCount = Math.round((endDate.getTime() - startDate.getTime()) / DAY_MS) + 1;
+
+  const points = Array.from({ length: dayCount }, (_, i) => {
+    const date = new Date(startDate.getTime() + i * DAY_MS);
+    const dateKey = date.toISOString().slice(0, 10);
+    const byEmployee: Record<string, Date | null> = {};
+    for (const member of members) {
+      byEmployee[member.id] = recordByKey.get(`${member.id}_${dateKey}`)?.checkIn ?? null;
+    }
+    return { date, byEmployee };
+  });
+
+  return { members, points };
+}
