@@ -4,32 +4,41 @@ import { StatCard } from "@/components/ui/StatCard";
 import { PresentTodayCard } from "@/components/dashboard/PresentTodayCard";
 import { ActiveCheckInsList } from "@/components/dashboard/ActiveCheckInsList";
 import { UpcomingBirthdaysCard } from "@/components/dashboard/UpcomingBirthdaysCard";
+import { OnLeaveTodayCard } from "@/components/dashboard/OnLeaveTodayCard";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
 import { getUpcomingBirthdays } from "@/lib/birthdays";
+import { getEmployeesOnLeaveToday } from "@/lib/leave";
 
 export async function AdminDashboard({ firstName }: { firstName: string }) {
   const today = todayDateOnly();
 
-  const [totalEmployees, todayRecords, pendingLeave, openTasks, upcomingBirthdays] =
-    await Promise.all([
-      prisma.employee.count({ where: { employmentStatus: "ACTIVE" } }),
-      prisma.attendanceRecord.findMany({
-        where: { date: today, status: "PRESENT" },
-        select: {
-          checkIn: true,
-          checkOut: true,
-          employee: {
-            select: { id: true, fullName: true, designation: true },
-          },
+  const [
+    totalEmployees,
+    todayRecords,
+    pendingLeave,
+    openTasks,
+    upcomingBirthdays,
+    onLeaveToday,
+  ] = await Promise.all([
+    prisma.employee.count({ where: { employmentStatus: "ACTIVE" } }),
+    prisma.attendanceRecord.findMany({
+      where: { date: today, status: "PRESENT" },
+      select: {
+        checkIn: true,
+        checkOut: true,
+        employee: {
+          select: { id: true, fullName: true, designation: true },
         },
-      }),
-      prisma.leaveRequest.count({ where: { status: "PENDING" } }),
-      prisma.task.count({
-        where: { status: { in: ["TODO", "IN_PROGRESS", "IN_REVIEW"] } },
-      }),
-      getUpcomingBirthdays(),
-    ]);
+      },
+    }),
+    prisma.leaveRequest.count({ where: { status: "PENDING" } }),
+    prisma.task.count({
+      where: { status: { in: ["TODO", "IN_PROGRESS", "IN_REVIEW"] } },
+    }),
+    getUpcomingBirthdays(),
+    getEmployeesOnLeaveToday(),
+  ]);
 
   const activeCheckIns = todayRecords
     .filter((r) => r.checkIn && !r.checkOut)
@@ -67,8 +76,9 @@ export async function AdminDashboard({ firstName }: { firstName: string }) {
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <ActiveCheckInsList employees={activeCheckIns} />
+          <OnLeaveTodayCard leaveRequests={onLeaveToday} />
           <UpcomingBirthdaysCard birthdays={upcomingBirthdays} />
         </div>
       </div>
