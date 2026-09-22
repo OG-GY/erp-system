@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Trash2 } from "lucide-react";
 import {
   updateTeamMemberRole,
   removeTeamMember,
@@ -57,9 +58,11 @@ export function TeamMemberRow({
           <form action={removeTeamMember.bind(null, teamId, membershipId)}>
             <button
               type="submit"
-              className="text-xs font-medium text-danger hover:underline"
+              aria-label={`Remove ${fullName}`}
+              title="Remove"
+              className="rounded-sm p-1 text-danger transition-colors hover:bg-danger/12"
             >
-              Remove
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
             </button>
           </form>
         </span>

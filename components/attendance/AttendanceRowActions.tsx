@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import { deleteAttendanceRecord } from "@/lib/actions/attendanceAdmin";
 import { EditAttendanceModal } from "@/components/attendance/EditAttendanceModal";
 
@@ -37,16 +38,20 @@ export function AttendanceRowActions({
       <button
         type="button"
         onClick={() => setEditOpen(true)}
-        className="text-xs font-medium text-accent hover:underline"
+        aria-label={`Edit ${employeeName}'s attendance`}
+        title="Edit"
+        className="rounded-sm p-1 text-accent transition-colors hover:bg-accent/12"
       >
-        Edit
+        <Pencil className="h-4 w-4" aria-hidden="true" />
       </button>
       <button
         type="button"
         onClick={() => setConfirmOpen(true)}
-        className="text-xs font-medium text-danger hover:underline"
+        aria-label={`Delete ${employeeName}'s attendance record`}
+        title="Delete"
+        className="rounded-sm p-1 text-danger transition-colors hover:bg-danger/12"
       >
-        Delete
+        <Trash2 className="h-4 w-4" aria-hidden="true" />
       </button>
 
       {editOpen ? (

@@ -1,3 +1,4 @@
+import { Trash2 } from "lucide-react";
 import { addProjectMember, removeProjectMember } from "@/lib/actions/projects";
 import { initials } from "@/lib/format";
 import { Select } from "@/components/ui/Select";
@@ -35,9 +36,11 @@ export function MembersPanel({
               >
                 <button
                   type="submit"
-                  className="text-xs font-medium text-danger hover:underline"
+                  aria-label={`Remove ${member.fullName}`}
+                  title="Remove"
+                  className="rounded-sm p-1 text-danger transition-colors hover:bg-danger/12"
                 >
-                  Remove
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               </form>
             </li>

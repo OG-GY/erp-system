@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import { Trash2 } from "lucide-react";
 import { deleteEmployee } from "@/lib/actions/employees";
 
 export function DeleteEmployeeButton({
@@ -38,9 +39,11 @@ export function DeleteEmployeeButton({
       <button
         type="button"
         onClick={() => setConfirmOpen(true)}
-        className="h-9 rounded-sm border border-danger/40 px-4 text-sm font-medium text-danger transition-colors hover:bg-danger/10"
+        aria-label="Delete employee"
+        title="Delete employee"
+        className="flex h-9 w-9 items-center justify-center rounded-sm border border-danger/40 text-danger transition-colors hover:bg-danger/10"
       >
-        Delete employee
+        <Trash2 className="h-4 w-4" aria-hidden="true" />
       </button>
       {error ? (
         <p role="alert" className="mt-2 text-sm text-danger">
