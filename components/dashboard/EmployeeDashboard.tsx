@@ -4,12 +4,14 @@ import { CheckInChart } from "@/components/dashboard/CheckInChart";
 import { AttendanceHistoryTable } from "@/components/dashboard/AttendanceHistoryTable";
 import { AssignedProjectsCard } from "@/components/dashboard/AssignedProjectsCard";
 import { MyTeamsCard } from "@/components/dashboard/MyTeamsCard";
+import { TeamCheckInsChart } from "@/components/dashboard/TeamCheckInsChart";
 import { UpcomingBirthdaysCard } from "@/components/dashboard/UpcomingBirthdaysCard";
 import { OnLeaveTodayCard } from "@/components/dashboard/OnLeaveTodayCard";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
 import { getUpcomingBirthdays } from "@/lib/birthdays";
 import { getEmployeesOnLeaveToday } from "@/lib/leave";
+import { getTeammatesCheckInsToday } from "@/lib/teamCheckIns";
 
 const HISTORY_DAYS = 14;
 
@@ -43,6 +45,11 @@ export async function EmployeeDashboard({
       getUpcomingBirthdays(),
       getEmployeesOnLeaveToday(),
     ]);
+
+  // Depends on teamMemberships above, so it can't join the Promise.all.
+  const teammateCheckIns = await getTeammatesCheckInsToday(
+    teamMemberships.map((m) => m.team.id),
+  );
 
   // An overnight shift (e.g. checked in 11pm, still running past midnight)
   // stays dated to the day it started, so once the calendar date rolls over
@@ -103,6 +110,8 @@ export async function EmployeeDashboard({
           <OnLeaveTodayCard leaveRequests={onLeaveToday} />
           <UpcomingBirthdaysCard birthdays={upcomingBirthdays} />
         </div>
+
+        <TeamCheckInsChart teammates={teammateCheckIns} />
 
         <div>
           <p className="mb-2 text-xs text-foreground-muted">
