@@ -7,6 +7,7 @@ import {
 } from "@/lib/actions/attendanceAdmin";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 
 const initialState: CreateAttendanceRecordState = { error: null, success: false };
 
@@ -146,6 +147,19 @@ export function AddAttendanceModal({
             <p className="text-xs text-foreground-muted">
               Leave blank to mark them as still checked in.
             </p>
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="addStandup" className="text-sm font-medium text-foreground-muted">
+              Standup
+            </label>
+            <Textarea
+              id="addStandup"
+              name="standup"
+              rows={3}
+              disabled={isPending}
+              placeholder="What they worked on (optional)"
+            />
           </div>
 
           {state.error ? (

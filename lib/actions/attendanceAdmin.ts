@@ -86,6 +86,10 @@ const createAttendanceSchema = z
         message: "Enter a valid check-in time.",
       }),
     checkOutIso: z.string().optional(),
+    standup: z
+      .string()
+      .max(4000, "Keep the standup under 4000 characters.")
+      .optional(),
   })
   .refine(
     (data) =>
@@ -112,6 +116,7 @@ export async function createAttendanceRecord(
     date: formData.get("date"),
     checkInIso: formData.get("checkInIso"),
     checkOutIso: formData.get("checkOutIso") || undefined,
+    standup: formData.get("standup") || undefined,
   });
   if (!parsed.success) {
     return {
@@ -134,6 +139,7 @@ export async function createAttendanceRecord(
         checkOut: parsed.data.checkOutIso
           ? new Date(parsed.data.checkOutIso)
           : null,
+        standup: parsed.data.standup || null,
       },
     });
   } catch (err) {
