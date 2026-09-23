@@ -4,10 +4,13 @@ import { Input } from "@/components/ui/Input";
 import { StandupModalButton } from "@/components/dashboard/StandupModalButton";
 import { AttendanceRowActions } from "@/components/attendance/AttendanceRowActions";
 import { AddAttendanceRecordButton } from "@/components/attendance/AddAttendanceRecordButton";
-import { requireAdmin } from "@/lib/auth";
+import { AttendanceHistoryTable } from "@/components/dashboard/AttendanceHistoryTable";
+import { requireEmployee, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
 import { totalBreakMinutes, formatTimeOfDay } from "@/lib/format";
+
+const EMPLOYEE_HISTORY_DAYS = 14;
 
 const STATUS_TONE = {
   PRESENT: "success",
@@ -34,7 +37,31 @@ function parseDateParam(value: string | undefined) {
 export default async function AttendancePage({
   searchParams,
 }: PageProps<"/attendance">) {
-  await requireAdmin();
+  const employee = await requireEmployee();
+
+  if (!isAdmin(employee.role)) {
+    const today = todayDateOnly();
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const rangeStart = new Date(today.getTime() - (EMPLOYEE_HISTORY_DAYS - 1) * DAY_MS);
+
+    const records = await prisma.attendanceRecord.findMany({
+      where: { employeeId: employee.id, date: { gte: rangeStart, lte: today } },
+      orderBy: { date: "desc" },
+      include: { breaks: true },
+    });
+
+    return (
+      <>
+        <PageHeader
+          title="Attendance"
+          description={`Your last ${EMPLOYEE_HISTORY_DAYS} days`}
+        />
+        <div className="p-4 sm:p-6">
+          <AttendanceHistoryTable records={records} />
+        </div>
+      </>
+    );
+  }
 
   const today = todayDateOnly();
   const params = await searchParams;

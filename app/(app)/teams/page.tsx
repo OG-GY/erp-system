@@ -2,11 +2,16 @@ import Link from "next/link";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { MyTeamsList } from "@/components/teams/MyTeamsList";
 import { TeamCheckInTimesChart } from "@/components/teams/TeamCheckInTimesChart";
+import { TeamCheckInsChart } from "@/components/dashboard/TeamCheckInsChart";
+import { CheckInChart } from "@/components/dashboard/CheckInChart";
 import { Input } from "@/components/ui/Input";
 import { requireEmployee, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
-import { getTeamCheckInTimeSeries } from "@/lib/teamCheckIns";
+import { getTeamCheckInTimeSeries, getTeammatesCheckInsToday } from "@/lib/teamCheckIns";
+import { minutesSinceMidnight } from "@/lib/format";
+
+const PERSONAL_HISTORY_DAYS = 14;
 
 function dateOnlyFromParam(value: string | undefined, fallback: Date) {
   if (!value) return fallback;
@@ -132,14 +137,37 @@ export default async function TeamsPage({
   const startDate = dateOnlyFromParam(startParam, defaultStart);
   const endDate = dateOnlyFromParam(endParam, today);
 
-  const checkInSeriesByTeam = await Promise.all(
-    teams.map((team) => getTeamCheckInTimeSeries(team.id, startDate, endDate)),
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const personalRangeStart = new Date(
+    today.getTime() - (PERSONAL_HISTORY_DAYS - 1) * DAY_MS,
   );
+
+  const [checkInSeriesByTeam, teammateCheckIns, personalRecords] = await Promise.all([
+    Promise.all(teams.map((team) => getTeamCheckInTimeSeries(team.id, startDate, endDate))),
+    getTeammatesCheckInsToday(teams.map((t) => t.id)),
+    prisma.attendanceRecord.findMany({
+      where: { employeeId: employee.id, date: { gte: personalRangeStart, lte: today } },
+      select: { date: true, checkIn: true },
+    }),
+  ]);
+
+  const personalRecordsByDate = new Map(
+    personalRecords.map((r) => [r.date.toISOString().slice(0, 10), r]),
+  );
+  const personalChartPoints = Array.from({ length: PERSONAL_HISTORY_DAYS }, (_, i) => {
+    const date = new Date(personalRangeStart.getTime() + i * DAY_MS);
+    const record = personalRecordsByDate.get(date.toISOString().slice(0, 10));
+    const checkInMinutes = record?.checkIn ? minutesSinceMidnight(record.checkIn) : null;
+    return { date, checkInMinutes };
+  });
 
   return (
     <>
       <PageHeader title="Teams" description="Teams you're part of" />
       <div className="flex flex-col gap-4 p-4 sm:p-6">
+        <TeamCheckInsChart teammates={teammateCheckIns} />
+        <CheckInChart points={personalChartPoints} />
+
         {teams.length > 0 ? (
           <form method="get" className="flex flex-wrap items-end gap-2">
             <div className="flex flex-col gap-1.5">
