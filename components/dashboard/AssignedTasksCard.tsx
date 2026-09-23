@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TaskQuickActions } from "@/components/dashboard/TaskQuickActions";
 
 const STATUS_TONE = {
   TODO: "neutral",
@@ -39,26 +39,26 @@ export function AssignedTasksCard({ tasks }: { tasks: Task[] }) {
       ) : (
         <ul className="flex flex-col gap-2">
           {tasks.map((task) => (
-            <li key={task.id}>
-              <Link
-                href={`/projects/${task.project.id}`}
-                className="flex items-center justify-between gap-2 rounded-sm px-1 py-1 text-sm hover:bg-overlay-hover"
-              >
-                <span className="min-w-0">
-                  <span className="block truncate text-foreground">{task.title}</span>
-                  <span className="block truncate text-xs text-foreground-muted">
-                    {task.project.name}
-                    {task.dueDate
-                      ? ` · Due ${new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" }).format(task.dueDate)}`
-                      : ""}
-                  </span>
+            <li
+              key={task.id}
+              className="flex items-center justify-between gap-2 rounded-sm px-1 py-1 text-sm"
+            >
+              <span className="min-w-0">
+                <span className="block truncate text-foreground">{task.title}</span>
+                <span className="block truncate text-xs text-foreground-muted">
+                  {task.project.name}
+                  {task.dueDate
+                    ? ` · Due ${new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" }).format(task.dueDate)}`
+                    : ""}
                 </span>
+              </span>
+              <span className="flex shrink-0 items-center gap-2">
                 <StatusBadge
                   label={STATUS_LABEL[task.status]}
                   tone={STATUS_TONE[task.status]}
-                  className="shrink-0"
                 />
-              </Link>
+                <TaskQuickActions taskId={task.id} status={task.status} />
+              </span>
             </li>
           ))}
         </ul>
