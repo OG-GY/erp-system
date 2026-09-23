@@ -3,6 +3,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Input } from "@/components/ui/Input";
 import { StandupModalButton } from "@/components/dashboard/StandupModalButton";
 import { AttendanceRowActions } from "@/components/attendance/AttendanceRowActions";
+import { AddAttendanceRecordButton } from "@/components/attendance/AddAttendanceRecordButton";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
@@ -41,25 +42,39 @@ export default async function AttendancePage({
   const selectedDate = parseDateParam(dateParam) ?? today;
   const isToday = selectedDate.getTime() === today.getTime();
 
-  const records = await prisma.attendanceRecord.findMany({
-    where: { date: selectedDate },
-    orderBy: { employee: { fullName: "asc" } },
-    select: {
-      id: true,
-      checkIn: true,
-      checkOut: true,
-      status: true,
-      standup: true,
-      employee: { select: { id: true, fullName: true } },
-      breaks: { select: { startedAt: true, endedAt: true } },
-    },
-  });
+  const [records, employees] = await Promise.all([
+    prisma.attendanceRecord.findMany({
+      where: { date: selectedDate },
+      orderBy: { employee: { fullName: "asc" } },
+      select: {
+        id: true,
+        checkIn: true,
+        checkOut: true,
+        status: true,
+        standup: true,
+        employee: { select: { id: true, fullName: true } },
+        breaks: { select: { startedAt: true, endedAt: true } },
+      },
+    }),
+    prisma.employee.findMany({
+      where: { employmentStatus: "ACTIVE" },
+      orderBy: { fullName: "asc" },
+      select: { id: true, fullName: true },
+      take: 500,
+    }),
+  ]);
 
   return (
     <>
       <PageHeader
         title="Attendance"
         description={`${isToday ? "Today" : new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" }).format(selectedDate)} · ${records.length} ${records.length === 1 ? "record" : "records"}`}
+        actions={
+          <AddAttendanceRecordButton
+            employees={employees}
+            todayValue={today.toISOString().slice(0, 10)}
+          />
+        }
       />
       <div className="flex flex-col gap-4 p-4 sm:p-6">
         <form method="get" className="flex items-end gap-2">

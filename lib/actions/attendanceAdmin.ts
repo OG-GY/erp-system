@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { todayDateOnly } from "@/lib/date";
 
 // Full ISO timestamps, not the raw datetime-local strings the inputs use —
 // those carry no timezone, so parsing them here would resolve them in the
@@ -61,6 +63,91 @@ export async function updateAttendanceRecord(
         : null,
     },
   });
+
+  revalidatePath("/attendance");
+  revalidatePath("/dashboard");
+  return { error: null, success: true };
+}
+
+const createAttendanceSchema = z
+  .object({
+    employeeId: z.string().min(1, "Select an employee."),
+    date: z
+      .string()
+      .min(1, "Pick a date.")
+      .refine(
+        (value) => !Number.isNaN(new Date(`${value}T00:00:00.000Z`).getTime()),
+        { message: "Enter a valid date." },
+      ),
+    checkInIso: z
+      .string()
+      .min(1, "Enter a check-in time.")
+      .refine((value) => !Number.isNaN(new Date(value).getTime()), {
+        message: "Enter a valid check-in time.",
+      }),
+    checkOutIso: z.string().optional(),
+  })
+  .refine(
+    (data) =>
+      !data.checkOutIso ||
+      new Date(data.checkOutIso) > new Date(data.checkInIso),
+    { message: "Check-out must be after check-in.", path: ["checkOutIso"] },
+  );
+
+export type CreateAttendanceRecordState = { error: string | null; success: boolean };
+
+/**
+ * Admin-created attendance record for a day an employee forgot to check in.
+ * Same computed-ISO pattern as updateAttendanceRecord — the modal resolves
+ * the date + time fields into unambiguous ISO timestamps client-side first.
+ */
+export async function createAttendanceRecord(
+  _prevState: CreateAttendanceRecordState,
+  formData: FormData,
+): Promise<CreateAttendanceRecordState> {
+  await requireAdmin();
+
+  const parsed = createAttendanceSchema.safeParse({
+    employeeId: formData.get("employeeId"),
+    date: formData.get("date"),
+    checkInIso: formData.get("checkInIso"),
+    checkOutIso: formData.get("checkOutIso") || undefined,
+  });
+  if (!parsed.success) {
+    return {
+      error: parsed.error.issues[0]?.message ?? "Please check the fields.",
+      success: false,
+    };
+  }
+
+  const date = new Date(`${parsed.data.date}T00:00:00.000Z`);
+  if (date.getTime() > todayDateOnly().getTime()) {
+    return { error: "Can't add a record for a future date.", success: false };
+  }
+
+  try {
+    await prisma.attendanceRecord.create({
+      data: {
+        employeeId: parsed.data.employeeId,
+        date,
+        checkIn: new Date(parsed.data.checkInIso),
+        checkOut: parsed.data.checkOutIso
+          ? new Date(parsed.data.checkOutIso)
+          : null,
+      },
+    });
+  } catch (err) {
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === "P2002"
+    ) {
+      return {
+        error: "This employee already has a record for that date — edit it instead.",
+        success: false,
+      };
+    }
+    throw err;
+  }
 
   revalidatePath("/attendance");
   revalidatePath("/dashboard");
