@@ -100,7 +100,15 @@ export async function deleteCandidate(candidateId: string) {
   redirect("/interviews");
 }
 
-const statusSchema = z.enum(["SCHEDULED", "IN_PROGRESS", "APPROVED", "REJECTED"]);
+const statusSchema = z.enum([
+  "APPLIED",
+  "SCHEDULED",
+  "IN_PROGRESS",
+  "ON_HOLD",
+  "APPROVED",
+  "OFFER_SENT",
+  "REJECTED",
+]);
 
 export async function updateCandidateStatus(candidateId: string, status: string) {
   await requireAdmin();

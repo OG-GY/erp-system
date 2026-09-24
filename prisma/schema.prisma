@@ -228,9 +228,12 @@ model LeaveRequest {
 // ---------------------------------------------------------------------------
 
 enum CandidateStatus {
+  APPLIED
   SCHEDULED
   IN_PROGRESS
+  ON_HOLD
   APPROVED
+  OFFER_SENT
   REJECTED
 }
 
@@ -240,7 +243,7 @@ model Candidate {
   position      String
   email         String?
   phone         String?
-  status        CandidateStatus  @default(SCHEDULED)
+  status        CandidateStatus  @default(APPLIED)
   interviewDate DateTime?        @db.Date
   notes         InterviewNote[]
   createdAt     DateTime         @default(now())

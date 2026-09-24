@@ -7,9 +7,12 @@ import { CandidateCard } from "@/components/candidates/CandidateCard";
 import { CandidateModal } from "@/components/candidates/CandidateModal";
 
 const COLUMNS = [
+  { status: "APPLIED", label: "Applied" },
   { status: "SCHEDULED", label: "Scheduled" },
   { status: "IN_PROGRESS", label: "In progress" },
+  { status: "ON_HOLD", label: "On hold" },
   { status: "APPROVED", label: "Approved" },
+  { status: "OFFER_SENT", label: "Offer sent" },
   { status: "REJECTED", label: "Rejected" },
 ] as const;
 
@@ -64,7 +67,7 @@ export function InterviewBoard({
 
   return (
     <>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="flex gap-4 overflow-x-auto pb-2">
         {COLUMNS.map((column) => {
           const items = candidates.filter((c) => c.status === column.status);
           const isDragOver = dragOverStatus === column.status;
@@ -78,7 +81,7 @@ export function InterviewBoard({
               }}
               onDragLeave={() => setDragOverStatus((s) => (s === column.status ? null : s))}
               onDrop={() => handleDrop(column.status)}
-              className={`flex flex-col gap-2 rounded-lg border p-3 transition-colors ${
+              className={`flex w-72 shrink-0 flex-col gap-2 rounded-lg border p-3 transition-colors ${
                 isDragOver ? "border-accent bg-accent/5" : "border-border bg-background"
               }`}
             >

@@ -6,9 +6,12 @@ import { updateCandidateStatus } from "@/lib/actions/candidates";
 import { Select } from "@/components/ui/Select";
 
 const STATUS_OPTIONS = [
+  { value: "APPLIED", label: "Applied" },
   { value: "SCHEDULED", label: "Scheduled" },
   { value: "IN_PROGRESS", label: "In progress" },
+  { value: "ON_HOLD", label: "On hold" },
   { value: "APPROVED", label: "Approved" },
+  { value: "OFFER_SENT", label: "Offer sent" },
   { value: "REJECTED", label: "Rejected" },
 ] as const;
 
