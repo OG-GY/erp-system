@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { EditCandidateForm } from "@/components/candidates/EditCandidateForm";
 import { CandidateStatusSelect } from "@/components/candidates/CandidateStatusSelect";
 import { CandidateNotesPanel } from "@/components/candidates/CandidateNotesPanel";
+import { CvUploader } from "@/components/candidates/CvUploader";
 import { DeleteCandidateButton } from "@/components/candidates/DeleteCandidateButton";
 
 type Candidate = {
@@ -15,6 +16,7 @@ type Candidate = {
   phone: string | null;
   status: string;
   interviewDate: Date | null;
+  cvUrl: string | null;
   notes: { id: string; note: string; createdAt: Date; author: { fullName: string } }[];
 };
 
@@ -89,6 +91,11 @@ export function CandidateModal({
               />
             </div>
           </details>
+
+          <div className="flex flex-col gap-1.5">
+            <p className="text-sm font-medium text-foreground-muted">CV</p>
+            <CvUploader candidateId={candidate.id} cvUrl={candidate.cvUrl} />
+          </div>
 
           <CandidateNotesPanel candidateId={candidate.id} notes={candidate.notes} />
 

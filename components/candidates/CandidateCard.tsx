@@ -1,12 +1,13 @@
 "use client";
 
-import { StickyNote } from "lucide-react";
+import { StickyNote, Paperclip } from "lucide-react";
 
 type Candidate = {
   id: string;
   fullName: string;
   position: string;
   interviewDate: Date | null;
+  cvUrl: string | null;
   notes: unknown[];
 };
 
@@ -41,12 +42,17 @@ export function CandidateCard({
               }).format(candidate.interviewDate)
             : "No date set"}
         </span>
-        {candidate.notes.length > 0 ? (
-          <span className="flex items-center gap-1">
-            <StickyNote className="h-3 w-3" aria-hidden="true" />
-            {candidate.notes.length}
-          </span>
-        ) : null}
+        <span className="flex items-center gap-2">
+          {candidate.cvUrl ? (
+            <Paperclip className="h-3 w-3" aria-label="CV attached" />
+          ) : null}
+          {candidate.notes.length > 0 ? (
+            <span className="flex items-center gap-1">
+              <StickyNote className="h-3 w-3" aria-hidden="true" />
+              {candidate.notes.length}
+            </span>
+          ) : null}
+        </span>
       </div>
     </button>
   );

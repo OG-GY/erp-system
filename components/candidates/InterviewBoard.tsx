@@ -36,6 +36,7 @@ type Candidate = {
   phone: string | null;
   status: string;
   interviewDate: Date | null;
+  cvUrl: string | null;
   notes: { id: string; note: string; createdAt: Date; author: { fullName: string } }[];
 };
 

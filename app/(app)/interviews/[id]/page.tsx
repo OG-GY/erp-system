@@ -3,9 +3,11 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { EditCandidateForm } from "@/components/candidates/EditCandidateForm";
 import { CandidateStatusSelect } from "@/components/candidates/CandidateStatusSelect";
 import { CandidateNotesPanel } from "@/components/candidates/CandidateNotesPanel";
+import { CvUploader } from "@/components/candidates/CvUploader";
 import { DeleteCandidateButton } from "@/components/candidates/DeleteCandidateButton";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCvSignedUrls } from "@/lib/candidateCv";
 
 export default async function CandidateDetailPage({
   params,
@@ -23,6 +25,7 @@ export default async function CandidateDetailPage({
       phone: true,
       status: true,
       interviewDate: true,
+      cvPath: true,
       notes: {
         orderBy: { createdAt: "desc" },
         select: {
@@ -38,6 +41,10 @@ export default async function CandidateDetailPage({
   if (!candidate) {
     notFound();
   }
+
+  const cvUrl = candidate.cvPath
+    ? (await getCvSignedUrls([candidate.cvPath])).get(candidate.cvPath) ?? null
+    : null;
 
   return (
     <>
@@ -81,7 +88,12 @@ export default async function CandidateDetailPage({
           </div>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="flex flex-col gap-4 lg:col-span-2">
+          <div className="rounded-lg border border-border bg-surface p-4">
+            <h2 className="mb-3 text-sm font-medium text-foreground-muted">CV</h2>
+            <CvUploader candidateId={candidate.id} cvUrl={cvUrl} />
+          </div>
+
           <CandidateNotesPanel candidateId={candidate.id} notes={candidate.notes} />
         </div>
       </div>

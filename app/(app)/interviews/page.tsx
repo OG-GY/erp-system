@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { InterviewBoard } from "@/components/candidates/InterviewBoard";
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getCvSignedUrls } from "@/lib/candidateCv";
 
 export default async function InterviewsPage() {
   await requireAdmin();
@@ -17,6 +18,7 @@ export default async function InterviewsPage() {
       phone: true,
       status: true,
       interviewDate: true,
+      cvPath: true,
       notes: {
         orderBy: { createdAt: "desc" },
         select: {
@@ -28,6 +30,13 @@ export default async function InterviewsPage() {
       },
     },
   });
+
+  const cvPaths = candidates.flatMap((c) => (c.cvPath ? [c.cvPath] : []));
+  const signedUrls = await getCvSignedUrls(cvPaths);
+  const candidatesWithCv = candidates.map((c) => ({
+    ...c,
+    cvUrl: c.cvPath ? signedUrls.get(c.cvPath) ?? null : null,
+  }));
 
   return (
     <>
@@ -55,7 +64,7 @@ export default async function InterviewsPage() {
             </Link>
           </div>
         ) : (
-          <InterviewBoard candidates={candidates} />
+          <InterviewBoard candidates={candidatesWithCv} />
         )}
       </div>
     </>

@@ -1,10 +1,20 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+const CV_BUCKET = "candidate-cvs";
+const MAX_CV_BYTES = 10 * 1024 * 1024;
+
+/** Same reasoning as avatar.ts's detectImageType: trust the file's actual bytes, not the client-supplied MIME type. */
+function isPng(bytes: Uint8Array) {
+  return bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+}
 
 const candidateFieldsSchema = z.object({
   fullName: z.string().min(1, "Enter a name.").max(200),
@@ -91,10 +101,19 @@ export async function updateCandidate(
 export async function deleteCandidate(candidateId: string) {
   await requireAdmin();
 
+  const candidate = await prisma.candidate.findUnique({
+    where: { id: candidateId },
+    select: { cvPath: true },
+  });
+
   await prisma.$transaction([
     prisma.interviewNote.deleteMany({ where: { candidateId } }),
     prisma.candidate.delete({ where: { id: candidateId } }),
   ]);
+
+  if (candidate?.cvPath) {
+    await createAdminClient().storage.from(CV_BUCKET).remove([candidate.cvPath]);
+  }
 
   revalidatePath("/interviews");
   redirect("/interviews");
@@ -155,4 +174,75 @@ export async function addInterviewNote(
 
   revalidatePath(`/interviews/${candidateId}`);
   return { error: null };
+}
+
+export type UploadCandidateCvState = { error: string | null };
+
+/**
+ * Replaces the candidate's CV image. The old file (if any) is hard-deleted
+ * from storage, not just unlinked — there's no soft-delete/trash for these.
+ */
+export async function uploadCandidateCv(
+  candidateId: string,
+  _prevState: UploadCandidateCvState,
+  formData: FormData,
+): Promise<UploadCandidateCvState> {
+  await requireAdmin();
+
+  const file = formData.get("cv");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Choose or paste a PNG image." };
+  }
+  if (file.size > MAX_CV_BYTES) {
+    return { error: "Image must be 10MB or smaller." };
+  }
+
+  const buffer = await file.arrayBuffer();
+  if (!isPng(new Uint8Array(buffer.slice(0, 4)))) {
+    return { error: "Only PNG images are allowed." };
+  }
+
+  const candidate = await prisma.candidate.findUnique({
+    where: { id: candidateId },
+    select: { cvPath: true },
+  });
+  if (!candidate) {
+    return { error: "Candidate not found." };
+  }
+
+  const supabaseAdmin = createAdminClient();
+  const path = `${candidateId}/${randomUUID()}.png`;
+
+  const { error: uploadError } = await supabaseAdmin.storage
+    .from(CV_BUCKET)
+    .upload(path, buffer, { contentType: "image/png", upsert: false });
+  if (uploadError) {
+    return { error: "Upload failed. Please try again." };
+  }
+
+  await prisma.candidate.update({ where: { id: candidateId }, data: { cvPath: path } });
+
+  if (candidate.cvPath) {
+    await supabaseAdmin.storage.from(CV_BUCKET).remove([candidate.cvPath]);
+  }
+
+  revalidatePath("/interviews");
+  revalidatePath(`/interviews/${candidateId}`);
+  return { error: null };
+}
+
+export async function deleteCandidateCv(candidateId: string) {
+  await requireAdmin();
+
+  const candidate = await prisma.candidate.findUnique({
+    where: { id: candidateId },
+    select: { cvPath: true },
+  });
+  if (!candidate?.cvPath) return;
+
+  await prisma.candidate.update({ where: { id: candidateId }, data: { cvPath: null } });
+  await createAdminClient().storage.from(CV_BUCKET).remove([candidate.cvPath]);
+
+  revalidatePath("/interviews");
+  revalidatePath(`/interviews/${candidateId}`);
 }

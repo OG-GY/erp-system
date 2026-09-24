@@ -245,6 +245,10 @@ model Candidate {
   phone         String?
   status        CandidateStatus  @default(APPLIED)
   interviewDate DateTime?        @db.Date
+  // Storage object path, not a public URL — the "candidate-cvs" bucket is
+  // private (CVs are personal documents), so viewing it means generating a
+  // short-lived signed URL server-side from this path.
+  cvPath        String?
   notes         InterviewNote[]
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
