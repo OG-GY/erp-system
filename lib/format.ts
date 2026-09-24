@@ -36,6 +36,14 @@ export function formatTimeOfDay(date: Date | null) {
   }).format(date);
 }
 
+export function formatDateTime(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: DISPLAY_TIMEZONE,
+  }).format(date);
+}
+
 /** Minutes since local midnight, in the business timezone — for charts that position a time-of-day on an axis. */
 export function minutesSinceMidnight(date: Date) {
   const parts = new Intl.DateTimeFormat("en-US", {
