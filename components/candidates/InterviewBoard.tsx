@@ -11,10 +11,22 @@ const COLUMNS = [
   { status: "SCHEDULED", label: "Scheduled" },
   { status: "IN_PROGRESS", label: "In progress" },
   { status: "ON_HOLD", label: "On hold" },
-  { status: "APPROVED", label: "Approved" },
   { status: "OFFER_SENT", label: "Offer sent" },
+  { status: "APPROVED", label: "Approved" },
   { status: "REJECTED", label: "Rejected" },
 ] as const;
+
+// Literal, fully-written class names (not interpolated) so Tailwind's
+// scanner picks them up — same reasoning as StatusBadge's TONE_CLASSES.
+const COLUMN_STYLES: Record<(typeof COLUMNS)[number]["status"], { bar: string; dot: string; wash: string }> = {
+  APPLIED: { bar: "border-t-info", dot: "bg-info", wash: "bg-info/5" },
+  SCHEDULED: { bar: "border-t-accent", dot: "bg-accent", wash: "bg-accent/5" },
+  IN_PROGRESS: { bar: "border-t-warning", dot: "bg-warning", wash: "bg-warning/5" },
+  ON_HOLD: { bar: "border-t-accent-secondary", dot: "bg-accent-secondary", wash: "bg-accent-secondary/5" },
+  OFFER_SENT: { bar: "border-t-accent", dot: "bg-accent", wash: "bg-accent/5" },
+  APPROVED: { bar: "border-t-success", dot: "bg-success", wash: "bg-success/5" },
+  REJECTED: { bar: "border-t-danger", dot: "bg-danger", wash: "bg-danger/5" },
+};
 
 type Candidate = {
   id: string;
@@ -67,10 +79,11 @@ export function InterviewBoard({
 
   return (
     <>
-      <div className="flex gap-4 overflow-x-auto pb-2">
+      <div className="no-scrollbar flex gap-4 overflow-x-auto pb-2">
         {COLUMNS.map((column) => {
           const items = candidates.filter((c) => c.status === column.status);
           const isDragOver = dragOverStatus === column.status;
+          const styles = COLUMN_STYLES[column.status];
 
           return (
             <div
@@ -81,12 +94,15 @@ export function InterviewBoard({
               }}
               onDragLeave={() => setDragOverStatus((s) => (s === column.status ? null : s))}
               onDrop={() => handleDrop(column.status)}
-              className={`flex w-72 shrink-0 flex-col gap-2 rounded-lg border p-3 transition-colors ${
-                isDragOver ? "border-accent bg-accent/5" : "border-border bg-background"
+              className={`flex w-72 shrink-0 flex-col gap-2 rounded-lg border border-t-4 p-3 transition-colors ${styles.bar} ${
+                isDragOver ? "border-accent bg-accent/10" : `border-border ${styles.wash}`
               }`}
             >
               <div className="flex items-center justify-between px-1">
-                <p className="text-xs font-medium text-foreground-muted">{column.label}</p>
+                <span className="flex items-center gap-1.5">
+                  <span className={`h-2 w-2 rounded-full ${styles.dot}`} aria-hidden="true" />
+                  <p className="text-xs font-medium text-foreground-muted">{column.label}</p>
+                </span>
                 <span className="text-xs text-foreground-muted">{items.length}</span>
               </div>
 

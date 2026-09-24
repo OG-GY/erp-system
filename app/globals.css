@@ -131,3 +131,15 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* Scrollable containers (e.g. the interview board) that still need to
+   scroll with a mouse wheel, trackpad, or touch — just without the bar
+   taking up visual space. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -28,7 +28,7 @@ export function CandidateCard({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onClick={onClick}
-      className="flex cursor-grab flex-col gap-1 rounded-md border border-border bg-surface p-3 text-left text-sm transition-colors hover:border-accent/50 active:cursor-grabbing"
+      className="flex cursor-grab flex-col gap-1 rounded-md border border-border bg-surface p-3 text-left text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-md active:cursor-grabbing"
     >
       <span className="font-medium text-foreground">{candidate.fullName}</span>
       <span className="text-xs text-foreground-muted">{candidate.position}</span>
