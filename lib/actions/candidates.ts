@@ -11,9 +11,27 @@ import { createAdminClient } from "@/lib/supabase/admin";
 const CV_BUCKET = "candidate-cvs";
 const MAX_CV_BYTES = 10 * 1024 * 1024;
 
-/** Same reasoning as avatar.ts's detectImageType: trust the file's actual bytes, not the client-supplied MIME type. */
-function isPng(bytes: Uint8Array) {
-  return bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
+/**
+ * Same as avatar.ts's detectImageType: identify the image from its actual
+ * bytes (magic numbers), not the client-supplied MIME type — an upload is
+ * hostile input, and a spoofed `Content-Type` shouldn't be trusted.
+ */
+function detectImageType(
+  bytes: Uint8Array,
+): { mime: string; extension: string } | null {
+  if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+    return { mime: "image/png", extension: "png" };
+  }
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return { mime: "image/jpeg", extension: "jpg" };
+  }
+  if (
+    bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 &&
+    bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50
+  ) {
+    return { mime: "image/webp", extension: "webp" };
+  }
+  return null;
 }
 
 const candidateFieldsSchema = z.object({
@@ -191,15 +209,16 @@ export async function uploadCandidateCv(
 
   const file = formData.get("cv");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Choose or paste a PNG image." };
+    return { error: "Choose or paste an image." };
   }
   if (file.size > MAX_CV_BYTES) {
     return { error: "Image must be 10MB or smaller." };
   }
 
   const buffer = await file.arrayBuffer();
-  if (!isPng(new Uint8Array(buffer.slice(0, 4)))) {
-    return { error: "Only PNG images are allowed." };
+  const detected = detectImageType(new Uint8Array(buffer.slice(0, 12)));
+  if (!detected) {
+    return { error: "Only PNG, JPEG, or WEBP images are allowed." };
   }
 
   const candidate = await prisma.candidate.findUnique({
@@ -211,11 +230,11 @@ export async function uploadCandidateCv(
   }
 
   const supabaseAdmin = createAdminClient();
-  const path = `${candidateId}/${randomUUID()}.png`;
+  const path = `${candidateId}/${randomUUID()}.${detected.extension}`;
 
   const { error: uploadError } = await supabaseAdmin.storage
     .from(CV_BUCKET)
-    .upload(path, buffer, { contentType: "image/png", upsert: false });
+    .upload(path, buffer, { contentType: detected.mime, upsert: false });
   if (uploadError) {
     return { error: "Upload failed. Please try again." };
   }

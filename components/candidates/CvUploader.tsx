@@ -35,8 +35,11 @@ export function CvUploader({
       const file = item?.getAsFile();
       if (!file || !fileInputRef.current) return;
 
+      const extension = file.type.split("/")[1]?.replace("jpeg", "jpg") || "png";
       const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(new File([file], "pasted-cv.png", { type: file.type }));
+      dataTransfer.items.add(
+        new File([file], `pasted-cv.${extension}`, { type: file.type }),
+      );
       fileInputRef.current.files = dataTransfer.files;
     }
     document.addEventListener("paste", handlePaste);
@@ -95,7 +98,7 @@ export function CvUploader({
           ref={fileInputRef}
           type="file"
           name="cv"
-          accept="image/png"
+          accept="image/png,image/jpeg,image/webp"
           disabled={isPending}
           className="text-xs text-foreground-muted file:mr-2 file:h-8 file:rounded-md file:border file:border-border-strong file:bg-surface file:px-3 file:text-xs file:font-medium file:text-foreground disabled:opacity-60"
         />
@@ -108,7 +111,7 @@ export function CvUploader({
         </button>
       </form>
       <p className="text-xs text-foreground-muted">
-        PNG only — choose a file, or paste (Ctrl+V) a screenshot.
+        PNG, JPEG, or WEBP — choose a file, or paste (Ctrl+V) a screenshot.
       </p>
       {state.error ? (
         <p role="alert" className="text-xs text-danger">

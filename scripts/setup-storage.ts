@@ -43,23 +43,32 @@ async function main() {
     console.log("Created public bucket 'avatars' (5MB limit, PNG/JPEG/WEBP).");
   }
 
+  // Private, unlike avatars — CVs are personal documents, viewed only via
+  // short-lived signed URLs generated server-side for an authenticated admin.
+  const cvBucketOptions = {
+    public: false,
+    fileSizeLimit: 10 * 1024 * 1024,
+    allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
+  };
+
   if (existing.has("candidate-cvs")) {
-    console.log("Bucket 'candidate-cvs' already exists — nothing to do.");
+    const { error: updateError } = await supabaseAdmin.storage.updateBucket(
+      "candidate-cvs",
+      cvBucketOptions,
+    );
+    if (updateError) {
+      throw new Error(`Could not update bucket: ${updateError.message}`);
+    }
+    console.log("Updated bucket 'candidate-cvs' (10MB limit, PNG/JPEG/WEBP).");
   } else {
-    // Private, unlike avatars — CVs are personal documents, viewed only via
-    // short-lived signed URLs generated server-side for an authenticated admin.
     const { error: createError } = await supabaseAdmin.storage.createBucket(
       "candidate-cvs",
-      {
-        public: false,
-        fileSizeLimit: 10 * 1024 * 1024,
-        allowedMimeTypes: ["image/png"],
-      },
+      cvBucketOptions,
     );
     if (createError) {
       throw new Error(`Could not create bucket: ${createError.message}`);
     }
-    console.log("Created private bucket 'candidate-cvs' (10MB limit, PNG only).");
+    console.log("Created private bucket 'candidate-cvs' (10MB limit, PNG/JPEG/WEBP).");
   }
 }
 
