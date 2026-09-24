@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
 
 export type SelectOption = { value: string; label: string; disabled?: boolean };
@@ -43,10 +44,31 @@ export function Select({
 
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  // Screen coordinates for the portaled dropdown — recomputed from the
+  // trigger button's live position, since the dropdown no longer lives
+  // inside whatever scroll/overflow container the button does.
+  const [position, setPosition] = useState<
+    { top: number; left: number; width: number; openUpward: boolean } | null
+  >(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const selected = options.find((o) => o.value === value);
+
+  function updatePosition() {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const LIST_MAX_HEIGHT = 224; // matches max-h-56
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const openUpward = spaceBelow < LIST_MAX_HEIGHT && spaceAbove > spaceBelow;
+    setPosition({
+      top: openUpward ? rect.top : rect.bottom,
+      left: rect.left,
+      width: rect.width,
+      openUpward,
+    });
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -61,11 +83,21 @@ export function Select({
         buttonRef.current?.focus();
       }
     }
+    function handleReposition() {
+      updatePosition();
+    }
     document.addEventListener("mousedown", handlePointerDown);
     document.addEventListener("keydown", handleKeyDown);
+    // capture: true — catches scrolling inside any ancestor scroll
+    // container (e.g. a table's overflow-x-auto wrapper), not just the
+    // window itself.
+    window.addEventListener("scroll", handleReposition, true);
+    window.addEventListener("resize", handleReposition);
     return () => {
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", handleReposition, true);
+      window.removeEventListener("resize", handleReposition);
     };
   }, [open]);
 
@@ -73,6 +105,7 @@ export function Select({
     if (disabled) return;
     const idx = options.findIndex((o) => o.value === value);
     setActiveIndex(idx >= 0 ? idx : 0);
+    updatePosition();
     setOpen(true);
   }
 
@@ -144,35 +177,47 @@ export function Select({
         />
       </button>
 
-      {open ? (
-        <ul
-          role="listbox"
-          tabIndex={-1}
-          className="absolute z-30 mt-1 max-h-56 w-full min-w-max overflow-auto rounded-md border border-border bg-surface py-1 shadow-lg"
-        >
-          {options.map((opt, i) => (
-            <li
-              key={opt.value}
-              role="option"
-              aria-selected={opt.value === value}
-              onMouseEnter={() => setActiveIndex(i)}
-              onClick={() => !opt.disabled && selectValue(opt.value)}
-              className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-1.5 text-sm ${
-                opt.disabled
-                  ? "cursor-not-allowed text-foreground-muted opacity-50"
-                  : i === activeIndex
-                    ? "bg-overlay-hover text-foreground"
-                    : "text-foreground"
-              }`}
+      {open && position
+        ? createPortal(
+            <ul
+              role="listbox"
+              tabIndex={-1}
+              style={{
+                position: "fixed",
+                top: position.openUpward ? undefined : position.top + 4,
+                bottom: position.openUpward
+                  ? window.innerHeight - position.top + 4
+                  : undefined,
+                left: position.left,
+                width: position.width,
+              }}
+              className="z-50 max-h-56 min-w-max overflow-auto rounded-md border border-border bg-surface py-1 shadow-lg"
             >
-              {opt.label}
-              {opt.value === value ? (
-                <Check className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      ) : null}
+              {options.map((opt, i) => (
+                <li
+                  key={opt.value}
+                  role="option"
+                  aria-selected={opt.value === value}
+                  onMouseEnter={() => setActiveIndex(i)}
+                  onClick={() => !opt.disabled && selectValue(opt.value)}
+                  className={`flex cursor-pointer items-center justify-between gap-2 px-3 py-1.5 text-sm ${
+                    opt.disabled
+                      ? "cursor-not-allowed text-foreground-muted opacity-50"
+                      : i === activeIndex
+                        ? "bg-overlay-hover text-foreground"
+                        : "text-foreground"
+                  }`}
+                >
+                  {opt.label}
+                  {opt.value === value ? (
+                    <Check className="h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
+                  ) : null}
+                </li>
+              ))}
+            </ul>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
