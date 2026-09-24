@@ -9,11 +9,11 @@ import {
   type UploadCandidateCvState,
 } from "@/lib/actions/candidates";
 
-const initialState: UploadCandidateCvState = { error: null };
+const initialState: UploadCandidateCvState = { error: null, url: null };
 
 export function CvUploader({
   candidateId,
-  cvUrl,
+  cvUrl: cvUrlProp,
 }: {
   candidateId: string;
   cvUrl: string | null;
@@ -23,6 +23,10 @@ export function CvUploader({
   const [state, formAction, isPending] = useActionState(boundUpload, initialState);
   const [isDeleting, startDeleteTransition] = useTransition();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // The action's own return value wins right after an upload — showing the
+  // freshly-signed URL immediately instead of waiting on the page to
+  // re-fetch and re-sign it via revalidation.
+  const cvUrl = state.url ?? cvUrlProp;
 
   // Lets Ctrl+V anywhere while this candidate's modal is open drop a
   // clipboard screenshot straight into the file input, reusing the same

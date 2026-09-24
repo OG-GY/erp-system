@@ -194,11 +194,16 @@ export async function addInterviewNote(
   return { error: null };
 }
 
-export type UploadCandidateCvState = { error: string | null };
+export type UploadCandidateCvState = { error: string | null; url: string | null };
 
 /**
  * Replaces the candidate's CV image. The old file (if any) is hard-deleted
  * from storage, not just unlinked — there's no soft-delete/trash for these.
+ *
+ * Returns a signed URL directly (same pattern as uploadAvatar) rather than
+ * relying on the board/detail page re-fetching and re-signing after
+ * revalidation — that round trip is what made the just-uploaded image not
+ * show up immediately.
  */
 export async function uploadCandidateCv(
   candidateId: string,
@@ -209,16 +214,16 @@ export async function uploadCandidateCv(
 
   const file = formData.get("cv");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Choose or paste an image." };
+    return { error: "Choose or paste an image.", url: null };
   }
   if (file.size > MAX_CV_BYTES) {
-    return { error: "Image must be 10MB or smaller." };
+    return { error: "Image must be 10MB or smaller.", url: null };
   }
 
   const buffer = await file.arrayBuffer();
   const detected = detectImageType(new Uint8Array(buffer.slice(0, 12)));
   if (!detected) {
-    return { error: "Only PNG, JPEG, or WEBP images are allowed." };
+    return { error: "Only PNG, JPEG, or WEBP images are allowed.", url: null };
   }
 
   const candidate = await prisma.candidate.findUnique({
@@ -226,7 +231,7 @@ export async function uploadCandidateCv(
     select: { cvPath: true },
   });
   if (!candidate) {
-    return { error: "Candidate not found." };
+    return { error: "Candidate not found.", url: null };
   }
 
   const supabaseAdmin = createAdminClient();
@@ -236,8 +241,12 @@ export async function uploadCandidateCv(
     .from(CV_BUCKET)
     .upload(path, buffer, { contentType: detected.mime, upsert: false });
   if (uploadError) {
-    return { error: "Upload failed. Please try again." };
+    return { error: "Upload failed. Please try again.", url: null };
   }
+
+  const { data: signedData } = await supabaseAdmin.storage
+    .from(CV_BUCKET)
+    .createSignedUrl(path, 60 * 60);
 
   await prisma.candidate.update({ where: { id: candidateId }, data: { cvPath: path } });
 
@@ -247,7 +256,7 @@ export async function uploadCandidateCv(
 
   revalidatePath("/interviews");
   revalidatePath(`/interviews/${candidateId}`);
-  return { error: null };
+  return { error: null, url: signedData?.signedUrl ?? null };
 }
 
 export async function deleteCandidateCv(candidateId: string) {
