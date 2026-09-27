@@ -26,6 +26,7 @@ type Task = {
   priority: keyof typeof PRIORITY_LABEL;
   dueDate: Date | null;
   assignee: { fullName: string } | null;
+  project?: { id: string; name: string };
 };
 
 export function TaskDetailModal({
@@ -72,6 +73,12 @@ export function TaskDetailModal({
         </div>
 
         <div className="flex flex-col gap-4">
+          {task.project ? (
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-foreground-muted">Project</span>
+              <span className="text-foreground">{task.project.name}</span>
+            </div>
+          ) : null}
           <div className="flex items-center justify-between text-sm">
             <span className="text-foreground-muted">Assignee</span>
             <span className="text-foreground">{task.assignee?.fullName ?? "Unassigned"}</span>

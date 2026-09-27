@@ -12,6 +12,7 @@ import {
   Wallet,
   BarChart3,
   UserSearch,
+  ListTodo,
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 
@@ -21,6 +22,7 @@ const EMPLOYEE_NAV_ITEMS = [
   { href: "/attendance", label: "Attendance", icon: CalendarCheck },
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/projects", label: "Projects", icon: FolderKanban },
+  { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/payroll", label: "Payroll", icon: Wallet },
 ] as const;
 
@@ -32,6 +34,7 @@ const ADMIN_NAV_ITEMS = [
   { href: "/attendance", label: "Attendance", icon: CalendarCheck },
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/projects", label: "Projects", icon: FolderKanban },
+  { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/payroll", label: "Payroll", icon: Wallet },
   { href: "/reports", label: "Reports", icon: BarChart3 },
 ] as const;
@@ -45,6 +48,7 @@ const PROJECT_MANAGER_NAV_ITEMS = [
   { href: "/attendance", label: "Attendance", icon: CalendarCheck },
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/projects", label: "Projects", icon: FolderKanban },
+  { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/payroll", label: "Payroll", icon: Wallet },
 ] as const;
 

@@ -34,7 +34,11 @@ export function TasksPanel({
         </div>
       ) : null}
 
-      <TaskBoard tasks={tasks} viewerId={viewerId} canManage={canManage} />
+      <TaskBoard
+        tasks={tasks.map((t) => ({ ...t, projectId }))}
+        viewerId={viewerId}
+        canManageTask={() => canManage}
+      />
     </div>
   );
 }

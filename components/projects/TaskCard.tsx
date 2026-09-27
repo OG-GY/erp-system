@@ -22,6 +22,7 @@ type Task = {
   priority: keyof typeof PRIORITY_LABEL;
   dueDate: Date | null;
   assignee: { fullName: string } | null;
+  project?: { id: string; name: string };
 };
 
 export function TaskCard({
@@ -49,6 +50,9 @@ export function TaskCard({
       }`}
     >
       <span className="font-medium text-foreground">{task.title}</span>
+      {task.project ? (
+        <span className="truncate text-xs text-accent">{task.project.name}</span>
+      ) : null}
       <span className="text-xs text-foreground-muted">
         {task.assignee?.fullName ?? "Unassigned"}
       </span>

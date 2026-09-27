@@ -33,17 +33,22 @@ type Task = {
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT";
   dueDate: Date | null;
   assigneeId: string | null;
+  projectId: string;
   assignee: { fullName: string } | null;
+  project?: { id: string; name: string };
 };
 
 export function TaskBoard({
   tasks: initialTasks,
   viewerId,
-  canManage,
+  canManageTask,
 }: {
   tasks: Task[];
   viewerId: string;
-  canManage: boolean;
+  /** Whether the viewer manages the project a given task belongs to — a
+   * single project's board passes a constant, a cross-project board (the
+   * top-level Tasks tab) checks per task. */
+  canManageTask: (task: Task) => boolean;
 }) {
   const router = useRouter();
   const [tasks, setTasks] = useState(initialTasks);
@@ -62,7 +67,7 @@ export function TaskBoard({
   const [, startTransition] = useTransition();
 
   function canDrag(task: Task) {
-    return canManage || task.assigneeId === viewerId;
+    return canManageTask(task) || task.assigneeId === viewerId;
   }
 
   function handleDrop(status: string) {
