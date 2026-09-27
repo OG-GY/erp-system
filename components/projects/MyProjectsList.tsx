@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TaskStatusSelect } from "@/components/projects/TaskStatusSelect";
 
@@ -57,7 +58,9 @@ export function MyProjectsList({ projects }: { projects: Project[] }) {
           <div className="mb-3 flex items-center justify-between gap-2">
             <div>
               <h3 className="text-sm font-medium text-foreground">
-                {project.name}
+                <Link href={`/projects/${project.id}`} className="hover:text-accent">
+                  {project.name}
+                </Link>
               </h3>
               {project.description ? (
                 <p className="text-xs text-foreground-muted">

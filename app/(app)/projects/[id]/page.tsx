@@ -49,6 +49,7 @@ export default async function ProjectDetailPage({
           status: true,
           priority: true,
           dueDate: true,
+          assigneeId: true,
           assignee: { select: { fullName: true } },
         },
       },
@@ -102,6 +103,7 @@ export default async function ProjectDetailPage({
             projectId={project.id}
             tasks={project.tasks}
             members={project.members.map((m) => m.employee)}
+            viewerId={employee.id}
             canManage={canManage}
           />
         </div>
