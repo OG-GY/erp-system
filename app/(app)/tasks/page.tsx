@@ -62,7 +62,8 @@ export default async function TasksPage() {
         <TaskBoard
           tasks={tasks}
           viewerId={employee.id}
-          canManageTask={(task) => viewerIsAdmin || managedProjectIds.has(task.projectId)}
+          viewerIsAdmin={viewerIsAdmin}
+          managedProjectIds={[...managedProjectIds]}
         />
       </div>
     </>

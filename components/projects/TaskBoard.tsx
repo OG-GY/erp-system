@@ -41,14 +41,17 @@ type Task = {
 export function TaskBoard({
   tasks: initialTasks,
   viewerId,
-  canManageTask,
+  viewerIsAdmin = false,
+  managedProjectIds = [],
 }: {
   tasks: Task[];
   viewerId: string;
-  /** Whether the viewer manages the project a given task belongs to — a
-   * single project's board passes a constant, a cross-project board (the
-   * top-level Tasks tab) checks per task. */
-  canManageTask: (task: Task) => boolean;
+  viewerIsAdmin?: boolean;
+  /** Project ids the viewer manages — a single project's board passes just
+   * that one id (or none), a cross-project board (the top-level Tasks tab)
+   * passes every project they manage. Plain data, not a callback: a function
+   * prop can't cross the Server Component -> Client Component boundary. */
+  managedProjectIds?: string[];
 }) {
   const router = useRouter();
   const [tasks, setTasks] = useState(initialTasks);
@@ -67,7 +70,11 @@ export function TaskBoard({
   const [, startTransition] = useTransition();
 
   function canDrag(task: Task) {
-    return canManageTask(task) || task.assigneeId === viewerId;
+    return (
+      viewerIsAdmin ||
+      managedProjectIds.includes(task.projectId) ||
+      task.assigneeId === viewerId
+    );
   }
 
   function handleDrop(status: string) {

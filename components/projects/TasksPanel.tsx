@@ -37,7 +37,7 @@ export function TasksPanel({
       <TaskBoard
         tasks={tasks.map((t) => ({ ...t, projectId }))}
         viewerId={viewerId}
-        canManageTask={() => canManage}
+        managedProjectIds={canManage ? [projectId] : []}
       />
     </div>
   );
