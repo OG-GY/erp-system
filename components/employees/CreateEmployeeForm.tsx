@@ -13,6 +13,7 @@ const initialState: CreateEmployeeState = { error: null };
 
 const ROLES = [
   { value: "EMPLOYEE", label: "Employee" },
+  { value: "PROJECT_MANAGER", label: "Project Manager" },
   { value: "MANAGER", label: "Manager" },
   { value: "HR_MANAGER", label: "HR Manager" },
   { value: "SUPER_ADMIN", label: "Super Admin" },

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { requireAdmin, requireEmployee, canManageTeam } from "@/lib/auth";
 
 const teamFieldsSchema = z.object({
   name: z.string().min(1, "Enter a team name.").max(200),
@@ -107,7 +107,10 @@ const addMemberSchema = z.object({
 });
 
 export async function addTeamMember(teamId: string, formData: FormData) {
-  await requireAdmin();
+  const employee = await requireEmployee();
+  if (!(await canManageTeam(employee, teamId))) {
+    throw new Error("Forbidden: you can't manage this team.");
+  }
 
   const parsed = addMemberSchema.safeParse({
     employeeId: formData.get("employeeId"),
@@ -134,8 +137,28 @@ export async function addTeamMember(teamId: string, formData: FormData) {
 }
 
 export async function removeTeamMember(teamId: string, membershipId: string) {
-  await requireAdmin();
+  const employee = await requireEmployee();
+  if (!(await canManageTeam(employee, teamId))) {
+    throw new Error("Forbidden: you can't manage this team.");
+  }
   await prisma.teamMembership.delete({ where: { id: membershipId } });
+  revalidatePath(`/teams/${teamId}`);
+}
+
+/** Self-service for a lead managing their own team — no admin gate needed here. */
+export async function setTeamMemberLead(
+  teamId: string,
+  membershipId: string,
+  isLead: boolean,
+) {
+  const employee = await requireEmployee();
+  if (!(await canManageTeam(employee, teamId))) {
+    throw new Error("Forbidden: you can't manage this team.");
+  }
+  await prisma.teamMembership.update({
+    where: { id: membershipId },
+    data: { isLead },
+  });
   revalidatePath(`/teams/${teamId}`);
 }
 
@@ -151,7 +174,10 @@ export async function updateTeamMemberRole(
   _prevState: UpdateMemberRoleState,
   formData: FormData,
 ): Promise<UpdateMemberRoleState> {
-  await requireAdmin();
+  const employee = await requireEmployee();
+  if (!(await canManageTeam(employee, teamId))) {
+    return { error: "Forbidden: you can't manage this team.", success: false };
+  }
 
   const parsed = updateRoleSchema.safeParse({ role: formData.get("role") });
   if (!parsed.success) {

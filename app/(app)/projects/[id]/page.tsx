@@ -1,9 +1,9 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { MembersPanel } from "@/components/projects/MembersPanel";
 import { TasksPanel } from "@/components/projects/TasksPanel";
-import { requireAdmin } from "@/lib/auth";
+import { requireEmployee, isAdmin, canManageProject } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 const STATUS_TONE = {
@@ -25,7 +25,7 @@ const STATUS_LABEL = {
 export default async function ProjectDetailPage({
   params,
 }: PageProps<"/projects/[id]">) {
-  await requireAdmin();
+  const employee = await requireEmployee();
   const { id } = await params;
 
   const project = await prisma.project.findUnique({
@@ -36,7 +36,10 @@ export default async function ProjectDetailPage({
       description: true,
       status: true,
       members: {
-        select: { employee: { select: { id: true, fullName: true } } },
+        select: {
+          isManager: true,
+          employee: { select: { id: true, fullName: true } },
+        },
       },
       tasks: {
         orderBy: { createdAt: "desc" },
@@ -56,13 +59,21 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
+  const canManage = await canManageProject(employee, id);
+  const isMember = canManage || project.members.some((m) => m.employee.id === employee.id);
+  if (!isAdmin(employee.role) && !isMember) {
+    redirect("/projects");
+  }
+
   const memberIds = new Set(project.members.map((m) => m.employee.id));
-  const availableEmployees = await prisma.employee.findMany({
-    where: { id: { notIn: [...memberIds] }, employmentStatus: "ACTIVE" },
-    orderBy: { fullName: "asc" },
-    select: { id: true, fullName: true },
-    take: 500,
-  });
+  const availableEmployees = canManage
+    ? await prisma.employee.findMany({
+        where: { id: { notIn: [...memberIds] }, employmentStatus: "ACTIVE" },
+        orderBy: { fullName: "asc" },
+        select: { id: true, fullName: true },
+        take: 500,
+      })
+    : [];
 
   return (
     <>
@@ -80,8 +91,10 @@ export default async function ProjectDetailPage({
         <div className="lg:col-span-1">
           <MembersPanel
             projectId={project.id}
-            members={project.members.map((m) => m.employee)}
+            members={project.members.map((m) => ({ ...m.employee, isManager: m.isManager }))}
             availableEmployees={availableEmployees}
+            canManage={canManage}
+            viewerIsAdmin={isAdmin(employee.role)}
           />
         </div>
         <div className="lg:col-span-2">
@@ -89,6 +102,7 @@ export default async function ProjectDetailPage({
             projectId={project.id}
             tasks={project.tasks}
             members={project.members.map((m) => m.employee)}
+            canManage={canManage}
           />
         </div>
       </div>

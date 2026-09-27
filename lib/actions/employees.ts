@@ -54,7 +54,7 @@ const createEmployeeSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters."),
   fullName: z.string().min(1).max(200),
   designation: z.string().max(200).optional(),
-  role: z.enum(["SUPER_ADMIN", "HR_MANAGER", "MANAGER", "EMPLOYEE"]),
+  role: z.enum(["SUPER_ADMIN", "HR_MANAGER", "MANAGER", "PROJECT_MANAGER", "EMPLOYEE"]),
   employmentType: z.enum(["FULL_TIME", "PART_TIME", "INTERN", "CONTRACT"]),
   joiningDate: z.string().min(1),
   departmentId: z.string().optional(),
@@ -219,11 +219,12 @@ export async function updateEmployeeSalary(
 const updateEmployeeSchema = z.object({
   fullName: z.string().min(1).max(200),
   designation: z.string().max(200).optional(),
-  role: z.enum(["SUPER_ADMIN", "HR_MANAGER", "MANAGER", "EMPLOYEE"]),
+  role: z.enum(["SUPER_ADMIN", "HR_MANAGER", "MANAGER", "PROJECT_MANAGER", "EMPLOYEE"]),
   employmentType: z.enum(["FULL_TIME", "PART_TIME", "INTERN", "CONTRACT"]),
   employmentStatus: z.enum(["ACTIVE", "INACTIVE", "ON_LEAVE", "TERMINATED"]),
   joiningDate: z.string().min(1),
   departmentId: z.string().optional(),
+  managerId: z.string().optional(),
   idCardNumber: z.string().max(50).optional(),
 });
 
@@ -244,6 +245,7 @@ export async function updateEmployeeDetails(
     employmentStatus: formData.get("employmentStatus"),
     joiningDate: formData.get("joiningDate"),
     departmentId: formData.get("departmentId") || undefined,
+    managerId: formData.get("managerId") || undefined,
     idCardNumber: formData.get("idCardNumber") || undefined,
   });
 
@@ -266,6 +268,10 @@ export async function updateEmployeeDetails(
     }
   }
 
+  if (data.managerId === employeeId) {
+    return { error: "An employee can't be their own manager.", success: false };
+  }
+
   if (data.departmentId) {
     const department = await prisma.department.findUnique({
       where: { id: data.departmentId },
@@ -273,6 +279,16 @@ export async function updateEmployeeDetails(
     });
     if (!department) {
       return { error: "Selected department no longer exists.", success: false };
+    }
+  }
+
+  if (data.managerId) {
+    const manager = await prisma.employee.findUnique({
+      where: { id: data.managerId },
+      select: { id: true },
+    });
+    if (!manager) {
+      return { error: "Selected manager no longer exists.", success: false };
     }
   }
 
@@ -299,6 +315,7 @@ export async function updateEmployeeDetails(
       employmentStatus: data.employmentStatus,
       joiningDate: new Date(data.joiningDate),
       departmentId: data.departmentId || null,
+      managerId: data.managerId || null,
       idCardNumber: data.idCardNumber || null,
       ...(becomingTerminated ? { terminationDate: new Date() } : {}),
       ...(leavingTerminated ? { terminationDate: null } : {}),

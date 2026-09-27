@@ -36,6 +36,24 @@ const ADMIN_NAV_ITEMS = [
   { href: "/reports", label: "Reports", icon: BarChart3 },
 ] as const;
 
+// Same item set as EMPLOYEE_NAV_ITEMS today — kept as its own constant (not
+// a shared reference) so it can diverge later without touching the employee
+// nav. A Project Manager doesn't get Employees/Interviews/Reports.
+const PROJECT_MANAGER_NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
+  { href: "/teams", label: "Teams", icon: Users2 },
+  { href: "/attendance", label: "Attendance", icon: CalendarCheck },
+  { href: "/leave", label: "Leave", icon: CalendarClock },
+  { href: "/projects", label: "Projects", icon: FolderKanban },
+  { href: "/payroll", label: "Payroll", icon: Wallet },
+] as const;
+
+function navItemsForRole(role: Role) {
+  if (role === "EMPLOYEE") return EMPLOYEE_NAV_ITEMS;
+  if (role === "PROJECT_MANAGER") return PROJECT_MANAGER_NAV_ITEMS;
+  return ADMIN_NAV_ITEMS;
+}
+
 export function SidebarNav({
   role,
   collapsed = false,
@@ -44,7 +62,7 @@ export function SidebarNav({
   collapsed?: boolean;
 }) {
   const pathname = usePathname();
-  const items = role === "EMPLOYEE" ? EMPLOYEE_NAV_ITEMS : ADMIN_NAV_ITEMS;
+  const items = navItemsForRole(role);
 
   return (
     <nav aria-label="Main" className="flex flex-col gap-1 px-2">

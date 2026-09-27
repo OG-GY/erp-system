@@ -2,7 +2,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { LeaveApplyForm } from "@/components/leave/LeaveApplyForm";
 import { MyLeaveList } from "@/components/leave/MyLeaveList";
 import { AdminLeaveApprovals } from "@/components/leave/AdminLeaveApprovals";
-import { requireEmployee, isAdmin } from "@/lib/auth";
+import { requireEmployee, isAdmin, isProjectManager } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function LeavePage() {
@@ -42,6 +42,24 @@ export default async function LeavePage() {
     take: 100,
   });
 
+  const teamRequests = isProjectManager(employee.role)
+    ? await prisma.leaveRequest.findMany({
+        where: { employee: { managerId: employee.id } },
+        orderBy: [{ status: "asc" }, { createdAt: "desc" }],
+        take: 200,
+        select: {
+          id: true,
+          leaveType: true,
+          startDate: true,
+          endDate: true,
+          daysCount: true,
+          reason: true,
+          status: true,
+          employee: { select: { fullName: true } },
+        },
+      })
+    : null;
+
   return (
     <>
       <PageHeader title="Leave" description="Apply for leave and track your requests" />
@@ -61,6 +79,18 @@ export default async function LeavePage() {
             requests={requests.map((r) => ({ ...r, daysCount: Number(r.daysCount) }))}
           />
         </section>
+
+        {teamRequests ? (
+          <section>
+            <h2 className="mb-3 text-sm font-medium text-foreground-muted">
+              Your team&apos;s requests
+            </h2>
+            <AdminLeaveApprovals
+              requests={teamRequests.map((r) => ({ ...r, daysCount: Number(r.daysCount) }))}
+              canDecide={false}
+            />
+          </section>
+        ) : null}
       </div>
     </>
   );

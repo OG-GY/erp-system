@@ -1,16 +1,25 @@
 import { Trash2 } from "lucide-react";
-import { addProjectMember, removeProjectMember } from "@/lib/actions/projects";
+import {
+  addProjectMember,
+  removeProjectMember,
+  setProjectMemberManager,
+} from "@/lib/actions/projects";
 import { initials } from "@/lib/format";
 import { Select } from "@/components/ui/Select";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 export function MembersPanel({
   projectId,
   members,
   availableEmployees,
+  canManage,
+  viewerIsAdmin,
 }: {
   projectId: string;
-  members: { id: string; fullName: string }[];
+  members: { id: string; fullName: string; isManager: boolean }[];
   availableEmployees: { id: string; fullName: string }[];
+  canManage: boolean;
+  viewerIsAdmin: boolean;
 }) {
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
@@ -30,25 +39,49 @@ export function MembersPanel({
                   {initials(member.fullName)}
                 </span>
                 {member.fullName}
+                {member.isManager ? (
+                  <StatusBadge label="Manager" tone="success" />
+                ) : null}
               </span>
-              <form
-                action={removeProjectMember.bind(null, projectId, member.id)}
-              >
-                <button
-                  type="submit"
-                  aria-label={`Remove ${member.fullName}`}
-                  title="Remove"
-                  className="rounded-sm p-1 text-danger transition-colors hover:bg-danger/12"
-                >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
-                </button>
-              </form>
+              <span className="flex shrink-0 items-center gap-1">
+                {viewerIsAdmin ? (
+                  <form
+                    action={setProjectMemberManager.bind(
+                      null,
+                      projectId,
+                      member.id,
+                      !member.isManager,
+                    )}
+                  >
+                    <button
+                      type="submit"
+                      className="rounded-sm px-2 py-1 text-xs font-medium text-foreground-muted transition-colors hover:bg-overlay-hover hover:text-foreground"
+                    >
+                      {member.isManager ? "Remove manager" : "Make manager"}
+                    </button>
+                  </form>
+                ) : null}
+                {canManage ? (
+                  <form
+                    action={removeProjectMember.bind(null, projectId, member.id)}
+                  >
+                    <button
+                      type="submit"
+                      aria-label={`Remove ${member.fullName}`}
+                      title="Remove"
+                      className="rounded-sm p-1 text-danger transition-colors hover:bg-danger/12"
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </form>
+                ) : null}
+              </span>
             </li>
           ))}
         </ul>
       )}
 
-      {availableEmployees.length > 0 ? (
+      {canManage && availableEmployees.length > 0 ? (
         <form
           action={addProjectMember.bind(null, projectId)}
           className="flex gap-2"

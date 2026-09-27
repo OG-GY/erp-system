@@ -7,10 +7,18 @@ export function TeamMembersPanel({
   teamId,
   members,
   availableEmployees,
+  canManage,
 }: {
   teamId: string;
-  members: { membershipId: string; id: string; fullName: string; role: string }[];
+  members: {
+    membershipId: string;
+    id: string;
+    fullName: string;
+    role: string;
+    isLead: boolean;
+  }[];
   availableEmployees: { id: string; fullName: string }[];
+  canManage: boolean;
 }) {
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
@@ -29,12 +37,14 @@ export function TeamMembersPanel({
               membershipId={member.membershipId}
               fullName={member.fullName}
               role={member.role}
+              isLead={member.isLead}
+              canManage={canManage}
             />
           ))}
         </ul>
       )}
 
-      {availableEmployees.length > 0 ? (
+      {canManage && availableEmployees.length > 0 ? (
         <form
           action={addTeamMember.bind(null, teamId)}
           className="flex flex-wrap items-end gap-2"

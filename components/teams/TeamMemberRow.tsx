@@ -5,9 +5,11 @@ import { Trash2 } from "lucide-react";
 import {
   updateTeamMemberRole,
   removeTeamMember,
+  setTeamMemberLead,
   type UpdateMemberRoleState,
 } from "@/lib/actions/teams";
 import { Input } from "@/components/ui/Input";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import { initials } from "@/lib/format";
 
 const initialState: UpdateMemberRoleState = { error: null, success: false };
@@ -17,11 +19,15 @@ export function TeamMemberRow({
   membershipId,
   fullName,
   role,
+  isLead,
+  canManage,
 }: {
   teamId: string;
   membershipId: string;
   fullName: string;
   role: string;
+  isLead: boolean;
+  canManage: boolean;
 }) {
   const boundAction = updateTeamMemberRole.bind(null, teamId, membershipId);
   const [state, formAction, isPending] = useActionState(
@@ -37,35 +43,49 @@ export function TeamMemberRow({
             {initials(fullName)}
           </span>
           <span className="min-w-0 truncate text-foreground">{fullName}</span>
+          {isLead ? <StatusBadge label="Lead" tone="success" /> : null}
         </span>
-        <span className="flex shrink-0 items-center gap-2">
-          <form action={formAction} className="flex items-center gap-1">
-            <Input
-              name="role"
-              defaultValue={role}
-              disabled={isPending}
-              aria-label={`Role for ${fullName}`}
-              className="h-7 w-28 px-2 text-xs"
-            />
-            <button
-              type="submit"
-              disabled={isPending}
-              className="text-xs font-medium text-accent hover:underline disabled:opacity-60"
-            >
-              Save
-            </button>
-          </form>
-          <form action={removeTeamMember.bind(null, teamId, membershipId)}>
-            <button
-              type="submit"
-              aria-label={`Remove ${fullName}`}
-              title="Remove"
-              className="rounded-sm p-1 text-danger transition-colors hover:bg-danger/12"
-            >
-              <Trash2 className="h-4 w-4" aria-hidden="true" />
-            </button>
-          </form>
-        </span>
+
+        {canManage ? (
+          <span className="flex shrink-0 items-center gap-2">
+            <form action={formAction} className="flex items-center gap-1">
+              <Input
+                name="role"
+                defaultValue={role}
+                disabled={isPending}
+                aria-label={`Role for ${fullName}`}
+                className="h-7 w-28 px-2 text-xs"
+              />
+              <button
+                type="submit"
+                disabled={isPending}
+                className="text-xs font-medium text-accent hover:underline disabled:opacity-60"
+              >
+                Save
+              </button>
+            </form>
+            <form action={setTeamMemberLead.bind(null, teamId, membershipId, !isLead)}>
+              <button
+                type="submit"
+                className="rounded-sm px-2 py-1 text-xs font-medium text-foreground-muted transition-colors hover:bg-overlay-hover hover:text-foreground"
+              >
+                {isLead ? "Remove lead" : "Make lead"}
+              </button>
+            </form>
+            <form action={removeTeamMember.bind(null, teamId, membershipId)}>
+              <button
+                type="submit"
+                aria-label={`Remove ${fullName}`}
+                title="Remove"
+                className="rounded-sm p-1 text-danger transition-colors hover:bg-danger/12"
+              >
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </form>
+          </span>
+        ) : (
+          <span className="shrink-0 text-xs text-foreground-muted">{role}</span>
+        )}
       </div>
       {state.error ? (
         <p role="alert" className="text-xs text-danger">

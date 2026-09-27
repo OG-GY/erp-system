@@ -12,6 +12,7 @@ const initialState: UpdateEmployeeState = { error: null, success: false };
 
 const ROLES = [
   { value: "EMPLOYEE", label: "Employee" },
+  { value: "PROJECT_MANAGER", label: "Project Manager" },
   { value: "MANAGER", label: "Manager" },
   { value: "HR_MANAGER", label: "HR Manager" },
   { value: "SUPER_ADMIN", label: "Super Admin" },
@@ -34,6 +35,7 @@ const EMPLOYMENT_STATUSES = [
 export function EditEmployeeForm({
   employeeId,
   departments,
+  managers,
   defaultFullName,
   defaultDesignation,
   defaultRole,
@@ -41,10 +43,12 @@ export function EditEmployeeForm({
   defaultEmploymentStatus,
   defaultJoiningDate,
   defaultDepartmentId,
+  defaultManagerId,
   defaultIdCardNumber,
 }: {
   employeeId: string;
   departments: { id: string; name: string }[];
+  managers: { id: string; fullName: string }[];
   defaultFullName: string;
   defaultDesignation: string;
   defaultRole: (typeof ROLES)[number]["value"];
@@ -52,6 +56,7 @@ export function EditEmployeeForm({
   defaultEmploymentStatus: (typeof EMPLOYMENT_STATUSES)[number]["value"];
   defaultJoiningDate: string;
   defaultDepartmentId: string;
+  defaultManagerId: string;
   defaultIdCardNumber: string;
 }) {
   const boundAction = updateEmployeeDetails.bind(null, employeeId);
@@ -161,6 +166,24 @@ export function EditEmployeeForm({
             ]}
           />
         </div>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="managerId" className="text-sm font-medium text-foreground-muted">
+          Manager
+        </label>
+        <Select
+          id="managerId"
+          name="managerId"
+          disabled={isPending}
+          defaultValue={defaultManagerId}
+          placeholder="No manager"
+          className="sm:w-1/2"
+          options={[
+            { value: "", label: "No manager" },
+            ...managers.map((m) => ({ value: m.id, label: m.fullName })),
+          ]}
+        />
       </div>
 
       <Field

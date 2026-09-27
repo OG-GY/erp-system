@@ -1,9 +1,13 @@
+import { redirect } from "next/navigation";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CreateProjectForm } from "@/components/projects/CreateProjectForm";
-import { requireAdmin } from "@/lib/auth";
+import { requireEmployee, isAdmin, isProjectManager } from "@/lib/auth";
 
 export default async function NewProjectPage() {
-  await requireAdmin();
+  const employee = await requireEmployee();
+  if (!isAdmin(employee.role) && !isProjectManager(employee.role)) {
+    redirect("/dashboard");
+  }
 
   return (
     <>

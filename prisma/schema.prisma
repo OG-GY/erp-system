@@ -24,6 +24,7 @@ enum Role {
   SUPER_ADMIN
   HR_MANAGER
   MANAGER
+  PROJECT_MANAGER
   EMPLOYEE
 }
 
@@ -76,6 +77,10 @@ model TeamMembership {
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
   role       String   @default("Member")
+  // Gates real permissions (who can manage this team's membership) —
+  // deliberately separate from the free-text `role` label above, which
+  // stays purely cosmetic and is never checked for authorization.
+  isLead     Boolean  @default(false)
   createdAt  DateTime @default(now())
 
   @@unique([teamId, employeeId])
@@ -315,6 +320,10 @@ model ProjectMember {
   project    Project  @relation(fields: [projectId], references: [id])
   employeeId String
   employee   Employee @relation(fields: [employeeId], references: [id])
+  // A boolean, not a free-text label — this gates real permissions (add/
+  // remove members, create tasks, edit the project), unlike
+  // TeamMembership.role which is purely a cosmetic display string.
+  isManager  Boolean  @default(false)
   addedAt    DateTime @default(now())
 
   @@unique([projectId, employeeId])

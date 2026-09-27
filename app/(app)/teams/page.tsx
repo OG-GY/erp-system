@@ -5,7 +5,7 @@ import { TeamCheckInTimesChart } from "@/components/teams/TeamCheckInTimesChart"
 import { TeamCheckInsChart } from "@/components/dashboard/TeamCheckInsChart";
 import { CheckInChart } from "@/components/dashboard/CheckInChart";
 import { Input } from "@/components/ui/Input";
-import { requireEmployee, isAdmin } from "@/lib/auth";
+import { requireEmployee, isAdmin, isProjectManager } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
 import { getTeamCheckInTimeSeries, getTeammatesCheckInsToday } from "@/lib/teamCheckIns";
@@ -101,6 +101,7 @@ export default async function TeamsPage({
     where: { employeeId: employee.id },
     select: {
       role: true,
+      isLead: true,
       team: {
         select: {
           id: true,
@@ -122,12 +123,14 @@ export default async function TeamsPage({
     name: m.team.name,
     description: m.team.description,
     myRole: m.role,
+    isLead: m.isLead,
     members: m.team.memberships.map((tm) => ({
       id: tm.employee.id,
       fullName: tm.employee.fullName,
       role: tm.role,
     })),
   }));
+  const ledTeams = isProjectManager(employee.role) ? teams.filter((t) => t.isLead) : [];
 
   const today = todayDateOnly();
   const defaultStart = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
@@ -203,6 +206,29 @@ export default async function TeamsPage({
               Refresh chart
             </button>
           </form>
+        ) : null}
+
+        {ledTeams.length > 0 ? (
+          <section>
+            <p className="mb-2 text-xs text-foreground-muted">
+              Teams you lead — {ledTeams.length}
+            </p>
+            <ul className="flex flex-col gap-2">
+              {ledTeams.map((team) => (
+                <li key={team.id}>
+                  <Link
+                    href={`/teams/${team.id}`}
+                    className="flex items-center justify-between gap-2 rounded-lg border border-border bg-surface p-3 text-sm hover:border-accent/50"
+                  >
+                    <span className="font-medium text-foreground">{team.name}</span>
+                    <span className="text-xs text-foreground-muted">
+                      {team.members.length} members
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         ) : null}
 
         <MyTeamsList teams={teams} />

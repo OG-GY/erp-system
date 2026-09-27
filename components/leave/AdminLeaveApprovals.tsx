@@ -24,6 +24,7 @@ function formatDate(date: Date) {
 
 export function AdminLeaveApprovals({
   requests,
+  canDecide = true,
 }: {
   requests: {
     id: string;
@@ -35,6 +36,7 @@ export function AdminLeaveApprovals({
     status: keyof typeof STATUS_LABEL;
     employee: { fullName: string };
   }[];
+  canDecide?: boolean;
 }) {
   if (requests.length === 0) {
     return (
@@ -67,7 +69,7 @@ export function AdminLeaveApprovals({
               label={STATUS_LABEL[request.status]}
               tone={STATUS_TONE[request.status]}
             />
-            {request.status === "PENDING" ? (
+            {canDecide && request.status === "PENDING" ? (
               <div className="flex gap-2">
                 <form action={approveLeaveRequest.bind(null, request.id)}>
                   <button

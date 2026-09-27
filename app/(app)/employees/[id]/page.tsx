@@ -49,6 +49,7 @@ export default async function EmployeeDetailPage({
         dateOfBirth: true,
         idCardNumber: true,
         departmentId: true,
+        managerId: true,
         department: { select: { name: true } },
         teamMemberships: { select: { team: { select: { name: true } } } },
         manager: { select: { fullName: true } },
@@ -63,6 +64,13 @@ export default async function EmployeeDetailPage({
   if (!employee) {
     notFound();
   }
+
+  const managers = await prisma.employee.findMany({
+    where: { id: { not: employee.id }, employmentStatus: "ACTIVE" },
+    orderBy: { fullName: "asc" },
+    select: { id: true, fullName: true },
+    take: 500,
+  });
 
   return (
     <>
@@ -127,6 +135,7 @@ export default async function EmployeeDetailPage({
           <EditEmployeeForm
             employeeId={employee.id}
             departments={departments}
+            managers={managers}
             defaultFullName={employee.fullName}
             defaultDesignation={employee.designation ?? ""}
             defaultRole={employee.role}
@@ -134,6 +143,7 @@ export default async function EmployeeDetailPage({
             defaultEmploymentStatus={employee.employmentStatus}
             defaultJoiningDate={employee.joiningDate.toISOString().slice(0, 10)}
             defaultDepartmentId={employee.departmentId ?? ""}
+            defaultManagerId={employee.managerId ?? ""}
             defaultIdCardNumber={employee.idCardNumber ?? ""}
           />
         </div>

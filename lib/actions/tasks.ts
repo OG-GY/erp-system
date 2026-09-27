@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { requireEmployee, isAdmin } from "@/lib/auth";
+import { requireEmployee, isAdmin, canManageProject } from "@/lib/auth";
 
 const statusSchema = z.enum([
   "TODO",
@@ -30,7 +30,10 @@ export async function updateTaskStatus(taskId: string, status: string) {
     throw new Error("Task not found.");
   }
 
-  const canEdit = isAdmin(employee.role) || task.assigneeId === employee.id;
+  const canEdit =
+    isAdmin(employee.role) ||
+    task.assigneeId === employee.id ||
+    (await canManageProject(employee, task.projectId));
   if (!canEdit) {
     throw new Error("Forbidden: you can only update your own tasks.");
   }

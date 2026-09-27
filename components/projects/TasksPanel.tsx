@@ -29,18 +29,22 @@ export function TasksPanel({
   projectId,
   tasks,
   members,
+  canManage,
 }: {
   projectId: string;
   tasks: Task[];
   members: { id: string; fullName: string }[];
+  canManage: boolean;
 }) {
   return (
     <div className="rounded-lg border border-border bg-surface p-4">
       <p className="mb-3 text-xs text-foreground-muted">Tasks</p>
 
-      <div className="mb-4">
-        <CreateTaskForm projectId={projectId} members={members} />
-      </div>
+      {canManage ? (
+        <div className="mb-4">
+          <CreateTaskForm projectId={projectId} members={members} />
+        </div>
+      ) : null}
 
       {tasks.length === 0 ? (
         <p className="text-sm text-foreground-muted">No tasks yet.</p>

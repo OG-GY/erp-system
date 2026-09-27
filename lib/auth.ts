@@ -71,13 +71,23 @@ export function assertRole(role: Role, allowed: Role[]) {
 }
 
 /**
- * The product only has two real user types today: a regular Employee, and
- * everyone else ("admin side" — Super Admin, HR Manager, Manager), who all
- * see the management views. This is the single place that distinction is
- * decided, so it can be refined later without touching every page.
+ * Full admin access — Super Admin, HR Manager, Manager. This is the single
+ * place that distinction is decided, so it can be refined later without
+ * touching every page. An explicit allow-list (not "!== EMPLOYEE") on
+ * purpose: Project Manager is a third, narrower tier (see isProjectManager)
+ * that must NOT fall into this bucket just because it isn't EMPLOYEE.
  */
 export function isAdmin(role: Role) {
-  return role !== "EMPLOYEE";
+  return role === "SUPER_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
+}
+
+/**
+ * Scoped tier: full control over the projects/teams they manage or lead,
+ * read-only visibility into their direct reports' leave — never company-wide
+ * admin access. See canManageProject/canManageTeam for the per-resource check.
+ */
+export function isProjectManager(role: Role) {
+  return role === "PROJECT_MANAGER";
 }
 
 /**
@@ -91,4 +101,37 @@ export async function requireAdmin() {
     redirect("/dashboard");
   }
   return employee;
+}
+
+/**
+ * Admin, or a Project Manager who's the designated manager of this specific
+ * project (ProjectMember.isManager) — the one check shared by every
+ * project-management Server Action and page (create task, add/remove member,
+ * view the detail page's edit controls).
+ */
+export async function canManageProject(
+  employee: { id: string; role: Role },
+  projectId: string,
+) {
+  if (isAdmin(employee.role)) return true;
+  if (!isProjectManager(employee.role)) return false;
+  const membership = await prisma.projectMember.findUnique({
+    where: { projectId_employeeId: { projectId, employeeId: employee.id } },
+    select: { isManager: true },
+  });
+  return membership?.isManager ?? false;
+}
+
+/** Same shape as canManageProject, for a Project Manager who leads a team (TeamMembership.isLead). */
+export async function canManageTeam(
+  employee: { id: string; role: Role },
+  teamId: string,
+) {
+  if (isAdmin(employee.role)) return true;
+  if (!isProjectManager(employee.role)) return false;
+  const membership = await prisma.teamMembership.findUnique({
+    where: { teamId_employeeId: { teamId, employeeId: employee.id } },
+    select: { isLead: true },
+  });
+  return membership?.isLead ?? false;
 }
