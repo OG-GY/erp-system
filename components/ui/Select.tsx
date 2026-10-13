@@ -52,6 +52,11 @@ export function Select({
   >(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  // The option list is portaled to document.body (see below), so it's not
+  // a DOM descendant of rootRef — without this, a click on an option would
+  // register as "outside" and close the dropdown before the option's own
+  // onClick ever fires.
+  const listRef = useRef<HTMLUListElement>(null);
 
   const selected = options.find((o) => o.value === value);
 
@@ -73,7 +78,10 @@ export function Select({
   useEffect(() => {
     if (!open) return;
     function handlePointerDown(e: MouseEvent) {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      const insideTrigger = rootRef.current?.contains(target) ?? false;
+      const insideList = listRef.current?.contains(target) ?? false;
+      if (!insideTrigger && !insideList) {
         setOpen(false);
       }
     }
@@ -180,6 +188,7 @@ export function Select({
       {open && position
         ? createPortal(
             <ul
+              ref={listRef}
               role="listbox"
               tabIndex={-1}
               style={{
