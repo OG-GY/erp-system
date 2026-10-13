@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { todayDateOnly } from "@/lib/date";
 import { getCachedDepartments } from "@/lib/cache/departments";
 import { formatCurrency } from "@/lib/format";
+import { getAllCallerMetrics } from "@/lib/leadMetrics";
 
 const LEAVE_STATUS_LABEL: Record<string, string> = {
   PENDING: "Pending",
@@ -67,6 +68,7 @@ export default async function ReportsPage() {
     leaveCounts,
     projectCounts,
     paidTotal,
+    callerMetrics,
   ] = await Promise.all([
     prisma.employee.count({ where: { employmentStatus: "ACTIVE" } }),
     prisma.attendanceRecord.count({
@@ -85,6 +87,7 @@ export default async function ReportsPage() {
       where: { status: "PAID" },
       _sum: { netSalary: true },
     }),
+    getAllCallerMetrics(thirtyDaysAgo, today),
   ]);
 
   const attendanceRate =
@@ -148,6 +151,48 @@ export default async function ReportsPage() {
           <BreakdownList title="Leave requests by status" rows={leaveRows} />
           <BreakdownList title="Projects by status" rows={projectRows} />
         </div>
+
+        {callerMetrics.length > 0 ? (
+          <div className="rounded-lg border border-border bg-surface p-4">
+            <p className="mb-3 text-xs text-foreground-muted">Caller performance — last 30 days</p>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border text-xs text-foreground-muted">
+                    <th className="px-3 py-2 font-medium">Caller</th>
+                    <th className="px-3 py-2 font-medium">Leads added</th>
+                    <th className="px-3 py-2 font-medium">Calls</th>
+                    <th className="px-3 py-2 font-medium">Connected</th>
+                    <th className="px-3 py-2 font-medium">Qualified</th>
+                    <th className="px-3 py-2 font-medium">Meetings booked</th>
+                    <th className="px-3 py-2 font-medium">Meetings held</th>
+                    <th className="px-3 py-2 font-medium">Follow-ups done</th>
+                    <th className="px-3 py-2 font-medium">Won</th>
+                    <th className="px-3 py-2 font-medium">Revenue won</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {callerMetrics.map(({ caller, metrics }) => (
+                    <tr key={caller.id} className="border-b border-border last:border-0">
+                      <td className="px-3 py-2.5 font-medium text-foreground">{caller.fullName}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">{metrics.leadsAdded}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">{metrics.callsAttempted}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">{metrics.callsConnected}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">{metrics.qualifiedLeads}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">{metrics.meetingsBooked}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">{metrics.meetingsHeld}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">{metrics.followUpsCompleted}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">{metrics.dealsWon}</td>
+                      <td className="px-3 py-2.5 text-foreground-muted">
+                        {metrics.revenueWon > 0 ? formatCurrency(metrics.revenueWon) : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
       </div>
     </>
   );

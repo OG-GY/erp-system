@@ -54,7 +54,7 @@ const createEmployeeSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters."),
   fullName: z.string().min(1).max(200),
   designation: z.string().max(200).optional(),
-  role: z.enum(["SUPER_ADMIN", "HR_MANAGER", "MANAGER", "PROJECT_MANAGER", "EMPLOYEE"]),
+  role: z.enum(["SUPER_ADMIN", "HR_MANAGER", "MANAGER", "PROJECT_MANAGER", "CALL_CALLER", "EMPLOYEE"]),
   employmentType: z.enum(["FULL_TIME", "PART_TIME", "INTERN", "CONTRACT"]),
   joiningDate: z.string().min(1),
   departmentId: z.string().optional(),
@@ -219,7 +219,7 @@ export async function updateEmployeeSalary(
 const updateEmployeeSchema = z.object({
   fullName: z.string().min(1).max(200),
   designation: z.string().max(200).optional(),
-  role: z.enum(["SUPER_ADMIN", "HR_MANAGER", "MANAGER", "PROJECT_MANAGER", "EMPLOYEE"]),
+  role: z.enum(["SUPER_ADMIN", "HR_MANAGER", "MANAGER", "PROJECT_MANAGER", "CALL_CALLER", "EMPLOYEE"]),
   employmentType: z.enum(["FULL_TIME", "PART_TIME", "INTERN", "CONTRACT"]),
   employmentStatus: z.enum(["ACTIVE", "INACTIVE", "ON_LEAVE", "TERMINATED"]),
   joiningDate: z.string().min(1),

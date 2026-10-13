@@ -13,6 +13,7 @@ import {
   BarChart3,
   UserSearch,
   ListTodo,
+  PhoneCall,
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 
@@ -30,6 +31,7 @@ const ADMIN_NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/employees", label: "Employees", icon: Users },
   { href: "/interviews", label: "Interviews", icon: UserSearch },
+  { href: "/leads", label: "Leads", icon: PhoneCall },
   { href: "/teams", label: "Teams", icon: Users2 },
   { href: "/attendance", label: "Attendance", icon: CalendarCheck },
   { href: "/leave", label: "Leave", icon: CalendarClock },
@@ -52,9 +54,20 @@ const PROJECT_MANAGER_NAV_ITEMS = [
   { href: "/payroll", label: "Payroll", icon: Wallet },
 ] as const;
 
+// Outbound prospecting is this role's whole job — Leads replaces
+// Projects/Tasks/Teams, which aren't relevant to it.
+const CALL_CALLER_NAV_ITEMS = [
+  { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
+  { href: "/leads", label: "Leads", icon: PhoneCall },
+  { href: "/attendance", label: "Attendance", icon: CalendarCheck },
+  { href: "/leave", label: "Leave", icon: CalendarClock },
+  { href: "/payroll", label: "Payroll", icon: Wallet },
+] as const;
+
 function navItemsForRole(role: Role) {
   if (role === "EMPLOYEE") return EMPLOYEE_NAV_ITEMS;
   if (role === "PROJECT_MANAGER") return PROJECT_MANAGER_NAV_ITEMS;
+  if (role === "CALL_CALLER") return CALL_CALLER_NAV_ITEMS;
   return ADMIN_NAV_ITEMS;
 }
 

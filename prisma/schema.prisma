@@ -25,6 +25,7 @@ enum Role {
   HR_MANAGER
   MANAGER
   PROJECT_MANAGER
+  CALL_CALLER
   EMPLOYEE
 }
 
@@ -139,6 +140,13 @@ model Employee {
   auditLogs        AuditLog[]
   teamMemberships  TeamMembership[]
   interviewNotes   InterviewNote[]
+
+  leadsOwned         Lead[]            @relation("LeadOwner")
+  leadsCreated        Lead[]            @relation("LeadCreator")
+  leadHandoffsReceived Lead[]           @relation("LeadHandoffRecipient")
+  leadStatusEvents    LeadStatusEvent[]
+  callAttempts        CallAttempt[]
+  followUpsAssigned   FollowUp[]        @relation("FollowUpAssignee")
 
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
@@ -445,4 +453,207 @@ model AuditLog {
 
   @@index([entityType, entityId])
   @@index([employeeId])
+}
+
+// ---------------------------------------------------------------------------
+// Call Caller / lead management
+// ---------------------------------------------------------------------------
+
+enum LeadStatus {
+  NEW
+  READY_TO_CALL
+  CONTACTED
+  QUALIFIED
+  MEETING_BOOKED
+  PROPOSAL_SENT
+  WON
+  LOST
+  DISQUALIFIED
+}
+
+enum LeadPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum InterestLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+// What happened on a call attempt. Distinct from LeadStatus: an outcome
+// describes one attempt, a status describes the lead's overall pipeline
+// position — logging a call never changes status by itself (see
+// updateCallSession in lib/actions/calls.ts).
+enum CallOutcome {
+  NO_ANSWER
+  BUSY
+  VOICEMAIL
+  GATEKEEPER
+  DECISION_MAKER_REACHED
+  INTERESTED
+  CALLBACK_REQUESTED
+  MEETING_BOOKED
+  NOT_INTERESTED
+  INVALID_NUMBER
+  DO_NOT_CALL
+}
+
+enum HandoffStatus {
+  NONE
+  PENDING
+  SENT
+  ACCEPTED
+  COMPLETED
+}
+
+enum FollowUpStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+model Lead {
+  id              String        @id @default(cuid())
+  businessName    String
+  industry        String?
+  city            String?
+  area            String?
+  contactName     String?
+  contactRole     String?
+  phone           String?
+  whatsapp        String?
+  email           String?
+  website         String?
+  source          String?
+  notes           String?
+
+  // Prospecting context — what the caller found before/while reaching out.
+  onlinePresence  String?
+  identifiedNeeds String?
+  priority        LeadPriority?
+
+  status             LeadStatus @default(NEW)
+  disqualifiedReason String?
+  lostReason         String?
+  dealValue          Decimal?   @db.Decimal(12, 2)
+
+  // Enforced server-side in startCallSession, not just hidden in the UI —
+  // see lib/actions/calls.ts.
+  doNotCall       Boolean  @default(false)
+  doNotCallReason String?
+
+  ownerId     String?
+  owner       Employee? @relation("LeadOwner", fields: [ownerId], references: [id])
+  createdById String
+  createdBy   Employee  @relation("LeadCreator", fields: [createdById], references: [id])
+
+  nextFollowUpDate DateTime? @db.Date
+  nextAction       String?
+
+  // Founder handoff — preserved context for a qualified lead, not a repeat
+  // of the full call history (that's already on the lead via `calls`).
+  handoffStatus  HandoffStatus @default(NONE)
+  handoffContext String?
+  handoffAt      DateTime?
+  handoffToId    String?
+  handoffTo      Employee?     @relation("LeadHandoffRecipient", fields: [handoffToId], references: [id])
+  meetingHeldAt  DateTime?
+
+  calls        CallAttempt[]
+  followUps    FollowUp[]
+  statusEvents LeadStatusEvent[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([ownerId])
+  @@index([nextFollowUpDate])
+  @@index([phone])
+}
+
+/**
+ * One row per status change — the lead's pipeline history survives even as
+ * `Lead.status` itself is overwritten. Also where disqualify/lost reasons
+ * and qualification/meeting/won timestamps are derived from for metrics,
+ * rather than trusting a point-in-time snapshot.
+ */
+model LeadStatusEvent {
+  id          String      @id @default(cuid())
+  leadId      String
+  lead        Lead        @relation(fields: [leadId], references: [id])
+  fromStatus  LeadStatus?
+  toStatus    LeadStatus
+  reason      String?
+  changedById String
+  changedBy   Employee    @relation(fields: [changedById], references: [id])
+  createdAt   DateTime    @default(now())
+
+  @@index([leadId])
+  @@index([toStatus])
+}
+
+/**
+ * A manually-tracked call session, not a real telephony record — the caller
+ * dials on a physical phone, and this just logs start/end/outcome. A row is
+ * created the moment a session starts (startedAt set, endedAt null is "in
+ * progress"); ending it fills in the rest. Never auto-created or inferred.
+ */
+model CallAttempt {
+  id                   String         @id @default(cuid())
+  leadId               String
+  lead                 Lead           @relation(fields: [leadId], references: [id])
+  callerId             String
+  caller               Employee       @relation(fields: [callerId], references: [id])
+  attemptNumber        Int
+
+  startedAt       DateTime
+  endedAt         DateTime?
+  durationSeconds Int?
+
+  outcome              CallOutcome?
+  decisionMakerReached Boolean       @default(false)
+  interestLevel        InterestLevel?
+  painPoints           String?
+  objections           String?
+  notes                String?
+  nextAction           String?
+  nextFollowUpDate     DateTime?     @db.Date
+  meetingDetails       String?
+  whatsappConsent      Boolean?
+
+  followUps FollowUp[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([callerId])
+  @@index([leadId, callerId, endedAt])
+}
+
+model FollowUp {
+  id            String         @id @default(cuid())
+  leadId        String
+  lead          Lead           @relation(fields: [leadId], references: [id])
+  callAttemptId String?
+  callAttempt   CallAttempt?   @relation(fields: [callAttemptId], references: [id])
+
+  dueDate     DateTime       @db.Date
+  action      String
+  status      FollowUpStatus @default(SCHEDULED)
+  completedAt DateTime?
+
+  assignedToId String
+  assignedTo   Employee @relation("FollowUpAssignee", fields: [assignedToId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([leadId])
+  @@index([dueDate])
+  @@index([status])
 }

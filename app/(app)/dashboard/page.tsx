@@ -10,5 +10,5 @@ export default async function DashboardPage() {
     return <AdminDashboard firstName={firstName} />;
   }
 
-  return <EmployeeDashboard employeeId={employee.id} firstName={firstName} />;
+  return <EmployeeDashboard employeeId={employee.id} firstName={firstName} role={employee.role} />;
 }

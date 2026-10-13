@@ -135,3 +135,27 @@ export async function canManageTeam(
   });
   return membership?.isLead ?? false;
 }
+
+/**
+ * Scoped tier: outbound prospecting and lead management. Sees/manages leads
+ * they own plus unowned leads (the shared pool), never company-wide data —
+ * see canManageLead for the per-lead check. Admins retain full oversight.
+ */
+export function isCallCaller(role: Role) {
+  return role === "CALL_CALLER";
+}
+
+/**
+ * Admin, or the caller who owns this lead, or any caller when the lead is
+ * unowned (the shared pool anyone can pick up). No DB round trip needed —
+ * unlike canManageProject/canManageTeam, the lead's ownerId is always
+ * already loaded by the caller, so this takes it directly instead of an id.
+ */
+export function canManageLead(
+  employee: { id: string; role: Role },
+  lead: { ownerId: string | null },
+) {
+  if (isAdmin(employee.role)) return true;
+  if (!isCallCaller(employee.role)) return false;
+  return lead.ownerId === null || lead.ownerId === employee.id;
+}
