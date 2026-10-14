@@ -1,3 +1,5 @@
+export const MAX_IMPORT_ROWS = 1000;
+
 export const LEAD_IMPORT_FIELDS = [
   {
     key: "businessName",

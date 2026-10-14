@@ -4,8 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireEmployee, isAdmin, isCallCaller } from "@/lib/auth";
-
-const MAX_ROWS = 1000;
+import { MAX_IMPORT_ROWS } from "@/lib/leadImportFields";
 
 const importRowSchema = z.object({
   businessName: z.string().min(1, "Business name is required.").max(200),
@@ -61,9 +60,9 @@ export async function importLeads(
   if (!Array.isArray(rows) || rows.length === 0) {
     return { error: "No rows to import.", created: 0, skippedDuplicates: [], invalidRows: [] };
   }
-  if (rows.length > MAX_ROWS) {
+  if (rows.length > MAX_IMPORT_ROWS) {
     return {
-      error: `Too many rows — import at most ${MAX_ROWS} at a time.`,
+      error: `Too many rows — import at most ${MAX_IMPORT_ROWS} at a time.`,
       created: 0,
       skippedDuplicates: [],
       invalidRows: [],

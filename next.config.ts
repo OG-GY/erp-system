@@ -16,6 +16,15 @@ const nextConfig: NextConfig = {
         ]
       : [],
   },
+  experimental: {
+    serverActions: {
+      // Default is 1MB. The lead CSV importer calls a Server Action directly
+      // with up to 1000 rows of mapped fields (notes/onlinePresence/
+      // identifiedNeeds alone allow up to 4000+2000+2000 chars each) — a
+      // worst-case 500-row batch can reach several MB as JSON.
+      bodySizeLimit: "8mb",
+    },
+  },
 };
 
 export default nextConfig;

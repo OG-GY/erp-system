@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { parseCsv } from "@/lib/csv";
-import { suggestMapping, resolveRow } from "@/lib/leadImportFields";
+import { suggestMapping, resolveRow, MAX_IMPORT_ROWS } from "@/lib/leadImportFields";
 import { importLeads, type ImportLeadsResult } from "@/lib/actions/leadImport";
 import {
   CsvMappingStep,
@@ -13,6 +13,8 @@ import {
 import { Select } from "@/components/ui/Select";
 
 type Step = "upload" | "map" | "results";
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 export function ImportLeadsWizard({
   callers,
@@ -34,11 +36,23 @@ export function ImportLeadsWizard({
 
   async function handleFile(file: File) {
     setParseError(null);
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setParseError(
+        `That file is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB) — CSVs are limited to ${MAX_FILE_SIZE_BYTES / (1024 * 1024)}MB.`,
+      );
+      return;
+    }
     const text = await file.text();
     const parsed = parseCsv(text);
     if (parsed.headers.length === 0 || parsed.rows.length === 0) {
       setParseError(
         "Couldn't find any data rows in that file. Make sure it's a CSV with a header row.",
+      );
+      return;
+    }
+    if (parsed.rows.length > MAX_IMPORT_ROWS) {
+      setParseError(
+        `That file has ${parsed.rows.length} rows — import at most ${MAX_IMPORT_ROWS} at a time. Split it into smaller files and import each separately.`,
       );
       return;
     }
