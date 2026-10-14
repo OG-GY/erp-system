@@ -39,24 +39,40 @@ export default async function LeadsPage() {
         title="Leads"
         description={`${leads.length} ${leads.length === 1 ? "lead" : "leads"}`}
         actions={
-          <Link
-            href="/leads/new"
-            className="flex h-8 items-center rounded-sm bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-          >
-            New lead
-          </Link>
+          <>
+            <Link
+              href="/leads/import"
+              className="flex h-8 items-center rounded-sm border border-border-strong px-3 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover"
+            >
+              Import CSV
+            </Link>
+            <Link
+              href="/leads/new"
+              className="flex h-8 items-center rounded-sm bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+            >
+              New lead
+            </Link>
+          </>
         }
       />
       <div className="p-4 sm:p-6">
         {leads.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
             <p className="text-sm font-medium text-foreground">No leads yet</p>
-            <Link
-              href="/leads/new"
-              className="mt-2 flex h-9 items-center rounded-sm bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-            >
-              New lead
-            </Link>
+            <div className="mt-2 flex gap-2">
+              <Link
+                href="/leads/import"
+                className="flex h-9 items-center rounded-sm border border-border-strong px-4 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover"
+              >
+                Import CSV
+              </Link>
+              <Link
+                href="/leads/new"
+                className="flex h-9 items-center rounded-sm bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+              >
+                New lead
+              </Link>
+            </div>
           </div>
         ) : (
           <LeadBoard leads={leads} showOwner={isAdmin(employee.role)} canDragAll />
