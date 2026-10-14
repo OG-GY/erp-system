@@ -11,6 +11,11 @@ export const LEAD_IMPORT_FIELDS = [
   { key: "city", label: "City", aliases: ["city"] },
   { key: "area", label: "Area", aliases: ["area", "location", "neighborhood"] },
   {
+    key: "businessOwnerName",
+    label: "Business owner name",
+    aliases: ["owner", "ownername", "owner name", "businessowner", "business owner", "businessownername", "proprietor", "proprietorname"],
+  },
+  {
     key: "contactName",
     label: "Contact person",
     aliases: ["contact", "contactname", "contact name", "contactperson", "contact person", "person"],

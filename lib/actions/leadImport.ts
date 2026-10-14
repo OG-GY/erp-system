@@ -11,6 +11,7 @@ const importRowSchema = z.object({
   industry: z.string().max(200).optional(),
   city: z.string().max(200).optional(),
   area: z.string().max(200).optional(),
+  businessOwnerName: z.string().max(200).optional(),
   contactName: z.string().max(200).optional(),
   contactRole: z.string().max(200).optional(),
   // Deliberately looser than the single-lead-create form (no email format
@@ -155,6 +156,7 @@ export async function importLeads(
         industry: row.industry || null,
         city: row.city || null,
         area: row.area || null,
+        businessOwnerName: row.businessOwnerName || null,
         contactName: row.contactName || null,
         contactRole: row.contactRole || null,
         phone: row.phone || null,

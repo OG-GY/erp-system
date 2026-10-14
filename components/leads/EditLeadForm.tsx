@@ -20,6 +20,7 @@ type Defaults = {
   industry: string;
   city: string;
   area: string;
+  businessOwnerName: string;
   contactName: string;
   contactRole: string;
   phone: string;
@@ -49,7 +50,8 @@ export function EditLeadForm({ leadId, defaults }: { leadId: string; defaults: D
         <Field id="area" name="area" label="Area" disabled={isPending} defaultValue={defaults.area} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Field id="businessOwnerName" name="businessOwnerName" label="Business owner name" disabled={isPending} defaultValue={defaults.businessOwnerName} />
         <Field id="contactName" name="contactName" label="Contact person" disabled={isPending} defaultValue={defaults.contactName} />
         <Field id="contactRole" name="contactRole" label="Contact's role" disabled={isPending} defaultValue={defaults.contactRole} />
       </div>

@@ -49,13 +49,13 @@ enum SalaryType {
 }
 
 model Department {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  headId    String?  @unique
-  head      Employee? @relation("DepartmentHead", fields: [headId], references: [id])
+  id        String     @id @default(cuid())
+  name      String     @unique
+  headId    String?    @unique
+  head      Employee?  @relation("DepartmentHead", fields: [headId], references: [id])
   employees Employee[] @relation("DepartmentMembers")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
 
 // A team is just a named group — no required department, no designated
@@ -91,26 +91,26 @@ model TeamMembership {
 // Supabase Auth owns credentials (auth.users). This table mirrors the app-level
 // identity: id == Supabase auth user id. Never store passwords here.
 model Employee {
-  id               String            @id // Supabase auth.users.id
-  employeeNumber   String            @unique
-  fullName         String
-  officialEmail    String            @unique
+  id                    String    @id // Supabase auth.users.id
+  employeeNumber        String    @unique
+  fullName              String
+  officialEmail         String    @unique
   // --- Self-service fields: the employee fills these in from /profile. ---
-  personalEmail    String?
-  phone            String?
-  profilePictureUrl String?
-  dateOfBirth      DateTime?         @db.Date
-  gender           String?
-  residentialAddress String?
+  personalEmail         String?
+  phone                 String?
+  profilePictureUrl     String?
+  dateOfBirth           DateTime? @db.Date
+  gender                String?
+  residentialAddress    String?
   emergencyContactName  String?
   emergencyContactPhone String?
 
   // --- Admin/HR-only fields: never writable from the self-service profile action. ---
-  role             Role              @default(EMPLOYEE)
+  role             Role             @default(EMPLOYEE)
   designation      String?
   idCardNumber     String?
-  employmentStatus EmploymentStatus  @default(ACTIVE)
-  employmentType   EmploymentType    @default(FULL_TIME)
+  employmentStatus EmploymentStatus @default(ACTIVE)
+  employmentType   EmploymentType   @default(FULL_TIME)
   joiningDate      DateTime
   terminationDate  DateTime?
 
@@ -120,36 +120,36 @@ model Employee {
   baseSalary           Decimal?    @db.Decimal(12, 2)
   commissionPerProject Decimal?    @db.Decimal(12, 2)
 
-  departmentId     String?
-  department       Department?       @relation("DepartmentMembers", fields: [departmentId], references: [id])
-  managerId        String?
-  manager          Employee?         @relation("ManagerReports", fields: [managerId], references: [id])
-  reports          Employee[]        @relation("ManagerReports")
+  departmentId String?
+  department   Department? @relation("DepartmentMembers", fields: [departmentId], references: [id])
+  managerId    String?
+  manager      Employee?   @relation("ManagerReports", fields: [managerId], references: [id])
+  reports      Employee[]  @relation("ManagerReports")
 
-  departmentHeadOf Department?       @relation("DepartmentHead")
+  departmentHeadOf Department? @relation("DepartmentHead")
 
   attendanceRecords AttendanceRecord[]
-  leaveRequests    LeaveRequest[]    @relation("LeaveApplicant")
-  leaveApprovals   LeaveRequest[]    @relation("LeaveApprover")
-  timeEntries      TimeEntry[]
-  timesheets       Timesheet[]
-  projectMembers   ProjectMember[]
-  assignedTasks    Task[]            @relation("TaskAssignee")
-  createdTasks     Task[]            @relation("TaskCreator")
-  payslips         Payslip[]
-  auditLogs        AuditLog[]
-  teamMemberships  TeamMembership[]
-  interviewNotes   InterviewNote[]
+  leaveRequests     LeaveRequest[]     @relation("LeaveApplicant")
+  leaveApprovals    LeaveRequest[]     @relation("LeaveApprover")
+  timeEntries       TimeEntry[]
+  timesheets        Timesheet[]
+  projectMembers    ProjectMember[]
+  assignedTasks     Task[]             @relation("TaskAssignee")
+  createdTasks      Task[]             @relation("TaskCreator")
+  payslips          Payslip[]
+  auditLogs         AuditLog[]
+  teamMemberships   TeamMembership[]
+  interviewNotes    InterviewNote[]
 
-  leadsOwned         Lead[]            @relation("LeadOwner")
-  leadsCreated        Lead[]            @relation("LeadCreator")
-  leadHandoffsReceived Lead[]           @relation("LeadHandoffRecipient")
-  leadStatusEvents    LeadStatusEvent[]
-  callAttempts        CallAttempt[]
-  followUpsAssigned   FollowUp[]        @relation("FollowUpAssignee")
+  leadsOwned           Lead[]            @relation("LeadOwner")
+  leadsCreated         Lead[]            @relation("LeadCreator")
+  leadHandoffsReceived Lead[]            @relation("LeadHandoffRecipient")
+  leadStatusEvents     LeadStatusEvent[]
+  callAttempts         CallAttempt[]
+  followUpsAssigned    FollowUp[]        @relation("FollowUpAssignee")
 
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([departmentId])
   @@index([managerId])
@@ -168,18 +168,18 @@ enum AttendanceStatus {
 }
 
 model AttendanceRecord {
-  id            String            @id @default(cuid())
-  employeeId    String
-  employee      Employee          @relation(fields: [employeeId], references: [id])
-  date          DateTime          @db.Date
-  checkIn       DateTime?
-  checkOut      DateTime?
-  status        AttendanceStatus  @default(PRESENT)
-  notes         String?
-  standup       String?
-  breaks        AttendanceBreak[]
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+  id         String            @id @default(cuid())
+  employeeId String
+  employee   Employee          @relation(fields: [employeeId], references: [id])
+  date       DateTime          @db.Date
+  checkIn    DateTime?
+  checkOut   DateTime?
+  status     AttendanceStatus  @default(PRESENT)
+  notes      String?
+  standup    String?
+  breaks     AttendanceBreak[]
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
 
   @@unique([employeeId, date])
   @@index([date])
@@ -216,21 +216,21 @@ enum LeaveStatus {
 }
 
 model LeaveRequest {
-  id           String      @id @default(cuid())
-  employeeId   String
-  employee     Employee    @relation("LeaveApplicant", fields: [employeeId], references: [id])
-  leaveType    LeaveType
-  startDate    DateTime    @db.Date
-  endDate      DateTime    @db.Date
-  daysCount    Decimal     @db.Decimal(4, 1)
-  reason       String
-  status       LeaveStatus @default(PENDING)
-  approverId   String?
-  approver     Employee?   @relation("LeaveApprover", fields: [approverId], references: [id])
-  approvedAt   DateTime?
+  id              String      @id @default(cuid())
+  employeeId      String
+  employee        Employee    @relation("LeaveApplicant", fields: [employeeId], references: [id])
+  leaveType       LeaveType
+  startDate       DateTime    @db.Date
+  endDate         DateTime    @db.Date
+  daysCount       Decimal     @db.Decimal(4, 1)
+  reason          String
+  status          LeaveStatus @default(PENDING)
+  approverId      String?
+  approver        Employee?   @relation("LeaveApprover", fields: [approverId], references: [id])
+  approvedAt      DateTime?
   rejectionReason String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   @@index([employeeId])
   @@index([status])
@@ -251,20 +251,20 @@ enum CandidateStatus {
 }
 
 model Candidate {
-  id            String           @id @default(cuid())
+  id            String          @id @default(cuid())
   fullName      String
   position      String
   email         String?
   phone         String?
-  status        CandidateStatus  @default(APPLIED)
-  interviewDate DateTime?        @db.Date
+  status        CandidateStatus @default(APPLIED)
+  interviewDate DateTime?       @db.Date
   // Storage object path, not a public URL — the "candidate-cvs" bucket is
   // private (CVs are personal documents), so viewing it means generating a
   // short-lived signed URL server-side from this path.
   cvPath        String?
   notes         InterviewNote[]
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
 
   @@index([status])
 }
@@ -338,22 +338,22 @@ model ProjectMember {
 }
 
 model Task {
-  id           String       @id @default(cuid())
-  projectId    String
-  project      Project      @relation(fields: [projectId], references: [id])
-  title        String
-  description  String?
-  status       TaskStatus   @default(TODO)
-  priority     TaskPriority @default(MEDIUM)
-  assigneeId   String?
-  assignee     Employee?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
-  createdById  String
-  createdBy    Employee     @relation("TaskCreator", fields: [createdById], references: [id])
-  dueDate      DateTime?    @db.Date
-  estimatedHours Decimal?   @db.Decimal(6, 2)
-  timeEntries  TimeEntry[]
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id             String       @id @default(cuid())
+  projectId      String
+  project        Project      @relation(fields: [projectId], references: [id])
+  title          String
+  description    String?
+  status         TaskStatus   @default(TODO)
+  priority       TaskPriority @default(MEDIUM)
+  assigneeId     String?
+  assignee       Employee?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  createdById    String
+  createdBy      Employee     @relation("TaskCreator", fields: [createdById], references: [id])
+  dueDate        DateTime?    @db.Date
+  estimatedHours Decimal?     @db.Decimal(6, 2)
+  timeEntries    TimeEntry[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   @@index([projectId])
   @@index([assigneeId])
@@ -372,36 +372,36 @@ enum TimesheetStatus {
 }
 
 model TimeEntry {
-  id          String    @id @default(cuid())
-  employeeId  String
-  employee    Employee  @relation(fields: [employeeId], references: [id])
-  taskId      String?
-  task        Task?     @relation(fields: [taskId], references: [id])
-  timesheetId String?
-  timesheet   Timesheet? @relation(fields: [timesheetId], references: [id])
-  date        DateTime  @db.Date
+  id              String     @id @default(cuid())
+  employeeId      String
+  employee        Employee   @relation(fields: [employeeId], references: [id])
+  taskId          String?
+  task            Task?      @relation(fields: [taskId], references: [id])
+  timesheetId     String?
+  timesheet       Timesheet? @relation(fields: [timesheetId], references: [id])
+  date            DateTime   @db.Date
   durationMinutes Int
-  description String?
-  billable    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  description     String?
+  billable        Boolean    @default(false)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
 
   @@index([employeeId, date])
   @@index([taskId])
 }
 
 model Timesheet {
-  id         String           @id @default(cuid())
-  employeeId String
-  employee   Employee         @relation(fields: [employeeId], references: [id])
+  id          String          @id @default(cuid())
+  employeeId  String
+  employee    Employee        @relation(fields: [employeeId], references: [id])
   periodStart DateTime        @db.Date
   periodEnd   DateTime        @db.Date
-  status     TimesheetStatus  @default(DRAFT)
-  entries    TimeEntry[]
+  status      TimesheetStatus @default(DRAFT)
+  entries     TimeEntry[]
   submittedAt DateTime?
   approvedAt  DateTime?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
 
   @@unique([employeeId, periodStart, periodEnd])
 }
@@ -417,20 +417,20 @@ enum PayslipStatus {
 }
 
 model Payslip {
-  id           String        @id @default(cuid())
-  employeeId   String
-  employee     Employee      @relation(fields: [employeeId], references: [id])
-  periodStart  DateTime      @db.Date
-  periodEnd    DateTime      @db.Date
-  basicSalary  Decimal       @db.Decimal(12, 2)
-  allowances   Decimal       @default(0) @db.Decimal(12, 2)
-  deductions   Decimal       @default(0) @db.Decimal(12, 2)
-  netSalary    Decimal       @db.Decimal(12, 2)
-  status       PayslipStatus @default(DRAFT)
-  paidAt       DateTime?
-  pdfUrl       String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id          String        @id @default(cuid())
+  employeeId  String
+  employee    Employee      @relation(fields: [employeeId], references: [id])
+  periodStart DateTime      @db.Date
+  periodEnd   DateTime      @db.Date
+  basicSalary Decimal       @db.Decimal(12, 2)
+  allowances  Decimal       @default(0) @db.Decimal(12, 2)
+  deductions  Decimal       @default(0) @db.Decimal(12, 2)
+  netSalary   Decimal       @db.Decimal(12, 2)
+  status      PayslipStatus @default(DRAFT)
+  paidAt      DateTime?
+  pdfUrl      String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@unique([employeeId, periodStart, periodEnd])
 }
@@ -440,16 +440,16 @@ model Payslip {
 // ---------------------------------------------------------------------------
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  employeeId String?
-  employee   Employee? @relation(fields: [employeeId], references: [id])
-  action     String
-  entityType String
-  entityId   String
+  id            String    @id @default(cuid())
+  employeeId    String?
+  employee      Employee? @relation(fields: [employeeId], references: [id])
+  action        String
+  entityType    String
+  entityId      String
   previousValue Json?
-  newValue   Json?
-  ipAddress  String?
-  createdAt  DateTime @default(now())
+  newValue      Json?
+  ipAddress     String?
+  createdAt     DateTime  @default(now())
 
   @@index([entityType, entityId])
   @@index([employeeId])
@@ -516,19 +516,20 @@ enum FollowUpStatus {
 }
 
 model Lead {
-  id              String        @id @default(cuid())
-  businessName    String
-  industry        String?
-  city            String?
-  area            String?
-  contactName     String?
-  contactRole     String?
-  phone           String?
-  whatsapp        String?
-  email           String?
-  website         String?
-  source          String?
-  notes           String?
+  id                String  @id @default(cuid())
+  businessName      String
+  industry          String?
+  city              String?
+  area              String?
+  businessOwnerName String?
+  contactName       String?
+  contactRole       String?
+  phone             String?
+  whatsapp          String?
+  email             String?
+  website           String?
+  source            String?
+  notes             String?
 
   // Prospecting context — what the caller found before/while reaching out.
   onlinePresence  String?
@@ -542,7 +543,7 @@ model Lead {
 
   // Enforced server-side in startCallSession, not just hidden in the UI —
   // see lib/actions/calls.ts.
-  doNotCall       Boolean  @default(false)
+  doNotCall       Boolean @default(false)
   doNotCallReason String?
 
   ownerId     String?
@@ -603,25 +604,25 @@ model LeadStatusEvent {
  * progress"); ending it fills in the rest. Never auto-created or inferred.
  */
 model CallAttempt {
-  id                   String         @id @default(cuid())
-  leadId               String
-  lead                 Lead           @relation(fields: [leadId], references: [id])
-  callerId             String
-  caller               Employee       @relation(fields: [callerId], references: [id])
-  attemptNumber        Int
+  id            String   @id @default(cuid())
+  leadId        String
+  lead          Lead     @relation(fields: [leadId], references: [id])
+  callerId      String
+  caller        Employee @relation(fields: [callerId], references: [id])
+  attemptNumber Int
 
   startedAt       DateTime
   endedAt         DateTime?
   durationSeconds Int?
 
   outcome              CallOutcome?
-  decisionMakerReached Boolean       @default(false)
+  decisionMakerReached Boolean        @default(false)
   interestLevel        InterestLevel?
   painPoints           String?
   objections           String?
   notes                String?
   nextAction           String?
-  nextFollowUpDate     DateTime?     @db.Date
+  nextFollowUpDate     DateTime?      @db.Date
   meetingDetails       String?
   whatsappConsent      Boolean?
 
@@ -636,11 +637,11 @@ model CallAttempt {
 }
 
 model FollowUp {
-  id            String         @id @default(cuid())
+  id            String       @id @default(cuid())
   leadId        String
-  lead          Lead           @relation(fields: [leadId], references: [id])
+  lead          Lead         @relation(fields: [leadId], references: [id])
   callAttemptId String?
-  callAttempt   CallAttempt?   @relation(fields: [callAttemptId], references: [id])
+  callAttempt   CallAttempt? @relation(fields: [callAttemptId], references: [id])
 
   dueDate     DateTime       @db.Date
   action      String

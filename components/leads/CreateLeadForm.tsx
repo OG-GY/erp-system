@@ -31,7 +31,8 @@ export function CreateLeadForm() {
         <Field id="area" name="area" label="Area" disabled={isPending} />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Field id="businessOwnerName" name="businessOwnerName" label="Business owner name" disabled={isPending} />
         <Field id="contactName" name="contactName" label="Contact person" disabled={isPending} />
         <Field id="contactRole" name="contactRole" label="Contact's role" disabled={isPending} />
       </div>

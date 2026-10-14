@@ -48,6 +48,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/leads/[id]"
       industry: true,
       city: true,
       area: true,
+      businessOwnerName: true,
       contactName: true,
       contactRole: true,
       phone: true,
@@ -148,6 +149,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/leads/[id]"
             <div className="mb-4 grid grid-cols-1 gap-2 text-sm">
               <Field label="Industry" value={lead.industry ?? "—"} />
               <Field label="Area" value={lead.area ?? "—"} />
+              <Field label="Business owner" value={lead.businessOwnerName ?? "—"} />
               <Field label="Contact role" value={lead.contactRole ?? "—"} />
               <Field label="Phone" value={lead.phone ?? "—"} />
               <Field label="WhatsApp" value={lead.whatsapp ?? "—"} />
@@ -168,6 +170,7 @@ export default async function LeadDetailPage({ params }: PageProps<"/leads/[id]"
                     industry: lead.industry ?? "",
                     city: lead.city ?? "",
                     area: lead.area ?? "",
+                    businessOwnerName: lead.businessOwnerName ?? "",
                     contactName: lead.contactName ?? "",
                     contactRole: lead.contactRole ?? "",
                     phone: lead.phone ?? "",
