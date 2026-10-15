@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { PhoneOff, Clock } from "lucide-react";
+import { PhoneOff, Clock, Signal } from "lucide-react";
 
 const PRIORITY_DOT = {
   LOW: "bg-overlay-neutral",
@@ -14,6 +14,7 @@ type Lead = {
   businessName: string;
   city: string | null;
   contactName: string | null;
+  simCallStatus?: string | null;
   priority: keyof typeof PRIORITY_DOT | null;
   doNotCall: boolean;
   nextFollowUpDate: Date | null;
@@ -76,6 +77,9 @@ export function LeadCard({
         </span>
         <span className="flex items-center gap-2">
           {lead.doNotCall ? <PhoneOff className="h-3 w-3 text-danger" aria-label="Do not call" /> : null}
+          {lead.simCallStatus && lead.simCallStatus !== "RESOLVED" ? (
+            <Signal className="h-3 w-3 text-warning" aria-label="Needs a SIM/local call" />
+          ) : null}
           {lead._count.calls > 0 ? <span>{lead._count.calls} calls</span> : null}
         </span>
       </div>

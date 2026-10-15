@@ -40,6 +40,7 @@ type Lead = {
   city: string | null;
   contactName: string | null;
   status: string;
+  simCallStatus: string | null;
   priority: "LOW" | "MEDIUM" | "HIGH" | null;
   doNotCall: boolean;
   nextFollowUpDate: Date | null;

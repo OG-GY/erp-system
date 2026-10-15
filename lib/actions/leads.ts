@@ -279,6 +279,86 @@ export async function setLeadDoNotCall(
   return { error: null };
 }
 
+const simCallStatusSchema = z.enum(["NEEDS_SIM_CALL", "ATTEMPTED", "RESOLVED", "UNREACHABLE"]);
+
+export type FlagSimCallState = { error: string | null };
+
+/** Marks a lead as unreachable on WhatsApp — it now shows up on the SIM/local calls board. */
+export async function flagLeadNeedsSimCall(
+  leadId: string,
+  note: string | null,
+): Promise<FlagSimCallState> {
+  const employee = await requireEmployee();
+  const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { ownerId: true } });
+  if (!lead) {
+    return { error: "Lead not found." };
+  }
+  if (!canManageLead(employee, lead)) {
+    return { error: "Forbidden: you can't update this lead." };
+  }
+
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { simCallStatus: "NEEDS_SIM_CALL", simCallNote: note || null },
+  });
+
+  revalidatePath("/leads");
+  revalidatePath("/leads/sim-calls");
+  revalidatePath(`/leads/${leadId}`);
+  return { error: null };
+}
+
+export type UpdateSimCallStatusState = { error: string | null };
+
+/** Moves a lead between SIM-call board columns — used by both the board drag-and-drop and the lead detail page. */
+export async function updateLeadSimCallStatus(
+  leadId: string,
+  status: string,
+): Promise<UpdateSimCallStatusState> {
+  const employee = await requireEmployee();
+  const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { ownerId: true } });
+  if (!lead) {
+    return { error: "Lead not found." };
+  }
+  if (!canManageLead(employee, lead)) {
+    return { error: "Forbidden: you can't update this lead." };
+  }
+
+  const parsed = simCallStatusSchema.safeParse(status);
+  if (!parsed.success) {
+    return { error: "Invalid status." };
+  }
+
+  await prisma.lead.update({ where: { id: leadId }, data: { simCallStatus: parsed.data } });
+
+  revalidatePath("/leads");
+  revalidatePath("/leads/sim-calls");
+  revalidatePath(`/leads/${leadId}`);
+  return { error: null };
+}
+
+/** Removes the lead from the SIM-call board entirely — for correcting a mistaken flag. */
+export async function clearLeadSimCallFlag(leadId: string): Promise<UpdateSimCallStatusState> {
+  const employee = await requireEmployee();
+  const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { ownerId: true } });
+  if (!lead) {
+    return { error: "Lead not found." };
+  }
+  if (!canManageLead(employee, lead)) {
+    return { error: "Forbidden: you can't update this lead." };
+  }
+
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { simCallStatus: null, simCallNote: null },
+  });
+
+  revalidatePath("/leads");
+  revalidatePath("/leads/sim-calls");
+  revalidatePath(`/leads/${leadId}`);
+  return { error: null };
+}
+
 /** Admin-only: reassigns a lead to a different caller, or back to the unowned pool (ownerId null). */
 export async function assignLeadOwner(leadId: string, ownerId: string | null) {
   await requireAdmin();

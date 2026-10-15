@@ -515,6 +515,17 @@ enum FollowUpStatus {
   CANCELLED
 }
 
+// A lead's WhatsApp-reachability problem, tracked separately from its main
+// pipeline status (LeadStatus) — a lead can be QUALIFIED in the pipeline and
+// still need a plain SIM/local call because WhatsApp couldn't reach them
+// (no internet on their end). Null means this never came up for the lead.
+enum SimCallStatus {
+  NEEDS_SIM_CALL
+  ATTEMPTED
+  RESOLVED
+  UNREACHABLE
+}
+
 model Lead {
   id                String  @id @default(cuid())
   businessName      String
@@ -546,6 +557,11 @@ model Lead {
   doNotCall       Boolean @default(false)
   doNotCallReason String?
 
+  // See SimCallStatus — null until a caller flags the lead as unreachable
+  // on WhatsApp.
+  simCallStatus SimCallStatus?
+  simCallNote   String?
+
   ownerId     String?
   owner       Employee? @relation("LeadOwner", fields: [ownerId], references: [id])
   createdById String
@@ -574,6 +590,7 @@ model Lead {
   @@index([ownerId])
   @@index([nextFollowUpDate])
   @@index([phone])
+  @@index([simCallStatus])
 }
 
 /**

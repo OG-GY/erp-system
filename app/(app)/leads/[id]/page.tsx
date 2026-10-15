@@ -4,6 +4,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EditLeadForm } from "@/components/leads/EditLeadForm";
 import { LeadStatusPanel } from "@/components/leads/LeadStatusPanel";
 import { DoNotCallToggle } from "@/components/leads/DoNotCallToggle";
+import { SimCallPanel } from "@/components/leads/SimCallPanel";
 import { LeadOwnerControl } from "@/components/leads/LeadOwnerControl";
 import { CallSessionPanel } from "@/components/leads/CallSessionPanel";
 import { CallHistoryList } from "@/components/leads/CallHistoryList";
@@ -63,6 +64,8 @@ export default async function LeadDetailPage({ params }: PageProps<"/leads/[id]"
       status: true,
       doNotCall: true,
       doNotCallReason: true,
+      simCallStatus: true,
+      simCallNote: true,
       ownerId: true,
       owner: { select: { fullName: true } },
       createdBy: { select: { fullName: true } },
@@ -135,6 +138,8 @@ export default async function LeadDetailPage({ params }: PageProps<"/leads/[id]"
           </div>
 
           <DoNotCallToggle leadId={lead.id} doNotCall={lead.doNotCall} reason={lead.doNotCallReason} />
+
+          <SimCallPanel leadId={lead.id} simCallStatus={lead.simCallStatus} simCallNote={lead.simCallNote} />
 
           {isAdmin(employee.role) ? (
             <div className="rounded-lg border border-border bg-surface p-4">

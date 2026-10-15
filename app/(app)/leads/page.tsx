@@ -11,6 +11,7 @@ const leadSelect = {
   city: true,
   contactName: true,
   status: true,
+  simCallStatus: true,
   priority: true,
   doNotCall: true,
   nextFollowUpDate: true,
@@ -40,6 +41,12 @@ export default async function LeadsPage() {
         description={`${leads.length} ${leads.length === 1 ? "lead" : "leads"}`}
         actions={
           <>
+            <Link
+              href="/leads/sim-calls"
+              className="flex h-8 items-center rounded-sm border border-border-strong px-3 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover"
+            >
+              SIM calls needed
+            </Link>
             <Link
               href="/leads/import"
               className="flex h-8 items-center rounded-sm border border-border-strong px-3 text-sm font-medium text-foreground transition-colors hover:bg-overlay-hover"
