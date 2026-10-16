@@ -359,6 +359,33 @@ export async function clearLeadSimCallFlag(leadId: string): Promise<UpdateSimCal
   return { error: null };
 }
 
+/**
+ * Permanently deletes a lead and its call/follow-up/status history. Same
+ * access as editing the lead (admin, or the owning caller / unowned pool).
+ * Array-form transaction: the pooler doesn't support the interactive form.
+ */
+export async function deleteLead(leadId: string): Promise<{ error: string | null }> {
+  const employee = await requireEmployee();
+  const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { ownerId: true } });
+  if (!lead) {
+    return { error: "Lead not found." };
+  }
+  if (!canManageLead(employee, lead)) {
+    return { error: "Forbidden: you can't delete this lead." };
+  }
+
+  await prisma.$transaction([
+    prisma.followUp.deleteMany({ where: { leadId } }),
+    prisma.callAttempt.deleteMany({ where: { leadId } }),
+    prisma.leadStatusEvent.deleteMany({ where: { leadId } }),
+    prisma.lead.delete({ where: { id: leadId } }),
+  ]);
+
+  revalidatePath("/leads");
+  revalidatePath("/leads/sim-calls");
+  return { error: null };
+}
+
 /** Admin-only: reassigns a lead to a different caller, or back to the unowned pool (ownerId null). */
 export async function assignLeadOwner(leadId: string, ownerId: string | null) {
   await requireAdmin();

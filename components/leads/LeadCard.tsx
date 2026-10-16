@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { PhoneOff, Clock, Signal } from "lucide-react";
+import { DeleteLeadButton } from "@/components/leads/DeleteLeadButton";
 
 const PRIORITY_DOT = {
   LOW: "bg-overlay-neutral",
@@ -43,12 +44,13 @@ export function LeadCard({
   const isOverdue = followUpIso !== null && followUpIso < todayIso;
 
   return (
+    <div className="relative">
     <Link
       href={`/leads/${lead.id}`}
       draggable={canDrag}
       onDragStart={canDrag ? onDragStart : undefined}
       onDragEnd={canDrag ? onDragEnd : undefined}
-      className={`flex flex-col gap-1 rounded-md border border-border bg-surface p-3 text-left text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-md ${
+      className={`flex flex-col gap-1 rounded-md border pr-8 border-border bg-surface p-3 text-left text-sm shadow-sm transition-all hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-md ${
         canDrag ? "cursor-grab active:cursor-grabbing" : ""
       }`}
     >
@@ -90,5 +92,9 @@ export function LeadCard({
         </span>
       ) : null}
     </Link>
+      <div className="absolute right-1 top-1">
+        <DeleteLeadButton leadId={lead.id} businessName={lead.businessName} />
+      </div>
+    </div>
   );
 }
