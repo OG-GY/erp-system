@@ -42,7 +42,12 @@ export async function getCallerMetrics(
   startDate: Date,
   endDate: Date,
 ): Promise<CallerMetrics> {
-  const createdRange = { gte: startDate, lte: endDate };
+  // startDate/endDate are calendar days (UTC midnight, see todayDateOnly), and
+  // endDate is inclusive — so the range runs up to the start of the NEXT day.
+  // A plain `lte: endDate` stopped at 00:00 of endDate and silently dropped
+  // everything done "today" from timestamp columns like createdAt/startedAt.
+  const endExclusive = new Date(endDate.getTime() + 24 * 60 * 60 * 1000);
+  const createdRange = { gte: startDate, lt: endExclusive };
 
   const [
     leadsAdded,
