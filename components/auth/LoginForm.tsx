@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { signIn, type SignInState } from "@/lib/actions/auth";
 import { Input } from "@/components/ui/Input";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: SignInState = { error: null };
 
@@ -50,11 +51,7 @@ export function LoginForm() {
         />
       </div>
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
 
       <button
         type="submit"

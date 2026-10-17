@@ -8,6 +8,8 @@ import {
   deleteCandidateCv,
   type UploadCandidateCvState,
 } from "@/lib/actions/candidates";
+import { ErrorToast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/Toast";
 
 const initialState: UploadCandidateCvState = { error: null, url: null };
 
@@ -19,6 +21,7 @@ export function CvUploader({
   cvUrl: string | null;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const boundUpload = uploadCandidateCv.bind(null, candidateId);
   const [state, formAction, isPending] = useActionState(boundUpload, initialState);
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -52,7 +55,7 @@ export function CvUploader({
 
   function handleRemove() {
     startDeleteTransition(async () => {
-      await deleteCandidateCv(candidateId);
+      await run(() => deleteCandidateCv(candidateId));
       router.refresh();
     });
   }
@@ -117,11 +120,7 @@ export function CvUploader({
       <p className="text-xs text-foreground-muted">
         PNG, JPEG, or WEBP — choose a file, or paste (Ctrl+V) a screenshot.
       </p>
-      {state.error ? (
-        <p role="alert" className="text-xs text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
     </div>
   );
 }

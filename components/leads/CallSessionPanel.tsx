@@ -6,6 +6,8 @@ import { startCallSession, cancelCallSession, endCallSession, type EndCallState 
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { Input } from "@/components/ui/Input";
+import { ErrorToast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/Toast";
 
 const OUTCOME_OPTIONS = [
   { value: "NO_ANSWER", label: "No answer" },
@@ -51,12 +53,13 @@ export function CallSessionPanel({
   doNotCall: boolean;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isStarting, startTransition] = useTransition();
   const [isCancelling, startCancelTransition] = useTransition();
 
   function handleStart() {
     startTransition(async () => {
-      await startCallSession(leadId);
+      await run(() => startCallSession(leadId));
       router.refresh();
     });
   }
@@ -64,7 +67,7 @@ export function CallSessionPanel({
   function handleDiscard() {
     if (!activeCallId) return;
     startCancelTransition(async () => {
-      await cancelCallSession(activeCallId);
+      await run(() => cancelCallSession(activeCallId));
       router.refresh();
     });
   }
@@ -180,11 +183,7 @@ function EndCallForm({ callId }: { callId: string }) {
         Consented to WhatsApp follow-up
       </label>
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
 
       <button
         type="submit"

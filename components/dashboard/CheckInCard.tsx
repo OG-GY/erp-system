@@ -16,6 +16,7 @@ import {
   formatDuration,
 } from "@/components/dashboard/LiveDurationTimer";
 import { formatTimeOfDay } from "@/lib/format";
+import { ErrorToast } from "@/components/ui/Toast";
 
 export function CheckInCard({
   checkInTime,
@@ -175,11 +176,7 @@ export function CheckInCard({
         </>
       )}
 
-      {error ? (
-        <p role="alert" className="mt-2 text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
+      <ErrorToast message={error} />
 
       {modalOpen ? <CheckInModal onClose={() => setModalOpen(false)} /> : null}
       {checkOutModalOpen ? (

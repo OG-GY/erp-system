@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { useToast } from "@/components/ui/Toast";
 
 const STATUS_OPTIONS = [
   { value: "NEEDS_SIM_CALL", label: "Needs SIM call" },
@@ -42,13 +43,14 @@ export function SimCallPanel({
   simCallNote: string | null;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showFlagInput, setShowFlagInput] = useState(false);
   const [noteInput, setNoteInput] = useState("");
 
   function confirmFlag() {
     startTransition(async () => {
-      await flagLeadNeedsSimCall(leadId, noteInput || null);
+      await run(() => flagLeadNeedsSimCall(leadId, noteInput || null));
       setShowFlagInput(false);
       router.refresh();
     });
@@ -56,14 +58,14 @@ export function SimCallPanel({
 
   function changeStatus(status: string) {
     startTransition(async () => {
-      await updateLeadSimCallStatus(leadId, status);
+      await run(() => updateLeadSimCallStatus(leadId, status));
       router.refresh();
     });
   }
 
   function clearFlag() {
     startTransition(async () => {
-      await clearLeadSimCallFlag(leadId);
+      await run(() => clearLeadSimCallFlag(leadId));
       router.refresh();
     });
   }

@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateTaskStatus } from "@/lib/actions/tasks";
 import { Select } from "@/components/ui/Select";
+import { useToast } from "@/components/ui/Toast";
 
 const STATUS_OPTIONS = [
   { value: "TODO", label: "To do" },
@@ -22,6 +23,7 @@ export function TaskStatusSelect({
   status: string;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -32,7 +34,7 @@ export function TaskStatusSelect({
       className="w-36"
       onChange={(next) => {
         startTransition(async () => {
-          await updateTaskStatus(taskId, next);
+          await run(() => updateTaskStatus(taskId, next));
           router.refresh();
         });
       }}

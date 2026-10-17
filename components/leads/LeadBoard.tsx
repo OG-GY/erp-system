@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateLeadStatus } from "@/lib/actions/leads";
 import { LeadCard } from "@/components/leads/LeadCard";
+import { useToast } from "@/components/ui/Toast";
 
 const COLUMNS = [
   { status: "NEW", label: "New" },
@@ -59,6 +60,7 @@ export function LeadBoard({
   canDragAll: boolean;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [leads, setLeads] = useState(initialLeads);
   const [prevInitialLeads, setPrevInitialLeads] = useState(initialLeads);
   if (initialLeads !== prevInitialLeads) {
@@ -89,7 +91,7 @@ export function LeadBoard({
     startTransition(async () => {
       const fd = new FormData();
       fd.set("status", status);
-      await updateLeadStatus(id, { error: null }, fd);
+      await run(() => updateLeadStatus(id, { error: null }, fd));
       router.refresh();
     });
   }

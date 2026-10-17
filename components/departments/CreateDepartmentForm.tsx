@@ -6,6 +6,7 @@ import {
   type CreateDepartmentState,
 } from "@/lib/actions/departments";
 import { Input } from "@/components/ui/Input";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: CreateDepartmentState = { error: null, success: false };
 
@@ -45,11 +46,7 @@ export function CreateDepartmentForm() {
           {isPending ? "Adding…" : "Add"}
         </button>
       </div>
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
     </form>
   );
 }

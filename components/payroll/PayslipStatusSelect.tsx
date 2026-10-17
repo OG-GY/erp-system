@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updatePayslipStatus } from "@/lib/actions/payroll";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const STATUSES = [
   { value: "DRAFT", label: "Draft" },
@@ -44,11 +45,7 @@ export function PayslipStatusSelect({
         className="w-36"
         options={STATUSES}
       />
-      {error ? (
-        <p role="alert" className="mt-1 text-xs text-danger">
-          {error}
-        </p>
-      ) : null}
+      <ErrorToast message={error} />
     </div>
   );
 }

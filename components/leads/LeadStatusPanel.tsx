@@ -5,6 +5,7 @@ import { updateLeadStatus, type UpdateLeadStatusState } from "@/lib/actions/lead
 import { Select } from "@/components/ui/Select";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const STATUS_OPTIONS = [
   { value: "NEW", label: "New" },
@@ -60,11 +61,7 @@ export function LeadStatusPanel({ leadId, status }: { leadId: string; status: st
           disabled={isPending}
         />
       ) : null}
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
       <button
         type="submit"
         disabled={isPending}

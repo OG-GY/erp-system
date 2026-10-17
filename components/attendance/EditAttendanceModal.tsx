@@ -6,6 +6,7 @@ import {
   type UpdateAttendanceRecordState,
 } from "@/lib/actions/attendanceAdmin";
 import { Input } from "@/components/ui/Input";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: UpdateAttendanceRecordState = { error: null, success: false };
 
@@ -151,11 +152,7 @@ export function EditAttendanceModal({
             </p>
           </div>
 
-          {state.error ? (
-            <p role="alert" className="text-sm text-danger">
-              {state.error}
-            </p>
-          ) : null}
+          <ErrorToast message={state.error} trigger={state} />
 
           <div className="flex justify-end gap-2">
             <button

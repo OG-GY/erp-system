@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { createTeam, type CreateTeamState } from "@/lib/actions/teams";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: CreateTeamState = { error: null };
 
@@ -32,11 +33,7 @@ export function CreateTeamForm() {
         <Textarea id="description" name="description" rows={2} disabled={isPending} />
       </div>
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
 
       <button
         type="submit"

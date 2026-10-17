@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateLeadSimCallStatus } from "@/lib/actions/leads";
 import { LeadCard } from "@/components/leads/LeadCard";
+import { useToast } from "@/components/ui/Toast";
 
 const COLUMNS = [
   { status: "NEEDS_SIM_CALL", label: "Needs SIM call" },
@@ -42,6 +43,7 @@ export function SimCallBoard({
   canDragAll: boolean;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [leads, setLeads] = useState(initialLeads);
   const [prevInitialLeads, setPrevInitialLeads] = useState(initialLeads);
   if (initialLeads !== prevInitialLeads) {
@@ -65,7 +67,7 @@ export function SimCallBoard({
 
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, simCallStatus: status } : l)));
     startTransition(async () => {
-      await updateLeadSimCallStatus(id, status);
+      await run(() => updateLeadSimCallStatus(id, status));
       router.refresh();
     });
   }

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { deleteAttendanceRecord } from "@/lib/actions/attendanceAdmin";
 import { EditAttendanceModal } from "@/components/attendance/EditAttendanceModal";
+import { ErrorToast } from "@/components/ui/Toast";
 
 export function AttendanceRowActions({
   recordId,
@@ -88,11 +89,7 @@ export function AttendanceRowActions({
               {employeeName} — this permanently removes the check-in,
               check-out, and any breaks for this day.
             </p>
-            {error ? (
-              <p role="alert" className="mb-4 text-sm text-danger">
-                {error}
-              </p>
-            ) : null}
+            <ErrorToast message={error} />
             <div className="flex justify-end gap-2">
               <button
                 type="button"

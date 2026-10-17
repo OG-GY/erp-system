@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { checkOut, type AttendanceActionState } from "@/lib/actions/attendance";
 import { Textarea } from "@/components/ui/Textarea";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: AttendanceActionState = { error: null, success: false };
 
@@ -71,11 +72,7 @@ export function CheckOutModal({ onClose }: { onClose: () => void }) {
             />
           </div>
 
-          {state.error ? (
-            <p role="alert" className="text-sm text-danger">
-              {state.error}
-            </p>
-          ) : null}
+          <ErrorToast message={state.error} trigger={state} />
 
           <div className="flex justify-end gap-2">
             <button

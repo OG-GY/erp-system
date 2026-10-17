@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateCandidateStatus } from "@/lib/actions/candidates";
 import { Select } from "@/components/ui/Select";
+import { useToast } from "@/components/ui/Toast";
 
 const STATUS_OPTIONS = [
   { value: "APPLIED", label: "Applied" },
@@ -23,6 +24,7 @@ export function CandidateStatusSelect({
   status: string;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -33,7 +35,7 @@ export function CandidateStatusSelect({
       className="w-40"
       onChange={(next) => {
         startTransition(async () => {
-          await updateCandidateStatus(candidateId, next);
+          await run(() => updateCandidateStatus(candidateId, next));
           router.refresh();
         });
       }}

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { deleteLead } from "@/lib/actions/leads";
+import { ErrorToast } from "@/components/ui/Toast";
 
 export function DeleteLeadButton({ leadId, businessName }: { leadId: string; businessName: string }) {
   const router = useRouter();
@@ -12,6 +13,7 @@ export function DeleteLeadButton({ leadId, businessName }: { leadId: string; bus
   const [isPending, startTransition] = useTransition();
 
   function confirmDelete() {
+    setError(null);
     startTransition(async () => {
       const res = await deleteLead(leadId);
       if (res.error) {
@@ -41,7 +43,7 @@ export function DeleteLeadButton({ leadId, businessName }: { leadId: string; bus
         >
           Cancel
         </button>
-        {error ? <span role="alert" className="text-danger">{error}</span> : null}
+        <ErrorToast message={error} />
       </span>
     );
   }

@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { assignLeadOwner } from "@/lib/actions/leads";
 import { Select } from "@/components/ui/Select";
+import { useToast } from "@/components/ui/Toast";
 
 export function LeadOwnerControl({
   leadId,
@@ -15,6 +16,7 @@ export function LeadOwnerControl({
   callers: { id: string; fullName: string }[];
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
   return (
@@ -27,7 +29,7 @@ export function LeadOwnerControl({
         aria-label="Lead owner"
         onChange={(next) => {
           startTransition(async () => {
-            await assignLeadOwner(leadId, next || null);
+            await run(() => assignLeadOwner(leadId, next || null));
             router.refresh();
           });
         }}

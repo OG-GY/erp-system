@@ -5,6 +5,7 @@ import { applyForLeave, type LeaveActionState } from "@/lib/actions/leave";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: LeaveActionState = { error: null, success: false };
 
@@ -81,11 +82,7 @@ export function LeaveApplyForm() {
         />
       </div>
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
       {state.success ? (
         <p role="status" className="text-sm text-success">
           Leave request submitted.

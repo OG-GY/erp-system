@@ -12,6 +12,8 @@ import {
 } from "@/lib/actions/followUps";
 import { Input } from "@/components/ui/Input";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { ErrorToast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/Toast";
 
 type FollowUp = {
   id: string;
@@ -50,6 +52,7 @@ export function FollowUpsPanel({ leadId, followUps }: { leadId: string; followUp
 
 function FollowUpRow({ followUp, todayIso }: { followUp: FollowUp; todayIso: string }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isPending, startTransition] = useTransition();
   const [rescheduling, setRescheduling] = useState(false);
   const dueIso = followUp.dueDate.toISOString().slice(0, 10);
@@ -57,13 +60,13 @@ function FollowUpRow({ followUp, todayIso }: { followUp: FollowUp; todayIso: str
 
   function complete() {
     startTransition(async () => {
-      await completeFollowUp(followUp.id);
+      await run(() => completeFollowUp(followUp.id));
       router.refresh();
     });
   }
   function cancel() {
     startTransition(async () => {
-      await cancelFollowUp(followUp.id);
+      await run(() => cancelFollowUp(followUp.id));
       router.refresh();
     });
   }
@@ -190,11 +193,7 @@ function AddFollowUpForm({ leadId }: { leadId: string }) {
       >
         {isPending ? "Adding…" : "Add"}
       </button>
-      {state.error ? (
-        <p role="alert" className="w-full text-xs text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
     </form>
   );
 }

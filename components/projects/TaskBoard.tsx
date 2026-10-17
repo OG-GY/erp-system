@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateTaskStatus } from "@/lib/actions/tasks";
 import { TaskCard } from "@/components/projects/TaskCard";
 import { TaskDetailModal } from "@/components/projects/TaskDetailModal";
+import { useToast } from "@/components/ui/Toast";
 
 const COLUMNS = [
   { status: "TODO", label: "To do" },
@@ -54,6 +55,7 @@ export function TaskBoard({
   managedProjectIds?: string[];
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [tasks, setTasks] = useState(initialTasks);
   // Re-sync when the server data refreshes — same render-time-adjustment
   // pattern as InterviewBoard (React's documented fix for a prop that
@@ -87,7 +89,7 @@ export function TaskBoard({
 
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
     startTransition(async () => {
-      await updateTaskStatus(id, status);
+      await run(() => updateTaskStatus(id, status));
       router.refresh();
     });
   }

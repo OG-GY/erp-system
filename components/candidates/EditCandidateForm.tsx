@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { updateCandidate, type UpdateCandidateState } from "@/lib/actions/candidates";
 import { Input } from "@/components/ui/Input";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: UpdateCandidateState = { error: null, success: false };
 
@@ -95,11 +96,7 @@ export function EditCandidateForm({
         />
       </div>
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
       {state.success ? (
         <p role="status" className="text-sm text-success">
           Saved.

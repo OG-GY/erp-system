@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setEmployeeSuspended } from "@/lib/actions/employees";
+import { ErrorToast } from "@/components/ui/Toast";
 
 export function SuspendButton({
   employeeId,
@@ -43,11 +44,7 @@ export function SuspendButton({
             ? "Suspend"
             : "Reactivate"}
       </button>
-      {error ? (
-        <p role="alert" className="mt-2 text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
+      <ErrorToast message={error} />
     </div>
   );
 }

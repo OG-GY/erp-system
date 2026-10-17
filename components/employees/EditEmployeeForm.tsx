@@ -7,6 +7,7 @@ import {
 } from "@/lib/actions/employees";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: UpdateEmployeeState = { error: null, success: false };
 
@@ -196,11 +197,7 @@ export function EditEmployeeForm({
         defaultValue={defaultIdCardNumber}
       />
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
       {state.success ? (
         <p role="status" className="text-sm text-success">
           Details saved.

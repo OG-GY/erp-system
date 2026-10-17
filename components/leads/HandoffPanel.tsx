@@ -11,6 +11,8 @@ import {
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { ErrorToast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/Toast";
 
 const STATUS_TONE = {
   NONE: "neutral",
@@ -46,18 +48,19 @@ export function HandoffPanel({
   founders: { id: string; fullName: string }[];
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
   function setStatus(status: string) {
     startTransition(async () => {
-      await updateHandoffStatus(leadId, status);
+      await run(() => updateHandoffStatus(leadId, status));
       router.refresh();
     });
   }
 
   function confirmMeetingHeld() {
     startTransition(async () => {
-      await markMeetingHeld(leadId);
+      await run(() => markMeetingHeld(leadId));
       router.refresh();
     });
   }
@@ -163,11 +166,7 @@ function RequestHandoffForm({
           disabled={isPending}
         />
       ) : null}
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
       <button
         type="submit"
         disabled={isPending}

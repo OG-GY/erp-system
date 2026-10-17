@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { uploadAvatar, type UploadAvatarState } from "@/lib/actions/avatar";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: UploadAvatarState = { error: null, url: null };
 
@@ -38,11 +39,7 @@ export function AvatarUploader({
         >
           {isPending ? "Uploading…" : "Upload photo"}
         </button>
-        {state.error ? (
-          <p role="alert" className="text-xs text-danger">
-            {state.error}
-          </p>
-        ) : null}
+        <ErrorToast message={state.error} trigger={state} />
       </div>
     </form>
   );

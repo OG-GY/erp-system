@@ -6,6 +6,7 @@ import { createLead, type CreateLeadState } from "@/lib/actions/leads";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: CreateLeadState = { error: null };
 
@@ -93,11 +94,7 @@ export function CreateLeadForm() {
         </div>
       ) : null}
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
 
       <button
         type="submit"

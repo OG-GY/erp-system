@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import { deleteCandidate } from "@/lib/actions/candidates";
+import { useToast } from "@/components/ui/Toast";
 
 export function DeleteCandidateButton({
   candidateId,
@@ -13,6 +14,7 @@ export function DeleteCandidateButton({
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const { run } = useToast();
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -24,7 +26,7 @@ export function DeleteCandidateButton({
 
   function handleDelete() {
     startTransition(async () => {
-      await deleteCandidate(candidateId);
+      await run(() => deleteCandidate(candidateId));
       // A successful delete redirects server-side and never returns here.
     });
   }

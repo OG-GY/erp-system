@@ -8,6 +8,7 @@ import {
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: CreateAttendanceRecordState = { error: null, success: false };
 
@@ -162,11 +163,7 @@ export function AddAttendanceModal({
             />
           </div>
 
-          {state.error ? (
-            <p role="alert" className="text-sm text-danger">
-              {state.error}
-            </p>
-          ) : null}
+          <ErrorToast message={state.error} trigger={state} />
 
           <div className="flex justify-end gap-2">
             <button

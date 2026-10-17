@@ -8,6 +8,7 @@ import {
 import { SalaryFields } from "@/components/employees/SalaryFields";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: CreateEmployeeState = { error: null };
 
@@ -134,11 +135,7 @@ export function CreateEmployeeForm({
 
       <SalaryFields disabled={isPending} />
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
 
       <button
         type="submit"

@@ -7,6 +7,7 @@ import {
 } from "@/lib/actions/payroll";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: CreatePayslipState = { error: null };
 
@@ -130,11 +131,7 @@ export function CreatePayslipForm({
         />
       </div>
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
 
       <button
         type="submit"

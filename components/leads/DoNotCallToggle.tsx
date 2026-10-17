@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setLeadDoNotCall } from "@/lib/actions/leads";
 import { Input } from "@/components/ui/Input";
+import { useToast } from "@/components/ui/Toast";
 
 export function DoNotCallToggle({
   leadId,
@@ -15,20 +16,21 @@ export function DoNotCallToggle({
   reason: string | null;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showReasonInput, setShowReasonInput] = useState(false);
   const [reasonInput, setReasonInput] = useState("");
 
   function allowCalling() {
     startTransition(async () => {
-      await setLeadDoNotCall(leadId, false, null);
+      await run(() => setLeadDoNotCall(leadId, false, null));
       router.refresh();
     });
   }
 
   function confirmMark() {
     startTransition(async () => {
-      await setLeadDoNotCall(leadId, true, reasonInput || null);
+      await run(() => setLeadDoNotCall(leadId, true, reasonInput || null));
       setShowReasonInput(false);
       router.refresh();
     });

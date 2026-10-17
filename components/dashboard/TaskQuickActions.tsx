@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Play, Check, X } from "lucide-react";
 import { updateTaskStatus } from "@/lib/actions/tasks";
+import { useToast } from "@/components/ui/Toast";
 
 export function TaskQuickActions({
   taskId,
@@ -13,11 +14,12 @@ export function TaskQuickActions({
   status: string;
 }) {
   const router = useRouter();
+  const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
   function setStatus(next: string) {
     startTransition(async () => {
-      await updateTaskStatus(taskId, next);
+      await run(() => updateTaskStatus(taskId, next));
       router.refresh();
     });
   }

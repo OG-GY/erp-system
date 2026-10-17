@@ -6,6 +6,7 @@ import {
   type UpdateSalaryState,
 } from "@/lib/actions/employees";
 import { SalaryFields } from "@/components/employees/SalaryFields";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: UpdateSalaryState = { error: null, success: false };
 
@@ -35,11 +36,7 @@ export function SalaryForm({
         disabled={isPending}
       />
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
       {state.success ? (
         <p role="status" className="text-sm text-success">
           Salary saved.

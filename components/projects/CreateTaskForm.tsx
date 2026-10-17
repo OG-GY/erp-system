@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { createTask, type CreateTaskState } from "@/lib/actions/projects";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: CreateTaskState = { error: null };
 
@@ -92,11 +93,7 @@ export function CreateTaskForm({
         {isPending ? "Adding…" : "Add task"}
       </button>
 
-      {state.error ? (
-        <p role="alert" className="w-full text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
     </form>
   );
 }

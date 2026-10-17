@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/Input";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { initials } from "@/lib/format";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: UpdateMemberRoleState = { error: null, success: false };
 
@@ -87,11 +88,7 @@ export function TeamMemberRow({
           <span className="shrink-0 text-xs text-foreground-muted">{role}</span>
         )}
       </div>
-      {state.error ? (
-        <p role="alert" className="text-xs text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
     </li>
   );
 }

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { updateMyProfile, type UpdateProfileState } from "@/lib/actions/profile";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: UpdateProfileState = { error: null, success: false };
 
@@ -96,11 +97,7 @@ export function ProfileForm({
         />
       </div>
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
       {state.success ? (
         <p role="status" className="text-sm text-success">
           Profile updated.

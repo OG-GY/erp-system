@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { checkIn, type AttendanceActionState } from "@/lib/actions/attendance";
 import { Input } from "@/components/ui/Input";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: AttendanceActionState = { error: null, success: false };
 
@@ -151,11 +152,7 @@ export function CheckInModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          {state.error ? (
-            <p role="alert" className="text-sm text-danger">
-              {state.error}
-            </p>
-          ) : null}
+          <ErrorToast message={state.error} trigger={state} />
 
           <div className="flex justify-end gap-2">
             <button

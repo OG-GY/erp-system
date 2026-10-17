@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import { deleteEmployee } from "@/lib/actions/employees";
+import { ErrorToast } from "@/components/ui/Toast";
 
 export function DeleteEmployeeButton({
   employeeId,
@@ -30,6 +31,7 @@ export function DeleteEmployeeButton({
       // A successful delete redirects server-side and never returns here.
       if (result?.error) {
         setError(result.error);
+        setConfirmOpen(false);
       }
     });
   }
@@ -45,11 +47,7 @@ export function DeleteEmployeeButton({
       >
         <Trash2 className="h-4 w-4" aria-hidden="true" />
       </button>
-      {error ? (
-        <p role="alert" className="mt-2 text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
+      <ErrorToast message={error} />
 
       {confirmOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">

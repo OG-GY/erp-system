@@ -4,6 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { addInterviewNote, type AddInterviewNoteState } from "@/lib/actions/candidates";
 import { Textarea } from "@/components/ui/Textarea";
 import { formatDateTime } from "@/lib/format";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: AddInterviewNoteState = { error: null };
 
@@ -53,11 +54,7 @@ export function CandidateNotesPanel({
           disabled={isPending}
           placeholder="Add a note from this interview…"
         />
-        {state.error ? (
-          <p role="alert" className="text-sm text-danger">
-            {state.error}
-          </p>
-        ) : null}
+        <ErrorToast message={state.error} trigger={state} />
         <button
           type="submit"
           disabled={isPending}

@@ -11,6 +11,7 @@ import {
   type FieldDefaults,
 } from "@/components/leads/import/CsvMappingStep";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 type Step = "upload" | "map" | "results";
 
@@ -102,11 +103,7 @@ export function ImportLeadsWizard({
           }}
           className="text-sm text-foreground-muted file:mr-3 file:h-9 file:rounded-md file:border file:border-border-strong file:bg-surface file:px-3 file:text-sm file:font-medium file:text-foreground"
         />
-        {parseError ? (
-          <p role="alert" className="mt-3 text-sm text-danger">
-            {parseError}
-          </p>
-        ) : null}
+        <ErrorToast message={parseError} />
       </div>
     );
   }
@@ -184,9 +181,10 @@ export function ImportLeadsWizard({
       <div className="flex flex-col gap-4">
         <div className="rounded-lg border border-border bg-surface p-4">
           {result.error ? (
-            <p role="alert" className="text-sm text-danger">
-              {result.error}
-            </p>
+            <>
+              <ErrorToast message={result.error} trigger={result} />
+              <p className="text-sm text-danger">{result.error}</p>
+            </>
           ) : (
             <>
               <p className="text-sm font-medium text-foreground">

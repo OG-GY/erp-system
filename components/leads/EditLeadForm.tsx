@@ -5,6 +5,7 @@ import { updateLead, type UpdateLeadState } from "@/lib/actions/leads";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Select } from "@/components/ui/Select";
+import { ErrorToast } from "@/components/ui/Toast";
 
 const initialState: UpdateLeadState = { error: null, success: false };
 
@@ -85,11 +86,7 @@ export function EditLeadForm({ leadId, defaults }: { leadId: string; defaults: D
       <TextField id="identifiedNeeds" name="identifiedNeeds" label="Problems / needs identified" disabled={isPending} defaultValue={defaults.identifiedNeeds} />
       <TextField id="notes" name="notes" label="Notes" disabled={isPending} defaultValue={defaults.notes} />
 
-      {state.error ? (
-        <p role="alert" className="text-sm text-danger">
-          {state.error}
-        </p>
-      ) : null}
+      <ErrorToast message={state.error} trigger={state} />
       {state.success ? (
         <p role="status" className="text-sm text-success">
           Saved.

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { updateLeadStatus } from "@/lib/actions/leads";
 import { Select } from "@/components/ui/Select";
+import { useToast } from "@/components/ui/Toast";
 
 // Same names as the board columns.
 const OPTIONS = [
@@ -24,6 +25,7 @@ const REASON_REQUIRED_STATUSES = new Set(["LOST", "DISQUALIFIED"]);
 
 export function LeadStatusSelect({ leadId, status }: { leadId: string; status: string }) {
   const router = useRouter();
+  const { run } = useToast();
   const [value, setValue] = useState(status);
   const [prevStatus, setPrevStatus] = useState(status);
   if (status !== prevStatus) {
@@ -42,7 +44,7 @@ export function LeadStatusSelect({ leadId, status }: { leadId: string; status: s
     startTransition(async () => {
       const fd = new FormData();
       fd.set("status", next);
-      await updateLeadStatus(leadId, { error: null }, fd);
+      await run(() => updateLeadStatus(leadId, { error: null }, fd));
       router.refresh();
     });
   }
