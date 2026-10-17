@@ -44,6 +44,7 @@ export async function updateTaskStatus(taskId: string, status: string) {
   });
 
   revalidatePath("/dashboard");
+  revalidatePath("/tasks");
   revalidatePath("/projects");
   revalidatePath(`/projects/${task.projectId}`);
 }

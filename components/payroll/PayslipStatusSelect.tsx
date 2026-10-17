@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { updatePayslipStatus } from "@/lib/actions/payroll";
 import { Select } from "@/components/ui/Select";
 import { ErrorToast } from "@/components/ui/Toast";
@@ -19,7 +18,6 @@ export function PayslipStatusSelect({
   payslipId: string;
   currentStatus: (typeof STATUSES)[number]["value"];
 }) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -29,8 +27,6 @@ export function PayslipStatusSelect({
       const result = await updatePayslipStatus(payslipId, status);
       if (result.error) {
         setError(result.error);
-      } else {
-        router.refresh();
       }
     });
   }

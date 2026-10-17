@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { deleteLead } from "@/lib/actions/leads";
 import { ErrorToast } from "@/components/ui/Toast";
 
 export function DeleteLeadButton({ leadId, businessName }: { leadId: string; businessName: string }) {
-  const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -15,12 +13,12 @@ export function DeleteLeadButton({ leadId, businessName }: { leadId: string; bus
   function confirmDelete() {
     setError(null);
     startTransition(async () => {
+      // deleteLead's revalidatePath re-renders this route in the action's own
+      // response, so no follow-up router.refresh() round-trip is needed.
       const res = await deleteLead(leadId);
       if (res.error) {
         setError(res.error);
-        return;
       }
-      router.refresh();
     });
   }
 

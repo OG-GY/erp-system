@@ -45,7 +45,6 @@ export function LeadStatusSelect({ leadId, status }: { leadId: string; status: s
       const fd = new FormData();
       fd.set("status", next);
       await run(() => updateLeadStatus(leadId, { error: null }, fd));
-      router.refresh();
     });
   }
 

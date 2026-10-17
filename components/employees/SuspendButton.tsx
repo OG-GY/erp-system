@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { setEmployeeSuspended } from "@/lib/actions/employees";
 import { ErrorToast } from "@/components/ui/Toast";
 
@@ -12,7 +11,6 @@ export function SuspendButton({
   employeeId: string;
   isActive: boolean;
 }) {
-  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -22,8 +20,6 @@ export function SuspendButton({
       const result = await setEmployeeSuspended(employeeId, isActive);
       if (result.error) {
         setError(result.error);
-      } else {
-        router.refresh();
       }
     });
   }

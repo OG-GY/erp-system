@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { updateTaskStatus } from "@/lib/actions/tasks";
 import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
@@ -22,7 +21,6 @@ export function TaskStatusSelect({
   taskId: string;
   status: string;
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
@@ -35,7 +33,6 @@ export function TaskStatusSelect({
       onChange={(next) => {
         startTransition(async () => {
           await run(() => updateTaskStatus(taskId, next));
-          router.refresh();
         });
       }}
       options={STATUS_OPTIONS}

@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { startCallSession, cancelCallSession, endCallSession, type EndCallState } from "@/lib/actions/calls";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
@@ -52,7 +51,6 @@ export function CallSessionPanel({
   activeCallStartedAt: Date | null;
   doNotCall: boolean;
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [isStarting, startTransition] = useTransition();
   const [isCancelling, startCancelTransition] = useTransition();
@@ -60,7 +58,6 @@ export function CallSessionPanel({
   function handleStart() {
     startTransition(async () => {
       await run(() => startCallSession(leadId));
-      router.refresh();
     });
   }
 
@@ -68,7 +65,6 @@ export function CallSessionPanel({
     if (!activeCallId) return;
     startCancelTransition(async () => {
       await run(() => cancelCallSession(activeCallId));
-      router.refresh();
     });
   }
 

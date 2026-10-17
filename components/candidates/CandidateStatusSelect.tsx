@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { updateCandidateStatus } from "@/lib/actions/candidates";
 import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
@@ -23,7 +22,6 @@ export function CandidateStatusSelect({
   candidateId: string;
   status: string;
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
@@ -36,7 +34,6 @@ export function CandidateStatusSelect({
       onChange={(next) => {
         startTransition(async () => {
           await run(() => updateCandidateStatus(candidateId, next));
-          router.refresh();
         });
       }}
       options={STATUS_OPTIONS}

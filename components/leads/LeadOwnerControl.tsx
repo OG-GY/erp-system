@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { assignLeadOwner } from "@/lib/actions/leads";
 import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
@@ -15,7 +14,6 @@ export function LeadOwnerControl({
   ownerId: string | null;
   callers: { id: string; fullName: string }[];
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
@@ -30,7 +28,6 @@ export function LeadOwnerControl({
         onChange={(next) => {
           startTransition(async () => {
             await run(() => assignLeadOwner(leadId, next || null));
-            router.refresh();
           });
         }}
         options={[

@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import {
   requestHandoff,
   updateHandoffStatus,
@@ -47,21 +46,18 @@ export function HandoffPanel({
   viewerIsAdmin: boolean;
   founders: { id: string; fullName: string }[];
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [isPending, startTransition] = useTransition();
 
   function setStatus(status: string) {
     startTransition(async () => {
       await run(() => updateHandoffStatus(leadId, status));
-      router.refresh();
     });
   }
 
   function confirmMeetingHeld() {
     startTransition(async () => {
       await run(() => markMeetingHeld(leadId));
-      router.refresh();
     });
   }
 

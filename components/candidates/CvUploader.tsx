@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import {
   uploadCandidateCv,
@@ -20,7 +19,6 @@ export function CvUploader({
   candidateId: string;
   cvUrl: string | null;
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const boundUpload = uploadCandidateCv.bind(null, candidateId);
   const [state, formAction, isPending] = useActionState(boundUpload, initialState);
@@ -56,7 +54,6 @@ export function CvUploader({
   function handleRemove() {
     startDeleteTransition(async () => {
       await run(() => deleteCandidateCv(candidateId));
-      router.refresh();
     });
   }
 

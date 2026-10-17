@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { updateCandidateStatus } from "@/lib/actions/candidates";
 import { CandidateCard } from "@/components/candidates/CandidateCard";
 import { CandidateModal } from "@/components/candidates/CandidateModal";
@@ -46,7 +45,6 @@ export function InterviewBoard({
 }: {
   candidates: Candidate[];
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [candidates, setCandidates] = useState(initialCandidates);
   // Re-sync when the server data refreshes (e.g. after a status update, or a
@@ -74,7 +72,6 @@ export function InterviewBoard({
     setCandidates((prev) => prev.map((c) => (c.id === id ? { ...c, status } : c)));
     startTransition(async () => {
       await run(() => updateCandidateStatus(id, status));
-      router.refresh();
     });
   }
 

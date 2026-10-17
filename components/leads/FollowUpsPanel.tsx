@@ -1,7 +1,6 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import {
   completeFollowUp,
   cancelFollowUp,
@@ -51,7 +50,6 @@ export function FollowUpsPanel({ leadId, followUps }: { leadId: string; followUp
 }
 
 function FollowUpRow({ followUp, todayIso }: { followUp: FollowUp; todayIso: string }) {
-  const router = useRouter();
   const { run } = useToast();
   const [isPending, startTransition] = useTransition();
   const [rescheduling, setRescheduling] = useState(false);
@@ -61,13 +59,11 @@ function FollowUpRow({ followUp, todayIso }: { followUp: FollowUp; todayIso: str
   function complete() {
     startTransition(async () => {
       await run(() => completeFollowUp(followUp.id));
-      router.refresh();
     });
   }
   function cancel() {
     startTransition(async () => {
       await run(() => cancelFollowUp(followUp.id));
-      router.refresh();
     });
   }
 

@@ -92,7 +92,6 @@ export function LeadBoard({
       const fd = new FormData();
       fd.set("status", status);
       await run(() => updateLeadStatus(id, { error: null }, fd));
-      router.refresh();
     });
   }
 

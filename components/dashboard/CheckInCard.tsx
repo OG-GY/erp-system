@@ -58,9 +58,10 @@ export function CheckInCard({
     if (!checkInTime || checkOutTime) return;
 
     function verifyAndAutoCheckOut() {
+      // checkAutoCheckOut revalidates /dashboard itself when it closes the
+      // session, so its response already carries the updated card.
       startTransition(async () => {
-        const result = await checkAutoCheckOut();
-        if (result.success) router.refresh();
+        await checkAutoCheckOut();
       });
     }
 
@@ -74,7 +75,7 @@ export function CheckInCard({
 
     const timeoutId = setTimeout(verifyAndAutoCheckOut, msUntilAutoCheckOut);
     return () => clearTimeout(timeoutId);
-  }, [checkInTime, checkOutTime, router]);
+  }, [checkInTime, checkOutTime]);
 
   function handle(action: () => Promise<AttendanceActionState>) {
     setError(null);
@@ -82,8 +83,6 @@ export function CheckInCard({
       const result = await action();
       if (result.error) {
         setError(result.error);
-      } else {
-        router.refresh();
       }
     });
   }

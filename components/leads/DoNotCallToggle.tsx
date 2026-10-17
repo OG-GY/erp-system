@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { setLeadDoNotCall } from "@/lib/actions/leads";
 import { Input } from "@/components/ui/Input";
 import { useToast } from "@/components/ui/Toast";
@@ -15,7 +14,6 @@ export function DoNotCallToggle({
   doNotCall: boolean;
   reason: string | null;
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showReasonInput, setShowReasonInput] = useState(false);
@@ -24,7 +22,6 @@ export function DoNotCallToggle({
   function allowCalling() {
     startTransition(async () => {
       await run(() => setLeadDoNotCall(leadId, false, null));
-      router.refresh();
     });
   }
 
@@ -32,7 +29,6 @@ export function DoNotCallToggle({
     startTransition(async () => {
       await run(() => setLeadDoNotCall(leadId, true, reasonInput || null));
       setShowReasonInput(false);
-      router.refresh();
     });
   }
 

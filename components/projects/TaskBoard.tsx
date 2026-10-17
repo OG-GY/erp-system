@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { updateTaskStatus } from "@/lib/actions/tasks";
 import { TaskCard } from "@/components/projects/TaskCard";
 import { TaskDetailModal } from "@/components/projects/TaskDetailModal";
@@ -54,7 +53,6 @@ export function TaskBoard({
    * prop can't cross the Server Component -> Client Component boundary. */
   managedProjectIds?: string[];
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [tasks, setTasks] = useState(initialTasks);
   // Re-sync when the server data refreshes — same render-time-adjustment
@@ -90,7 +88,6 @@ export function TaskBoard({
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
     startTransition(async () => {
       await run(() => updateTaskStatus(id, status));
-      router.refresh();
     });
   }
 

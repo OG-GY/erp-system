@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import {
   flagLeadNeedsSimCall,
   updateLeadSimCallStatus,
@@ -42,7 +41,6 @@ export function SimCallPanel({
   simCallStatus: string | null;
   simCallNote: string | null;
 }) {
-  const router = useRouter();
   const { run } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showFlagInput, setShowFlagInput] = useState(false);
@@ -52,21 +50,18 @@ export function SimCallPanel({
     startTransition(async () => {
       await run(() => flagLeadNeedsSimCall(leadId, noteInput || null));
       setShowFlagInput(false);
-      router.refresh();
     });
   }
 
   function changeStatus(status: string) {
     startTransition(async () => {
       await run(() => updateLeadSimCallStatus(leadId, status));
-      router.refresh();
     });
   }
 
   function clearFlag() {
     startTransition(async () => {
       await run(() => clearLeadSimCallFlag(leadId));
-      router.refresh();
     });
   }
 
