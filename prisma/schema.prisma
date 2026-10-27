@@ -148,6 +148,9 @@ model Employee {
   callAttempts         CallAttempt[]
   followUpsAssigned    FollowUp[]        @relation("FollowUpAssignee")
 
+  coldLeadsOwned ColdLead[]
+  coldCallLogs   ColdCallLog[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -674,4 +677,95 @@ model FollowUp {
   @@index([leadId])
   @@index([dueDate])
   @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Cold calling — self-sourced prospecting, open to every role
+// ---------------------------------------------------------------------------
+
+// Where the person found the business. Separate from the free-form
+// Lead.source on purpose: cold-calling stats group by it.
+enum ColdLeadSource {
+  GOOGLE_MAPS
+  REFERENCE
+  SOCIAL_MEDIA
+  WALK_IN
+  OTHER
+}
+
+// A cold lead's funnel position. Logging a call sets it directly (the call's
+// outcome IS the new status), unlike the main pipeline where a CallOutcome
+// and a LeadStatus are tracked separately. CONVERTED means it was moved into
+// the main Leads pipeline (see convertColdLead in lib/actions/coldCalling.ts).
+enum ColdLeadStatus {
+  NEW
+  NO_ANSWER
+  CALLBACK
+  SEND_DETAILS
+  DETAILS_SENT
+  FOLLOW_UP_LATER
+  INTERESTED
+  CONVERTED
+  HAS_TEAM
+  NOT_INTERESTED
+  WRONG_NUMBER
+}
+
+/**
+ * A business someone found and is cold-calling themselves. Deliberately its
+ * own table, not a Lead: most of these die on the first call, and the main
+ * Leads pipeline (handoffs, call sessions, owner pool) is restricted to
+ * admins/callers. An interested one is promoted to a real Lead.
+ */
+model ColdLead {
+  id           String         @id @default(cuid())
+  businessName String
+  category     String?
+  city         String?
+  area         String?
+  contactName  String?
+  // Stored normalized (digits and a leading +) so the duplicate check in
+  // createColdLead matches regardless of how the number was typed.
+  phone        String
+  whatsapp     String?
+  source       ColdLeadSource @default(GOOGLE_MAPS)
+  // Maps link, or who referred them.
+  sourceDetail String?
+  notes        String?
+
+  status     ColdLeadStatus @default(NEW)
+  // When to call/message next — a time, not just a date, since a callback
+  // is usually "call me at 4".
+  followUpAt DateTime?
+  lastCalledAt DateTime?
+
+  ownerId String
+  owner   Employee @relation(fields: [ownerId], references: [id])
+
+  convertedLeadId String? @unique
+
+  logs ColdCallLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ownerId, status])
+  @@index([followUpAt])
+  @@index([phone])
+}
+
+/** One row per call (or "details sent" message) — the lead's timeline. */
+model ColdCallLog {
+  id         String         @id @default(cuid())
+  coldLeadId String
+  coldLead   ColdLead       @relation(fields: [coldLeadId], references: [id], onDelete: Cascade)
+  callerId   String
+  caller     Employee       @relation(fields: [callerId], references: [id])
+  outcome    ColdLeadStatus
+  notes      String?
+  followUpAt DateTime?
+  createdAt  DateTime       @default(now())
+
+  @@index([coldLeadId])
+  @@index([callerId, createdAt])
 }

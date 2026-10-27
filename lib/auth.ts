@@ -159,3 +159,14 @@ export function canManageLead(
   if (!isCallCaller(employee.role)) return false;
   return lead.ownerId === null || lead.ownerId === employee.id;
 }
+
+/**
+ * Cold calling is open to every role, but each person only works their own
+ * list — admins can see and manage everyone's.
+ */
+export function canManageColdLead(
+  employee: { id: string; role: Role },
+  coldLead: { ownerId: string },
+) {
+  return isAdmin(employee.role) || coldLead.ownerId === employee.id;
+}

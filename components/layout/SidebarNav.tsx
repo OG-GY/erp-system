@@ -14,6 +14,7 @@ import {
   UserSearch,
   ListTodo,
   PhoneCall,
+  PhoneOutgoing,
 } from "lucide-react";
 import type { Role } from "@prisma/client";
 
@@ -24,6 +25,7 @@ const EMPLOYEE_NAV_ITEMS = [
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/tasks", label: "Tasks", icon: ListTodo },
+  { href: "/cold-calling", label: "Cold Calling", icon: PhoneOutgoing },
   { href: "/payroll", label: "Payroll", icon: Wallet },
 ] as const;
 
@@ -37,6 +39,7 @@ const ADMIN_NAV_ITEMS = [
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/tasks", label: "Tasks", icon: ListTodo },
+  { href: "/cold-calling", label: "Cold Calling", icon: PhoneOutgoing },
   { href: "/payroll", label: "Payroll", icon: Wallet },
   { href: "/reports", label: "Reports", icon: BarChart3 },
 ] as const;
@@ -51,6 +54,7 @@ const PROJECT_MANAGER_NAV_ITEMS = [
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/projects", label: "Projects", icon: FolderKanban },
   { href: "/tasks", label: "Tasks", icon: ListTodo },
+  { href: "/cold-calling", label: "Cold Calling", icon: PhoneOutgoing },
   { href: "/payroll", label: "Payroll", icon: Wallet },
 ] as const;
 
@@ -59,6 +63,7 @@ const PROJECT_MANAGER_NAV_ITEMS = [
 const CALL_CALLER_NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutGrid },
   { href: "/leads", label: "Leads", icon: PhoneCall },
+  { href: "/cold-calling", label: "Cold Calling", icon: PhoneOutgoing },
   { href: "/attendance", label: "Attendance", icon: CalendarCheck },
   { href: "/leave", label: "Leave", icon: CalendarClock },
   { href: "/payroll", label: "Payroll", icon: Wallet },
