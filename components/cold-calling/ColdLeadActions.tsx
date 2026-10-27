@@ -1,31 +1,44 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowRightCircle, Trash2 } from "lucide-react";
 import { convertColdLead, deleteColdLead } from "@/lib/actions/coldCalling";
 import { useToast } from "@/components/ui/Toast";
 
 export function ConvertColdLeadButton({ coldLeadId }: { coldLeadId: string }) {
-  const { run } = useToast();
-  const [isPending, startTransition] = useTransition();
+  const { track } = useToast();
+  const [isMoving, setIsMoving] = useState(false);
+
+  async function handleClick() {
+    setIsMoving(true);
+    await track({ pending: "Moving to Leads…", done: "Moved to Leads" }, () => convertColdLead(coldLeadId));
+    setIsMoving(false);
+  }
 
   return (
     <button
       type="button"
-      onClick={() => startTransition(async () => void (await run(() => convertColdLead(coldLeadId))))}
-      disabled={isPending}
+      onClick={handleClick}
+      disabled={isMoving}
       className="flex h-9 w-fit items-center gap-2 rounded-sm bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
     >
       <ArrowRightCircle className="h-4 w-4" aria-hidden="true" />
-      {isPending ? "Moving…" : "Move to Leads pipeline"}
+      Move to Leads pipeline
     </button>
   );
 }
 
 export function DeleteColdLeadButton({ coldLeadId }: { coldLeadId: string }) {
-  const { run } = useToast();
+  const { track } = useToast();
+  const router = useRouter();
   const [confirming, setConfirming] = useState(false);
-  const [isPending, startTransition] = useTransition();
+
+  // Leave the page straight away; the delete finishes in the background.
+  function handleDelete() {
+    router.push("/cold-calling");
+    void track({ pending: "Deleting business…", done: "Business deleted" }, () => deleteColdLead(coldLeadId));
+  }
 
   if (!confirming) {
     return (
@@ -45,16 +58,14 @@ export function DeleteColdLeadButton({ coldLeadId }: { coldLeadId: string }) {
       <span className="text-foreground-muted">Delete it and its call history?</span>
       <button
         type="button"
-        onClick={() => startTransition(async () => void (await run(() => deleteColdLead(coldLeadId))))}
-        disabled={isPending}
+        onClick={handleDelete}
         className="rounded-sm bg-danger px-2 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
       >
-        {isPending ? "Deleting…" : "Delete"}
+        Delete
       </button>
       <button
         type="button"
         onClick={() => setConfirming(false)}
-        disabled={isPending}
         className="rounded-sm border border-border-strong px-2 py-1 text-xs font-medium text-foreground hover:bg-overlay-hover"
       >
         Cancel

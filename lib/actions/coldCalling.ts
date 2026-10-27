@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
@@ -69,7 +68,12 @@ export type ColdDuplicate = {
   where: "cold" | "leads";
   addedBy: string | null;
 };
-export type ColdLeadFormState = { error: string | null; success?: boolean; duplicates?: ColdDuplicate[] };
+export type ColdLeadFormState = {
+  error: string | null;
+  success?: boolean;
+  duplicates?: ColdDuplicate[];
+  businessName?: string;
+};
 
 /**
  * Soft duplicate check on the phone number, across both cold leads (anyone's)
@@ -116,13 +120,12 @@ export async function createColdLead(
     }
   }
 
-  const coldLead = await prisma.coldLead.create({
+  await prisma.coldLead.create({
     data: { ...coldLeadWriteData(data), ownerId: employee.id },
-    select: { id: true },
   });
 
   revalidatePath("/cold-calling");
-  redirect(`/cold-calling/${coldLead.id}`);
+  return { error: null, success: true, businessName: data.businessName };
 }
 
 export async function updateColdLead(
@@ -295,5 +298,5 @@ export async function deleteColdLead(coldLeadId: string): Promise<{ error: strin
   await prisma.coldLead.delete({ where: { id: coldLeadId } });
 
   revalidatePath("/cold-calling");
-  redirect("/cold-calling");
+  return { error: null };
 }

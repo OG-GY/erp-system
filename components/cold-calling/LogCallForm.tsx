@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState, type FormEvent } from "react";
 import type { ColdLeadStatus } from "@prisma/client";
 import { logColdCall, type LogColdCallState } from "@/lib/actions/coldCalling";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/lib/coldCalling";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { ErrorToast } from "@/components/ui/Toast";
+import { useToast } from "@/components/ui/Toast";
 
 const DAY_MS = 86_400_000;
 
@@ -39,17 +39,29 @@ export function LogCallForm({
 }) {
   const [outcome, setOutcome] = useState<ColdLeadStatus | "">("");
   const [followUpAt, setFollowUpAt] = useState("");
-  const [state, formAction, isPending] = useActionState(
-    async (prev: LogColdCallState, formData: FormData) => {
-      const result = await logColdCall(coldLeadId, prev, formData);
-      if (result.success) {
-        setOutcome("");
-        setFollowUpAt("");
-      }
-      return result;
-    },
-    { error: null, success: false },
-  );
+  const { track } = useToast();
+
+  // Reset right away and save in the background; if it fails, restore what was entered.
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+    const saved = { outcome, followUpAt, notes: String(formData.get("notes") ?? "") };
+
+    setOutcome("");
+    setFollowUpAt("");
+    form.reset();
+    const result = await track<LogColdCallState>({ pending: "Logging call…", done: "Call logged" }, () =>
+      logColdCall(coldLeadId, { error: null, success: false }, formData),
+    );
+
+    if (!result || result.error) {
+      setOutcome(saved.outcome);
+      setFollowUpAt(saved.followUpAt);
+      const notesField = form.elements.namedItem("notes");
+      if (notesField instanceof HTMLTextAreaElement) notesField.value = saved.notes;
+    }
+  }
 
   const outcomes: ColdLeadStatus[] =
     currentStatus === "SEND_DETAILS" ? ["DETAILS_SENT", ...CALL_OUTCOMES] : [...CALL_OUTCOMES];
@@ -57,8 +69,8 @@ export function LogCallForm({
   const followUpRequired = outcome !== "" && OUTCOMES_REQUIRING_FOLLOW_UP.includes(outcome);
 
   return (
-    <form action={formAction} className="flex flex-col gap-3">
-      <fieldset disabled={isPending} className="flex flex-col gap-2">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+      <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm font-medium text-foreground-muted">What happened?</legend>
         <div className="flex flex-wrap gap-2">
           {outcomes.map((value) => (
@@ -89,7 +101,7 @@ export function LogCallForm({
         <label htmlFor={`notes-${coldLeadId}`} className="text-sm font-medium text-foreground-muted">
           What did they say?
         </label>
-        <Textarea id={`notes-${coldLeadId}`} name="notes" rows={2} disabled={isPending} />
+        <Textarea id={`notes-${coldLeadId}`} name="notes" rows={2} />
       </div>
 
       {showFollowUp ? (
@@ -106,14 +118,14 @@ export function LogCallForm({
               value={followUpAt}
               onChange={(e) => setFollowUpAt(e.target.value)}
               required={followUpRequired}
-              disabled={isPending}
+             
             />
             {QUICK_PICKS.map((pick) => (
               <button
                 key={pick.label}
                 type="button"
                 onClick={() => setFollowUpAt(pick.value())}
-                disabled={isPending}
+               
                 className="h-7 rounded-sm border border-border px-2 text-xs text-foreground-muted transition-colors hover:bg-overlay-hover hover:text-foreground"
               >
                 {pick.label}
@@ -123,21 +135,14 @@ export function LogCallForm({
         </div>
       ) : null}
 
-      <ErrorToast message={state.error} trigger={state} />
-
       <div className="flex items-center gap-3">
         <button
           type="submit"
-          disabled={isPending || outcome === ""}
+          disabled={outcome === ""}
           className="h-9 w-fit rounded-sm bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {isPending ? "Saving…" : "Save"}
+          Save
         </button>
-        {state.success ? (
-          <p role="status" className="text-sm text-success">
-            Logged.
-          </p>
-        ) : null}
       </div>
     </form>
   );

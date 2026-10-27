@@ -4,6 +4,7 @@ import type { ColdLeadStatus, Prisma } from "@prisma/client";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { ColdLeadCard } from "@/components/cold-calling/ColdLeadCard";
+import { AddColdLeadButton } from "@/components/cold-calling/AddColdLeadModal";
 import { requireEmployee, isAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
@@ -115,12 +116,7 @@ export default async function ColdCallingPage({ searchParams }: PageProps<"/cold
         title="Cold calling"
         description={`${total} ${total === 1 ? "business" : "businesses"} · ${dueCount} due today`}
         actions={
-          <Link
-            href="/cold-calling/new"
-            className="flex h-8 items-center rounded-sm bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-          >
-            Add business
-          </Link>
+          <AddColdLeadButton className="flex h-8 items-center rounded-sm bg-accent px-3 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90" />
         }
       />
       <div className="flex flex-col gap-4 p-4 sm:p-6">
@@ -219,12 +215,7 @@ function EmptyState({ view, hasAny }: { view: "due" | "all"; hasAny: boolean }) 
         <p className="max-w-sm text-sm text-foreground-muted">
           Found a business on Google Maps or got a reference? Add it here, call them, and log what they said.
         </p>
-        <Link
-          href="/cold-calling/new"
-          className="mt-2 flex h-9 items-center rounded-sm bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
-        >
-          Add business
-        </Link>
+        <AddColdLeadButton className="mt-2 flex h-9 items-center rounded-sm bg-accent px-4 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90" />
       </div>
     );
   }
